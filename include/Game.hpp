@@ -10,7 +10,7 @@ namespace coup {
     
     class Game {
     private:
-        std::vector<Player*> player_list; // List of players in the game
+        std::vector<Player*> players_list; // List of players in the game
         int current_player_index; // Index of current player
         
     public:
@@ -19,12 +19,6 @@ namespace coup {
         
         // Destructor - cleanup
         ~Game();
-        
-        // Add player to the game
-        void addPlayer(Player* player);
-        
-        // Move to next player's turn
-        void nextTurn();
         
         // Print current player's name
         void turn() const;
@@ -35,6 +29,12 @@ namespace coup {
         // Get winner name (throws if game still active)
         std::string winner() const;
         
+        // Add player to the game
+        void addPlayer(Player* player);
+        
+        // Move to next player's turn
+        void nextTurn();
+
         // Check if it's player's turn
         bool isPlayerTurn(const Player* player) const;
     };

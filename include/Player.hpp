@@ -13,7 +13,10 @@ namespace coup {
         std::string name; // Player's name
         int coin_count; // Number of coins player has
         bool active; // Whether player is still in the game
-        bool sanctioned; // Whether player is sanctioned
+        bool sanctioned; // Whether player is sanctioned (can't use gather and tax until his next turn)
+        bool tax_available; // Whether another player implemented "undo" for player's tax action
+        bool arrest_available; // Whether another player prevents another player's arrest action
+        bool bribe_used; // Whether player used bribe action in the current turn
 
     public:
         // Constructor - creates player and adds to game
@@ -27,10 +30,18 @@ namespace coup {
         int coins() const; // Get number of coins
         bool isActive() const; // Check if player is still active
         bool isSanctioned() const; // Check if player is sanctioned
+        bool isTaxAvailable() const; // Check if tax action is available
+        bool isArrestAvailable() const; // Check if arrest action is available
+        bool isBribeUsed() const { return bribe_used; } // Check if bribe action was used in the current turn
+
+        // Check if player is a specific type
+        virtual bool isGeneral() const { return false; } // Check if player is a General (default: false)
+        virtual bool isJudge() const { return false; } // Check if player is a Judge (default: false)
+        virtual bool isMerchant() const { return false; } // Check if player is a Merchant (default: false)
 
         // Basic actions that all players can perform
         void gather(); // Take 1 coin from bank
-        void tax(); // Take 2 coins from bank
+        virtual void tax(); // Take 2 coins from bank
         void bribe(); // Pay 4 coins for extra action
         void arrest(Player& target); // Take 1 coin from another player
         void sanction(Player& target); // Block economic actions (gather, tax) of another player
@@ -39,8 +50,11 @@ namespace coup {
         // Helper methods
         void addCoins(int amount); // Add coins to player
         void removeCoins(int amount); // Remove coins from player (throws if not enough)
-        void eliminate(); // Remove player from game
-        void setSanctioned(); // Mark player as sanctioned
+        void setActivityStatus(bool value); // Set player's activity status
+        virtual void setSanctionStatus(bool value); // Set sanction's status
+        void disableTax(); // Mark tax action as unavailable
+        void setArrestAvailability(bool value); // Set arrest action availability
+        void resetBribeUsed(); // Reset bribe used flag back to false
     };
 }
 
