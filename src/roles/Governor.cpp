@@ -41,5 +41,15 @@ namespace coup {
         }
         
         target.disableTax(); // Disable target's tax action
+
+        // If player used bribe, then let him play another turn
+        if(bribe_used) {
+            bribe_used = false; // Reset bribe used flag
+        }
+        
+        // If player did not use bribe, then move to next player's turn
+        else {
+            game.nextTurn(); // Move to next player's turn
+        }
     }
 }

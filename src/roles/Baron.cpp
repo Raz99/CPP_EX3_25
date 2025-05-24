@@ -35,7 +35,16 @@ namespace coup {
         }
         
         addCoins(3); // Add 3 coins (Baron pays 3 coins for getting 6 coins, which means he gets 3 coins overall)
-        game.nextTurn(); // Move to next player's turn
+        
+        // If player used bribe, then let him play another turn
+        if(bribe_used) {
+            bribe_used = false; // Reset bribe used flag
+        }
+        
+        // If player did not use bribe, then move to next player's turn
+        else {
+            game.nextTurn(); // Move to next player's turn
+        }
     }
     
     // Override setSanctionStatus() to get a coin when targeted

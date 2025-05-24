@@ -30,8 +30,6 @@ namespace coup {
         }
 
         // std::cout << "Judge " << name << " blocks " << target.getName() 
-        //           << "'s bribe, causing them to lose their 4 coins." << std::endl;
-
-        game.nextTurn(); // Move to next player's turn
+        //           << "'s bribe, causing them to lose their 4 coins." << std::endl;    }
     }
 }

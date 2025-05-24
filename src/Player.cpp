@@ -73,7 +73,16 @@ namespace coup {
         }
 
         addCoins(1); // Increase coin count
-        game.nextTurn(); // Move to next player's turn
+
+        // If player used bribe, then let him play another turn
+        if(bribe_used) {
+            bribe_used = false; // Reset bribe used flag
+        }
+        
+        // If player did not use bribe, then move to next player's turn
+        else {
+            game.nextTurn(); // Move to next player's turn
+        }
     }
 
     // Tax action - take 2 coins
@@ -104,7 +113,16 @@ namespace coup {
         }
 
         addCoins(2); // Increase coin count
-        game.nextTurn(); // Move to next player's turn
+
+        // If player used bribe, then let him play another turn
+        if(bribe_used) {
+            bribe_used = false; // Reset bribe used flag
+        }
+        
+        // If player did not use bribe, then move to next player's turn
+        else {
+            game.nextTurn(); // Move to next player's turn
+        }
     }
 
     // Bribe action - pay 4 coins for extra action
@@ -188,7 +206,15 @@ namespace coup {
             target.removeCoins(2);
         }
         
-        game.nextTurn(); // Move to next player's turn
+        // If player used bribe, then let him play another turn
+        if(bribe_used) {
+            bribe_used = false; // Reset bribe used flag
+        }
+        
+        // If player did not use bribe, then move to next player's turn
+        else {
+            game.nextTurn(); // Move to next player's turn
+        }
     }
 
     // Sanction action - block target's economic actions
@@ -235,7 +261,16 @@ namespace coup {
         removeCoins(3); // Pay 3 coins
 
         target.setSanctionStatus(true); // Mark target as sanctioned
-        game.nextTurn(); // Move to next player's turn
+        
+        // If player used bribe, then let him play another turn
+        if(bribe_used) {
+            bribe_used = false; // Reset bribe used flag
+        }
+        
+        // If player did not use bribe, then move to next player's turn
+        else {
+            game.nextTurn(); // Move to next player's turn
+        }
     }
 
     // Coup action - eliminate target for 7 coins
@@ -267,7 +302,16 @@ namespace coup {
 
         removeCoins(7); // Decrease coin count
         target.setActivityStatus(false); // Eliminate target
-        game.nextTurn(); // Move to next player's turn
+        
+        // If player used bribe, then let him play another turn
+        if(bribe_used) {
+            bribe_used = false; // Reset bribe used flag
+        }
+        
+        // If player did not use bribe, then move to next player's turn
+        else {
+            game.nextTurn(); // Move to next player's turn
+        }
     }
 
     // Helper methods
