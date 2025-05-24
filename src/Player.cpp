@@ -189,21 +189,19 @@ namespace coup {
             throw std::runtime_error("Target player is eliminated");
         }
 
-        // Ensure target has coins
-        if (target.coins() < 1) {
-            throw std::runtime_error("Target has no coins to take");
-        }
+        // Bribe action is meaningless if target has no coins
+        if (target.coins() >= 1) {
+            // If target is not a General, then transfer 1 coin from target to current player
+            // (If General was arrested, he recieves his 1 coin back)
+            if(!target.isGeneral()) {
+                target.removeCoins(1); // Remove 1 coin from target
+                addCoins(1); // Add 1 coin to current player
+            }
 
-        // If target is not a General, then transfer 1 coin from target to current player
-        // (If General was arrested, he recieves his 1 coin back)
-        if(!target.isGeneral()) {
-            target.removeCoins(1); // Remove 1 coin from target
-            addCoins(1); // Add 1 coin to current player
-        }
-
-        // If target is a Merchant, then take 2 coins from target directly to bank (not to current player)
-        else if(target.isMerchant()) {
-            target.removeCoins(2);
+            // If target is a Merchant, then take 2 coins from target directly to bank (not to current player)
+            else if(target.isMerchant()) {
+                target.removeCoins(2);
+            }
         }
         
         // If player used bribe, then let him play another turn
