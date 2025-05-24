@@ -13,7 +13,6 @@
 #include <cmath>
 
 namespace coup {
-
 // EnhancedButton implementation
 EnhancedButton::EnhancedButton(sf::Vector2f position, sf::Vector2f size, const std::string& label, 
                                const std::string& actionType, sf::Color normal)
