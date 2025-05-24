@@ -22,8 +22,8 @@ namespace coup {
         // Constructor - creates player and adds to game
         Player(Game& game, const std::string& name);
 
-        // Virtual destructor for inheritance
-        virtual ~Player() {}
+        // // Virtual destructor for inheritance
+        // virtual ~Player() {}
 
         // Basic getters
         std::string getName() const; // Get player name

@@ -9,6 +9,11 @@ namespace coup {
     
     // Invest 3 coins to get 6 (net gain of 3)
     void Baron::invest() {
+        // Check if game has started
+        if (!game.isGameStarted()) {
+            throw std::runtime_error("Game has not started yet");
+        }
+        
         // Ensure it's the player's turn
         if (!game.isPlayerTurn(this)) {
             throw std::runtime_error("Not your turn");
@@ -17,6 +22,11 @@ namespace coup {
         // Ensure player is active
         if (!active) {
             throw std::runtime_error("Player is eliminated");
+        }
+
+        // Check if player has 10 coins and just started his turn - must coup
+        if (coin_count >= 10 && !bribe_used) {
+            throw std::runtime_error("You have 10 or more coins, must perform coup");
         }
         
         // Ensure player has enough coins

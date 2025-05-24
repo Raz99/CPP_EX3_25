@@ -5,8 +5,8 @@
 
 namespace coup {
     // Constructor - initialize player and add to game
-    Player::Player(Game& game, const std::string& name) 
-    : game(game), name(name), coin_count(0), active(true), sanctioned(false), tax_available(true), arrest_available(true) {
+    Player::Player(Game& game, const std::string& name)
+    : game(game), name(name), coin_count(0), active(true), sanctioned(false), tax_available(true), arrest_available(true), bribe_used(false) {
         // Check if name is empty
         if (name.empty()) {
             throw std::invalid_argument("Player name cannot be empty");
@@ -15,6 +15,7 @@ namespace coup {
         game.addPlayer(this); // Add player to game
     }
 
+    // Basic getters
     // Get player name
     std::string Player::getName() const {
         return name;
@@ -43,8 +44,14 @@ namespace coup {
         return arrest_available; // Check if arrest action is available
     }
 
+    // Basic actions that all players can perform
     // Gather action - take 1 coin
     void Player::gather() {
+        // Check if game has started
+        if (!game.isGameStarted()) {
+            throw std::runtime_error("Game has not started yet");
+        }
+
         // Ensure it's the player's turn
         if (!game.isPlayerTurn(this)) {
             throw std::runtime_error("Not your turn");
@@ -53,6 +60,11 @@ namespace coup {
         // Ensure player is active
         if (!active) {
             throw std::runtime_error("Player is eliminated");
+        }
+
+        // Check if player has 10 coins and just started his turn - must coup
+        if (coin_count >= 10 && !bribe_used) {
+            throw std::runtime_error("You have 10 or more coins, must perform coup");
         }
 
         // Ensure player is not sanctioned
@@ -66,6 +78,11 @@ namespace coup {
 
     // Tax action - take 2 coins
     void Player::tax() {
+        // Check if game has started
+        if (!game.isGameStarted()) {
+            throw std::runtime_error("Game has not started yet");
+        }
+
         // Ensure it's the player's turn
         if (!game.isPlayerTurn(this)) {
             throw std::runtime_error("Not your turn");
@@ -74,6 +91,11 @@ namespace coup {
         // Ensure player is active
         if (!active) {
             throw std::runtime_error("Player is eliminated");
+        }
+
+        // Check if player has 10 coins and just started his turn - must coup
+        if (coin_count >= 10 && !bribe_used) {
+            throw std::runtime_error("You have 10 or more coins, must perform coup");
         }
 
         // Ensure player is not sanctioned
@@ -87,6 +109,11 @@ namespace coup {
 
     // Bribe action - pay 4 coins for extra action
     void Player::bribe() {
+        // Check if game has started
+        if (!game.isGameStarted()) {
+            throw std::runtime_error("Game has not started yet");
+        }
+
         // Ensure it's the player's turn
         if (!game.isPlayerTurn(this)) {
             throw std::runtime_error("Not your turn");
@@ -95,6 +122,11 @@ namespace coup {
         // Ensure player is active
         if (!active) {
             throw std::runtime_error("Player is eliminated");
+        }
+
+        // Check if player has 10 coins and just started his turn - must coup
+        if (coin_count >= 10 && !bribe_used) {
+            throw std::runtime_error("You have 10 or more coins, must perform coup");
         }
 
         // Ensure player has enough coins
@@ -109,6 +141,11 @@ namespace coup {
 
     // Arrest action - take 1 coin from target
     void Player::arrest(Player& target) {
+        // Check if game has started
+        if (!game.isGameStarted()) {
+            throw std::runtime_error("Game has not started yet");
+        }
+        
         // Ensure it's the player's turn
         if (!game.isPlayerTurn(this)) {
             throw std::runtime_error("Not your turn");
@@ -122,6 +159,11 @@ namespace coup {
         // Ensure player is able to arrest
         if (!arrest_available) {
             throw std::runtime_error("Arrest action is not available");
+        }
+
+        // Check if player has 10 coins and just started his turn - must coup
+        if (coin_count >= 10 && !bribe_used) {
+            throw std::runtime_error("You have 10 or more coins, must perform coup");
         }
 
         // Ensure target is active
@@ -151,6 +193,11 @@ namespace coup {
 
     // Sanction action - block target's economic actions
     void Player::sanction(Player& target) {
+        // Check if game has started
+        if (!game.isGameStarted()) {
+            throw std::runtime_error("Game has not started yet");
+        }
+
         // Ensure it's the player's turn
         if (!game.isPlayerTurn(this)) {
             throw std::runtime_error("Not your turn");
@@ -159,6 +206,11 @@ namespace coup {
         // Ensure player is active
         if (!active) {
             throw std::runtime_error("Player is eliminated");
+        }
+
+        // Check if player has 10 coins and just started his turn - must coup
+        if (coin_count >= 10 && !bribe_used) {
+            throw std::runtime_error("You have 10 or more coins, must perform coup");
         }
 
         // Ensure target is active
@@ -188,6 +240,11 @@ namespace coup {
 
     // Coup action - eliminate target for 7 coins
     void Player::coup(Player& target) {
+        // Check if game has started
+        if (!game.isGameStarted()) {
+            throw std::runtime_error("Game has not started yet");
+        }
+        
         // Ensure it's the player's turn
         if (!game.isPlayerTurn(this)) {
             throw std::runtime_error("Not your turn");
@@ -213,6 +270,7 @@ namespace coup {
         game.nextTurn(); // Move to next player's turn
     }
 
+    // Helper methods
     // Add coins to player
     void Player::addCoins(int amount) {
         // Ensure the amount is non-negative

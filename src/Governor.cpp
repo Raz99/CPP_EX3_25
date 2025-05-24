@@ -15,9 +15,24 @@ namespace coup {
     
     // Block another player's tax action
     void Governor::undo(Player& target) {
+        // Check if game has started
+        if (!game.isGameStarted()) {
+            throw std::runtime_error("Game has not started yet");
+        }
+        
+        // Ensure it's the player's turn
+        if (!game.isPlayerTurn(this)) {
+            throw std::runtime_error("Not your turn");
+        }
+
         // Ensure player is active
         if (!active) {
             throw std::runtime_error("Player is eliminated");
+        }
+
+        // Check if player has 10 coins and just started his turn - must coup
+        if (coin_count >= 10 && !bribe_used) {
+            throw std::runtime_error("You have 10 or more coins, must perform coup");
         }
 
         // Ensure target is active

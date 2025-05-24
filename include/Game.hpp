@@ -12,6 +12,7 @@ namespace coup {
     private:
         std::vector<Player*> players_list; // List of players in the game
         int current_player_index; // Index of current player
+        bool game_started; // Flag to track if game has started
         
     public:
         // Constructor - initialize with first player
@@ -37,6 +38,12 @@ namespace coup {
 
         // Check if it's player's turn
         bool isPlayerTurn(const Player* player) const;
+
+        // Start the game - as long as the amount of players is valid (should be 2-6)
+        void startGame();
+        
+        // Check if game is started
+        bool isGameStarted() const;
     };
 }
 

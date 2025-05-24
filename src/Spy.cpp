@@ -9,6 +9,11 @@ namespace coup {
     
     // Watch another player's amount of coins and prevent him from using arrest action
     void Spy::spy_on(Player& target) {
+        // Check if game has started
+        if (!game.isGameStarted()) {
+            throw std::runtime_error("Game has not started yet");
+        }
+        
         // Ensure it's the player's turn
         if (!game.isPlayerTurn(this)) {
             throw std::runtime_error("Not your turn");

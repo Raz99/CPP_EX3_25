@@ -7,7 +7,7 @@
 
 namespace coup {
     // Constructor - initialize with first player
-    Game::Game() : current_player_index(0) {}
+    Game::Game() : current_player_index(0), game_started(false) {}
     
     // Destructor - cleanup
     Game::~Game() {
@@ -16,6 +16,11 @@ namespace coup {
 
     // Print current player's name
     void Game::turn() const {
+        // Check if game has started
+        if (!game_started) {
+            throw std::runtime_error("Game has not started yet");
+        }
+
         // Check if there are no players in the game
         if (players_list.empty()) {
             throw std::runtime_error("No players in game");
@@ -42,6 +47,11 @@ namespace coup {
     
     // Get winner name (throws if game still active)
     std::string Game::winner() const {
+        // Check if game has started
+        if (!game_started) {
+            throw std::runtime_error("Game has not started yet");
+        }
+
         int active_count = 0; // Count of active players
         std::string winner_name; // Name of the winner
         
@@ -68,6 +78,11 @@ namespace coup {
     
     // Add player to game
     void Game::addPlayer(Player* player) {
+        // Check if game has already started
+        if (game_started) {
+            throw std::runtime_error("Cannot add players after game has started");
+        }
+
         // Check max players
         if (players_list.size() >= 6) {
             throw std::runtime_error("Maximum 6 players allowed");
@@ -78,6 +93,11 @@ namespace coup {
     
     // Move to next turn
     void Game::nextTurn() {
+        // Check if game has started
+        if (!game_started) {
+            throw std::runtime_error("Game has not started yet");
+        }
+
         if (players().empty()) {
             throw std::runtime_error("No players in the game");
         }
@@ -113,6 +133,11 @@ namespace coup {
             next_player = players_list[current_player_index];
         }
 
+        // // Check if player has 10+ coins - must perform coup
+        // if (next_player->coins() >= 10) {
+        //     // std::cout << next_player->getName() << " must perform coup this turn (has 10+ coins)" << std::endl;
+        // }
+
         // If the next player is a Merchant, check for bonus coin
         if(next_player->isMerchant()) {
             // If merchant has 3+ coins at start of turn, gain an extra
@@ -124,6 +149,11 @@ namespace coup {
     
     // Check if it's player's turn
     bool Game::isPlayerTurn(const Player* player) const {
+        // Check if game has started
+        if (!game_started) {
+            throw std::runtime_error("Game has not started yet");
+        }
+
         // If no players in the game
         if (players_list.empty()) {
             return false;
@@ -131,5 +161,26 @@ namespace coup {
 
          // Ensure it's the current player's turn
         return players_list[current_player_index] == player;
+    }
+
+    // Start the game - checks player count requirements
+    void Game::startGame() {
+        // Check minimum players
+        if (players_list.size() < 2) {
+            throw std::runtime_error("Minimum 2 players required to start the game");
+        }
+        
+        // Check maximum players
+        if (players_list.size() > 6) {
+            throw std::runtime_error("Maximum 6 players allowed to start the game");
+        }
+        
+        game_started = true;
+        // current_player_index = 0; // Start with first player
+    }
+    
+    // Check if game is started
+    bool Game::isGameStarted() const {
+        return game_started;
     }
 }

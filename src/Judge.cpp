@@ -9,6 +9,11 @@ namespace coup {
     
     // Block another player's bribe action
     void Judge::block_bribe(Player& target) {
+        // Check if game has started
+        if (!game.isGameStarted()) {
+            throw std::runtime_error("Game has not started yet");
+        }
+        
         // Ensure player is active
         if (!active) {
             throw std::runtime_error("Player is eliminated");
