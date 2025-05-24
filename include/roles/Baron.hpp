@@ -2,7 +2,7 @@
 #ifndef BARON_HPP
 #define BARON_HPP
 
-#include "Player.hpp"
+#include "../Player.hpp"
 
 namespace coup {
     class Baron : public Player {

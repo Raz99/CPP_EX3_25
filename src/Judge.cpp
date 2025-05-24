@@ -1,5 +1,5 @@
 // email: razcohenp@gmail.com
-#include "../include/Judge.hpp"
+#include "../include/roles/Judge.hpp"
 #include "../include/Game.hpp"
 #include <stdexcept>
 

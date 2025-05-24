@@ -1,5 +1,5 @@
 // email: razcohenp@gmail.com
-#include "../include/Player.hpp"
+#include "../include/roles/Player.hpp"
 #include "../include/Game.hpp"
 #include <stdexcept>
 

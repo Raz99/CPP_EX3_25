@@ -2,7 +2,7 @@
 #ifndef JUDGE_HPP
 #define JUDGE_HPP
 
-#include "Player.hpp"
+#include "../Player.hpp"
 
 namespace coup {
     class Judge : public Player {

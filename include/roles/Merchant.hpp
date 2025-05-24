@@ -2,7 +2,7 @@
 #ifndef MERCHANT_HPP
 #define MERCHANT_HPP
 
-#include "Player.hpp"
+#include "../Player.hpp"
 
 namespace coup {
     class Merchant : public Player {

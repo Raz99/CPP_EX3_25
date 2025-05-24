@@ -2,7 +2,7 @@
 #ifndef GENERAL_HPP
 #define GENERAL_HPP
 
-#include "Player.hpp"
+#include "../Player.hpp"
 
 namespace coup {
     class General : public Player {

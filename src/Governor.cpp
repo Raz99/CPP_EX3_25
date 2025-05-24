@@ -1,5 +1,5 @@
 // email: razcohenp@gmail.com
-#include "../include/Governor.hpp"
+#include "../include/roles/Governor.hpp"
 #include "../include/Game.hpp"
 #include <stdexcept>
 

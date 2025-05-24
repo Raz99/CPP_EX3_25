@@ -2,7 +2,7 @@
 #ifndef GOVERNOR_HPP
 #define GOVERNOR_HPP
 
-#include "Player.hpp"
+#include "../Player.hpp"
 
 namespace coup {
     class Governor : public Player {

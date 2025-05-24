@@ -1,5 +1,5 @@
 // email: razcohenp@gmail.com
-#include "../include/Spy.hpp"
+#include "../include/roles/Spy.hpp"
 #include "../include/Game.hpp"
 #include <stdexcept>
 

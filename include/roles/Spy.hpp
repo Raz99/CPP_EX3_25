@@ -2,7 +2,7 @@
 #ifndef SPY_HPP
 #define SPY_HPP
 
-#include "Player.hpp"
+#include "../Player.hpp"
 
 namespace coup {
     class Spy : public Player {
