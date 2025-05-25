@@ -19,6 +19,11 @@ namespace coup {
             throw std::runtime_error("Player is eliminated");
         }
 
+        // Ensure target is not the current player
+        if (&target == this) {
+            throw std::runtime_error("An action against yourself is not allowed");
+        }
+
         // Check if target is active
         if (!target.isActive()) {
             throw std::runtime_error("Target player is eliminated");

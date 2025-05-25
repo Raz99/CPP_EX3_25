@@ -7,7 +7,7 @@
 
 namespace coup {
     // Constructor - initialize with first player
-    Game::Game() : current_player_index(0), game_started(false) {}
+    Game::Game() : current_player_index(0), game_started(false), last_arrested_player(nullptr) {}
     
     // Destructor - cleanup
     Game::~Game() {
@@ -182,5 +182,14 @@ namespace coup {
     // Check if game is started
     bool Game::isGameStarted() const {
         return game_started;
+    }
+    
+    // Track last arrested player
+    void Game::setLastArrestedPlayer(Player* player) {
+        last_arrested_player = player;
+    }
+    
+    Player* Game::getLastArrestedPlayer() const {
+        return last_arrested_player;
     }
 }

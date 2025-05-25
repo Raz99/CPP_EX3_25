@@ -13,6 +13,7 @@ namespace coup {
         std::vector<Player*> players_list; // List of players in the game
         int current_player_index; // Index of current player
         bool game_started; // Flag to track if game has started
+        Player* last_arrested_player; // Track the last player that was arrested
         
     public:
         // Constructor - initialize with first player
@@ -44,6 +45,13 @@ namespace coup {
         
         // Check if game is started
         bool isGameStarted() const;
+        
+        // Track last arrested player
+        // Set last arrested player
+        void setLastArrestedPlayer(Player* player);
+
+        // Get last arrested player
+        Player* getLastArrestedPlayer() const;
     };
 }
 

@@ -7,7 +7,7 @@ namespace coup {
     // Constructor
     General::General(Game& game, const std::string& name) : Player(game, name) {}
     
-    // Block coup against another player (or self)
+    // Block coup of another player (or self)
     void General::block_coup(Player& target) {
         // Check if game has started
         if (!game.isGameStarted()) {

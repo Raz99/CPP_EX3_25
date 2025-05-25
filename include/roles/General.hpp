@@ -10,7 +10,7 @@ namespace coup {
         // Constructor
         General(Game& game, const std::string& name);
         
-        // Block coup against another player
+        // Block coup of another player
         void block_coup(Player& target);
 
         // Override to get a coin when targeted

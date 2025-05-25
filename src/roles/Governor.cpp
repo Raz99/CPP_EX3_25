@@ -35,6 +35,11 @@ namespace coup {
             throw std::runtime_error("You have 10 or more coins, must perform coup");
         }
 
+        // Ensure target is not the current player
+        if (&target == this) {
+            throw std::runtime_error("An action against yourself is not allowed");
+        }
+
         // Ensure target is active
         if (!target.isActive()) {
             throw std::runtime_error("Target player is eliminated");

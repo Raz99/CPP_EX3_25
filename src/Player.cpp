@@ -184,9 +184,19 @@ namespace coup {
             throw std::runtime_error("You have 10 or more coins, must perform coup");
         }
 
+        // Ensure target is not the current player
+        if (&target == this) {
+            throw std::runtime_error("An action against yourself is not allowed");
+        }
+
         // Ensure target is active
         if (!target.isActive()) {
             throw std::runtime_error("Target player is eliminated");
+        }
+
+        // Check if target was the last player arrested - prevent consecutive arrests
+        if (game.getLastArrestedPlayer() == &target) {
+            throw std::runtime_error("This player was arrested last turn and cannot be arrested again consecutively");
         }
 
         // Bribe action is meaningless if target has no coins
@@ -203,6 +213,9 @@ namespace coup {
                 target.removeCoins(2);
             }
         }
+        
+        // Mark this player as the last arrested player
+        game.setLastArrestedPlayer(&target);
         
         // If player used bribe, then let him play another turn
         if(bribe_used) {
@@ -235,6 +248,11 @@ namespace coup {
         // Check if player has 10 coins and just started his turn - must coup
         if (coin_count >= 10 && !bribe_used) {
             throw std::runtime_error("You have 10 or more coins, must perform coup");
+        }
+
+        // Ensure target is not the current player
+        if (&target == this) {
+            throw std::runtime_error("An action against yourself is not allowed");
         }
 
         // Ensure target is active
@@ -286,6 +304,11 @@ namespace coup {
         // Ensure player is active
         if (!active) {
             throw std::runtime_error("Player is eliminated");
+        }
+
+        // Ensure target is not the current player
+        if (&target == this) {
+            throw std::runtime_error("An action against yourself is not allowed");
         }
 
         // Ensure target is active
