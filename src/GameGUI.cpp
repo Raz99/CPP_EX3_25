@@ -254,7 +254,7 @@ namespace coup {
         window.draw(roleText);
         window.draw(coinsText);
         window.draw(statusText);
-        window.draw(coinIcon);
+        // window.draw(coinIcon);
         
         // Only draw delete button when explicitly requested (during player setup)
         if (showDeleteButton) {
