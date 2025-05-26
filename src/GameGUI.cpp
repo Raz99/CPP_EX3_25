@@ -90,7 +90,7 @@ namespace coup {
 
     // PlayerCard implementation
     PlayerCard::PlayerCard(sf::Vector2f position, sf::Vector2f size)
-        : isCurrentPlayer(false), isActive(true), // role(RoleType::PLAYER),
+        : isCurrentPlayer(false), isActive(true),
         deleteButton(sf::Vector2f(position.x + size.x - 70, position.y + size.y - 35), 
                     sf::Vector2f(50, 25), "X", "delete_player", sf::Color(180, 60, 60)) {
         
@@ -353,7 +353,6 @@ namespace coup {
         startGameButton(sf::Vector2f(600, 500), sf::Vector2f(200, 50), "Start Game", "start_game"),
         backButton(sf::Vector2f(50, 50), sf::Vector2f(100, 40), "Back", "back"),
         returnToMenuButton(sf::Vector2f(600, 600), sf::Vector2f(200, 50), "Return to Menu", "menu", sf::Color(70, 130, 180)) {
-        // selectedRole(RoleType::PLAYER) {
         
         window.create(sf::VideoMode(WINDOW_WIDTH, WINDOW_HEIGHT), "COUP", sf::Style::Titlebar | sf::Style::Close);
         window.setFramerateLimit(60);
