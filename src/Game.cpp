@@ -273,44 +273,10 @@ namespace coup {
     }
 
     // Methods for Role Assignment
-    // Assign random roles to existing players in the game
+    // Modified assignRandomRoles() to avoid player duplication when game GUI already creates players
     void Game::assignRandomRoles() {
-        // Check if there are players to assign roles to
-        if (players_list.empty()) {
-            throw std::runtime_error("No players in game to assign roles");
-        }
-        
-        // Create list of available roles (can repeat for multiple players)
-        std::vector<RoleType> available_roles = {
-            RoleType::GOVERNOR,
-            RoleType::SPY,
-            RoleType::BARON,
-            RoleType::GENERAL,
-            RoleType::JUDGE, 
-            RoleType::MERCHANT
-        };
-        
-        // Store player names and delete old players
-        std::vector<std::string> player_names;
-        for (Player* player : players_list) {
-            player_names.push_back(player->getName());
-            delete player;
-        }
-        
-        // Clear the list
-        players_list.clear();
-        
-        // Create new players with random roles
-        for (const std::string& name : player_names) {
-            // Pick random role from available roles
-            RoleType assigned_role = available_roles[random_generator() % available_roles.size()];
-            
-            // Create player with assigned role
-            Player* player = createPlayerWithRole(name, assigned_role);
-            players_list.push_back(player);
-        }
-        
-        // Reset game state
+        // Roles are already assigned when players are added from GameGUI.
+        // Simply reset game state.
         current_player_index = 0;
         last_arrested_player = nullptr;
     }

@@ -837,11 +837,17 @@ namespace coup {
         }
         
         try {
-            // Create a new basic player and add to game
-            Player* newPlayer = new Player(*game, name);
+            // Assign a random role to the new player
+            std::vector<RoleType> roles = { RoleType::GOVERNOR, RoleType::SPY, RoleType::BARON, 
+                                            RoleType::GENERAL, RoleType::JUDGE, RoleType::MERCHANT };
+            RoleType assignedRole = roles[std::rand() % roles.size()];
+            
+            // Create a new player with the assigned role (this already adds the player to the game)
+            game->createPlayerWithRole(name, assignedRole);
+            
             playerNameInput.clear();
             createPlayerCards();
-            updateMessage("Player " + name + " added successfully!", false);
+            updateMessage("Player " + name + " added as " + game->getRoleName(assignedRole) + " successfully!", false);
             
             // Enable start button if we have enough players (get updated player count)
             std::vector<Player*> updatedPlayers = game->getAllPlayers();
@@ -858,10 +864,11 @@ namespace coup {
         }
         
         try {
-            game->assignRolesToExistingPlayers(); // Use new method that doesn't duplicate players
-            game->startGame(); // Start the game
+            // Remove role assignment since players already have roles assigned during add_player.
+            // game->assignRolesToExistingPlayers(); // Removed to avoid duplication.
+            game->startGame(); // Start the game using existing players.
             changeState(GameState::PLAYING);
-            updateMessage("Roles assigned - Game started! " + game->getCurrentPlayer()->getName() + "'s turn");
+            updateMessage("Game started! " + game->getCurrentPlayer()->getName() + "'s turn");
         } catch (const std::exception& e) {
             updateMessage("Error starting game: " + std::string(e.what()), true);
         }
