@@ -315,6 +315,48 @@ namespace coup {
         last_arrested_player = nullptr;
     }
     
+    // Assign roles to existing players without recreating them
+    void Game::assignRolesToExistingPlayers() {
+        // Check if there are players to assign roles to
+        if (players_list.empty()) {
+            throw std::runtime_error("No players in game to assign roles");
+        }
+        
+        // Create list of available roles (can repeat for multiple players)
+        std::vector<RoleType> available_roles = {
+            RoleType::GOVERNOR,
+            RoleType::SPY,
+            RoleType::BARON,
+            RoleType::GENERAL,
+            RoleType::JUDGE, 
+            RoleType::MERCHANT
+        };
+        
+        // Store existing players and their names
+        std::vector<std::pair<std::string, Player*>> player_data;
+        for (Player* player : players_list) {
+            player_data.push_back({player->getName(), player});
+        }
+        
+        // Clear the list temporarily
+        players_list.clear();
+        
+        // Create new players with roles and delete the old ones
+        for (const auto& data : player_data) {
+            // Pick random role from available roles
+            RoleType assigned_role = available_roles[random_generator() % available_roles.size()];
+            
+            // Delete the old player and create new one with role
+            delete data.second;
+            Player* player = createPlayerWithRole(data.first, assigned_role);
+            players_list.push_back(player);
+        }
+        
+        // Reset game state
+        current_player_index = 0;
+        last_arrested_player = nullptr;
+    }
+    
     // Get role name as string for display
     std::string Game::getRoleName(RoleType role) const {
         switch (role) {

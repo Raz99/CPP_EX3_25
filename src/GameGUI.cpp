@@ -858,7 +858,7 @@ namespace coup {
         }
         
         try {
-            game->assignRandomRoles(); // Assign roles to players
+            game->assignRolesToExistingPlayers(); // Use new method that doesn't duplicate players
             game->startGame(); // Start the game
             changeState(GameState::PLAYING);
             updateMessage("Roles assigned - Game started! " + game->getCurrentPlayer()->getName() + "'s turn");
@@ -866,7 +866,7 @@ namespace coup {
             updateMessage("Error starting game: " + std::string(e.what()), true);
         }
     }
-
+    
     void GameGUI::executeAction(const std::string& action, Player* target) {
         Player* currentPlayer = game->getCurrentPlayer();
         if (!currentPlayer) {
