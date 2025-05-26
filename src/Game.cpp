@@ -1,15 +1,25 @@
 // email: your_email@example.com
 #include "../include/Game.hpp"
 #include "../include/Player.hpp"
+#include "../include/roles/General.hpp"
+#include "../include/roles/Judge.hpp"
+#include "../include/roles/Merchant.hpp"
+#include "../include/roles/Governor.hpp"
+#include "../include/roles/Baron.hpp"
+#include "../include/roles/Spy.hpp"
 
 #include <iostream> // for printing
 #include <stdexcept>
 #include <algorithm> // for std::find
-#include <random> // for assigning random roles
+#include <chrono> // for seeding random generator
 
 namespace coup {
     // Constructor - initialize with first player
-    Game::Game() : current_player_index(0), game_started(false), last_arrested_player(nullptr) {}
+    Game::Game() : current_player_index(0), game_started(false), last_arrested_player(nullptr) {
+        // Seed random generator with current time for role assignment
+        auto seed = std::chrono::high_resolution_clock::now().time_since_epoch().count();
+        random_generator.seed(seed);
+    }
     
     // Destructor - cleanup
     Game::~Game() {
@@ -259,6 +269,82 @@ namespace coup {
             if (last_arrested_player == player) {
                 last_arrested_player = nullptr;
             }
+        }
+    }
+
+    // Methods for Role Assignment
+    // Assign random roles to existing players in the game
+    void Game::assignRandomRoles() {
+        // Check if there are players to assign roles to
+        if (players_list.empty()) {
+            throw std::runtime_error("No players in game to assign roles");
+        }
+        
+        // Create list of available roles (can repeat for multiple players)
+        std::vector<RoleType> available_roles = {
+            RoleType::GOVERNOR,
+            RoleType::SPY,
+            RoleType::BARON,
+            RoleType::GENERAL,
+            RoleType::JUDGE, 
+            RoleType::MERCHANT
+        };
+        
+        // Store player names and delete old players
+        std::vector<std::string> player_names;
+        for (Player* player : players_list) {
+            player_names.push_back(player->getName());
+            delete player;
+        }
+        
+        // Clear the list
+        players_list.clear();
+        
+        // Create new players with random roles
+        for (const std::string& name : player_names) {
+            // Pick random role from available roles
+            RoleType assigned_role = available_roles[random_generator() % available_roles.size()];
+            
+            // Create player with assigned role
+            Player* player = createPlayerWithRole(name, assigned_role);
+            players_list.push_back(player);
+        }
+        
+        // Reset game state
+        current_player_index = 0;
+        last_arrested_player = nullptr;
+    }
+    
+    // Get role name as string for display
+    std::string Game::getRoleName(RoleType role) const {
+        switch (role) {
+            case RoleType::GOVERNOR: return "Governor";
+            case RoleType::SPY: return "Spy";
+            case RoleType::BARON: return "Baron";
+            case RoleType::GENERAL: return "General";
+            case RoleType::JUDGE: return "Judge";
+            case RoleType::MERCHANT: return "Merchant";
+            default: return "Unknown";
+        }
+    }
+    
+    // Create player with specific role (for internal use)
+    Player* Game::createPlayerWithRole(const std::string& name, RoleType role) {
+        switch (role) {
+            case RoleType::GOVERNOR:
+                return new Governor(*this, name);
+            case RoleType::SPY:
+                return new Spy(*this, name);
+            case RoleType::BARON:
+                return new Baron(*this, name);
+            case RoleType::GENERAL:
+                return new General(*this, name);
+            case RoleType::JUDGE:
+                return new Judge(*this, name);
+            case RoleType::MERCHANT:
+                return new Merchant(*this, name);
+            default:
+                throw std::runtime_error("Invalid role type");
         }
     }
 }

@@ -4,9 +4,21 @@
 
 #include <vector>
 #include <string>
+#include <random> // for role assignment
 
 namespace coup {
     class Player; // Forward declaration to avoid circular dependency
+
+    // Enum for available roles
+    enum class RoleType {
+        GOVERNOR,
+        SPY,
+        BARON,
+        GENERAL,
+        JUDGE,
+        MERCHANT,
+        PLAYER // Default player type
+    };
     
     class Game {
     private:
@@ -14,6 +26,7 @@ namespace coup {
         int current_player_index; // Index of current player
         bool game_started; // Flag to track if game has started
         Player* last_arrested_player; // Track the last player that was arrested
+        std::mt19937 random_generator; // Random number generator for role assignment
         
     public:
         // Constructor - initialize with first player
@@ -67,6 +80,19 @@ namespace coup {
         
         // Remove a specific player from the game (only allowed when game not started)
         void removePlayer(Player* player);
+
+        // Methods for Role Assignment
+        // Assign random roles to existing players in the game
+        void assignRandomRoles();
+        
+        // Assign roles to existing players without recreating them
+        void assignRolesToExistingPlayers();
+        
+        // Get role name as string for display
+        std::string getRoleName(RoleType role) const;
+        
+        // Create player with specific role (for internal use)
+        Player* createPlayerWithRole(const std::string& name, RoleType role);
     };
 }
 

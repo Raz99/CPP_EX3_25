@@ -35,20 +35,20 @@ namespace coup
         GAME_OVER // End game screen showing results
     };
 
-    /**
-     * Character roles available in the game.
-     * Each role has different abilities and skills.
-     */
-    enum class RoleType
-    {
-        PLAYER, // Default player type
-        GOVERNOR, // Can collect taxes
-        SPY, // Can perform coups at lower cost
-        BARON, // Can steal coins from other players
-        GENERAL, // Can force other players to give coins
-        JUDGE, // Can block stealing actions
-        MERCHANT // Can gain extra coins during income
-    };
+    // /**
+    //  * Character roles available in the game.
+    //  * Each role has different abilities and skills.
+    //  */
+    // enum class RoleType
+    // {
+    //     // PLAYER, // Default player type
+    //     GOVERNOR, // Can collect taxes
+    //     SPY, // Can perform coups at lower cost
+    //     BARON, // Can steal coins from other players
+    //     GENERAL, // Can force other players to give coins
+    //     JUDGE, // Can block stealing actions
+    //     MERCHANT // Can gain extra coins during income
+    // };
 
     /**
      * Enhanced Button with hover effects and icons.
@@ -94,7 +94,7 @@ namespace coup
         RoleType role; // Player's character role
         PlayerCard(sf::Vector2f position, sf::Vector2f size); // Constructor for a new player card
         void updateInfo(const Player *player, bool current, 
-            RoleType playerRole = RoleType::PLAYER); // Updates card with current player information
+            RoleType playerRole); // Updates card with current player information
         void draw(sf::RenderWindow &window, bool showDeleteButton = false) const; // Draws the player card to the window.
         void setFont(const sf::Font &font); // Sets the font for all text elements
     };
