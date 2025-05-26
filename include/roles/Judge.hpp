@@ -10,6 +10,9 @@ namespace coup {
         // Constructor
         Judge(Game& game, const std::string& name);
         
+        // Override role type
+        std::string getRoleType() const override { return "Judge"; }
+        
         // Block bribe
         void block_bribe(Player& target);
         

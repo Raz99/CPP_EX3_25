@@ -90,7 +90,18 @@ void EnhancedButton::setFont(const sf::Font& font) {
 
 // PlayerCard implementation
 PlayerCard::PlayerCard(sf::Vector2f position, sf::Vector2f size)
-    : isCurrentPlayer(false), isActive(true), role(RoleType::PLAYER) {
+    : isCurrentPlayer(false), isActive(true), role(RoleType::PLAYER),
+      deleteButton(sf::Vector2f(position.x + size.x - 70, position.y + size.y - 35), 
+                   sf::Vector2f(50, 25), "X", "delete_player", sf::Color(180, 60, 60)) {
+    
+    // Customize delete button appearance
+    deleteButton.hoverColor = sf::Color(220, 80, 80);
+    deleteButton.normalColor = sf::Color(180, 60, 60);
+    deleteButton.shape.setFillColor(deleteButton.normalColor);
+    deleteButton.shape.setOutlineThickness(2);
+    deleteButton.shape.setOutlineColor(sf::Color(120, 40, 40));
+    deleteButton.text.setCharacterSize(16);
+    deleteButton.text.setStyle(sf::Text::Bold);
     
     background.setPosition(position);
     background.setSize(size);
@@ -107,6 +118,8 @@ PlayerCard::PlayerCard(sf::Vector2f position, sf::Vector2f size)
     roleIcon.setSize(sf::Vector2f(30, 30));
     roleIcon.setPosition(position.x + size.x - 40, position.y + 10);
     roleIcon.setFillColor(sf::Color(200, 100, 100));
+    roleIcon.setOutlineThickness(2);
+    roleIcon.setOutlineColor(sf::Color::Black);
     
 // Text elements
     nameText.setPosition(position.x + 70, position.y + 15);
@@ -129,8 +142,10 @@ PlayerCard::PlayerCard(sf::Vector2f position, sf::Vector2f size)
     
 // Coin icon
     coinIcon.setSize(sf::Vector2f(15, 15));
-    coinIcon.setFillColor(sf::Color::Yellow);
+    coinIcon.setFillColor(sf::Color(255, 215, 0)); // Gold color
     coinIcon.setPosition(position.x + 90, position.y + 75);
+    coinIcon.setOutlineThickness(1);
+    coinIcon.setOutlineColor(sf::Color(139, 69, 19)); // Brown outline for gold coin
 }
 
 void PlayerCard::updateInfo(const Player* player, bool current, RoleType playerRole) {
@@ -177,21 +192,60 @@ void PlayerCard::updateInfo(const Player* player, bool current, RoleType playerR
         playerAvatar.setFillColor(sf::Color(100, 150, 200)); // Blue
     }
     
-// Role-specific colors
+// Role-specific colors and shapes
     sf::Color roleColor = sf::Color(200, 100, 100);
     switch (role) {
-        case RoleType::GOVERNOR: roleColor = sf::Color(200, 150, 50); break;
-        case RoleType::SPY: roleColor = sf::Color(100, 100, 200); break;
-        case RoleType::BARON: roleColor = sf::Color(150, 100, 200); break;
-        case RoleType::GENERAL: roleColor = sf::Color(200, 100, 100); break;
-        case RoleType::JUDGE: roleColor = sf::Color(150, 150, 150); break;
-        case RoleType::MERCHANT: roleColor = sf::Color(100, 200, 100); break;
-        default: roleColor = sf::Color(120, 120, 120); break;
+        case RoleType::GOVERNOR: 
+            roleColor = sf::Color(200, 150, 50); // Gold-like color
+            break;
+        case RoleType::SPY: 
+            roleColor = sf::Color(100, 100, 200); // Blue color
+            break;
+        case RoleType::BARON: 
+            roleColor = sf::Color(150, 100, 200); // Purple color
+            break;
+        case RoleType::GENERAL: 
+            roleColor = sf::Color(200, 100, 100); // Red color
+            break;
+        case RoleType::JUDGE: 
+            roleColor = sf::Color(150, 150, 150); // Silver/gray color
+            break;
+        case RoleType::MERCHANT: 
+            roleColor = sf::Color(100, 200, 100); // Green color
+            break;
+        default: 
+            roleColor = sf::Color(120, 120, 120); // Default gray
+            break;
     }
     roleIcon.setFillColor(roleColor);
+    
+    // Customize icon appearance based on role
+    switch (role) {
+        case RoleType::GOVERNOR:
+            roleIcon.setSize(sf::Vector2f(30, 20)); // Crown-like shape
+            break;
+        case RoleType::SPY:
+            roleIcon.setSize(sf::Vector2f(25, 25)); // More square shape
+            break;
+        case RoleType::BARON:
+            roleIcon.setSize(sf::Vector2f(35, 25)); // Wider rectangle
+            break;
+        case RoleType::GENERAL:
+            roleIcon.setSize(sf::Vector2f(30, 30)); // Standard square
+            break;
+        case RoleType::JUDGE:
+            roleIcon.setSize(sf::Vector2f(35, 20)); // Wider, flatter shape
+            break;
+        case RoleType::MERCHANT:
+            roleIcon.setSize(sf::Vector2f(25, 30)); // Taller rectangle
+            break;
+        default:
+            roleIcon.setSize(sf::Vector2f(30, 30)); // Default square
+            break;
+    }
 }
 
-void PlayerCard::draw(sf::RenderWindow& window) const {
+void PlayerCard::draw(sf::RenderWindow& window, bool showDeleteButton) const {
     window.draw(background);
     window.draw(playerAvatar);
     window.draw(roleIcon);
@@ -200,6 +254,11 @@ void PlayerCard::draw(sf::RenderWindow& window) const {
     window.draw(coinsText);
     window.draw(statusText);
     window.draw(coinIcon);
+    
+    // Only draw delete button when explicitly requested (during player setup)
+    if (showDeleteButton) {
+        deleteButton.draw(window);
+    }
 }
 
 void PlayerCard::setFont(const sf::Font& font) {
@@ -207,6 +266,7 @@ void PlayerCard::setFont(const sf::Font& font) {
     roleText.setFont(font);
     coinsText.setFont(font);
     statusText.setFont(font);
+    deleteButton.setFont(font);
 }
 
 // InputField implementation
@@ -387,6 +447,9 @@ void GameGUI::setupPlayerSetup() {
     startGameButton.setFont(mainFont);
     backButton.setFont(mainFont);
     
+    // Initially disable start game button until we have enough players
+    startGameButton.setEnabled(false);
+    
 // Instruction text
     instructionText.setFont(mainFont);
     instructionText.setString("Add 2-6 players to start the game");
@@ -401,13 +464,17 @@ void GameGUI::setupPlayerSetup() {
 void GameGUI::createPlayerCards() {
     playerCards.clear();
     
+    if (!game) return;
+    
+    std::vector<Player*> allPlayers = game->getAllPlayers();
+    
     int playersPerRow = 3;
     sf::Vector2f cardSize(CARD_WIDTH, CARD_HEIGHT);
     sf::Vector2f spacing(20, 20);
     // Position cards within the player panel
     sf::Vector2f startPos(490, 80);
     
-    for (size_t i = 0; i < players.size(); ++i) {
+    for (size_t i = 0; i < allPlayers.size(); ++i) {
         int row = i / playersPerRow;
         int col = i % playersPerRow;
         
@@ -419,9 +486,9 @@ void GameGUI::createPlayerCards() {
         playerCards.emplace_back(pos, cardSize);
         playerCards.back().setFont(mainFont);
         
-        // Determine player role for display (this would need to be enhanced)
-        RoleType displayRole = RoleType::PLAYER; // Default for now
-        playerCards.back().updateInfo(players[i].get(), false, displayRole);
+        // Use the Player's getRoleType method for proper role detection
+        RoleType displayRole = convertRoleType(allPlayers[i]->getRoleType());
+        playerCards.back().updateInfo(allPlayers[i], false, displayRole);
     }
 }
 
@@ -451,12 +518,7 @@ void GameGUI::createActionButtons() {
         actionButtons.back().setFont(mainFont);
     }
     
-    // Add role-specific action buttons
-    Player* currentPlayer = getCurrentPlayer();
-    if (currentPlayer) {
-        RoleType role = getPlayerRole(currentPlayer);
-        addRoleSpecificButtons(role, startPos, buttonSize, spacing, basicActions.size());
-    }
+    // Role-specific buttons will be added dynamically based on current player's role
 }
 
 void GameGUI::addRoleSpecificButtons(RoleType role, sf::Vector2f startPos, sf::Vector2f buttonSize, 
@@ -574,12 +636,45 @@ void GameGUI::handleMouseClick(sf::Vector2f mousePos) {
                 addNewPlayer();
             }
             
-            if (startGameButton.contains(mousePos) && players.size() >= 2) {
+            if (startGameButton.contains(mousePos) && game && game->getAllPlayers().size() >= 2) {
                 startNewGame();
             }
             
             if (backButton.contains(mousePos)) {
+                // Clear all players when going back to main menu
+                if (game) {
+                    try {
+                        game->clearAllPlayers();
+                        updateMessage("All players cleared", false);
+                    } catch (const std::exception& e) {
+                        updateMessage("Error clearing players: " + std::string(e.what()), true);
+                    }
+                    delete game;
+                    game = nullptr;
+                }
                 changeState(GameState::MAIN_MENU);
+            }
+            
+            // Handle delete player button clicks
+            if (game) {
+                std::vector<Player*> allPlayers = game->getAllPlayers();
+                for (size_t i = 0; i < playerCards.size() && i < allPlayers.size(); ++i) {
+                    if (playerCards[i].deleteButton.contains(mousePos)) {
+                        try {
+                            std::string playerName = allPlayers[i]->getName();
+                            game->removePlayer(allPlayers[i]);
+                            createPlayerCards(); // Refresh the player cards
+                            updateMessage("Player " + playerName + " removed", false);
+                            
+                            // Update start button state
+                            std::vector<Player*> updatedPlayers = game->getAllPlayers();
+                            startGameButton.setEnabled(updatedPlayers.size() >= 2);
+                        } catch (const std::exception& e) {
+                            updateMessage("Error removing player: " + std::string(e.what()), true);
+                        }
+                        break; // Only handle one delete at a time
+                    }
+                }
             }
             break;
             
@@ -599,10 +694,11 @@ void GameGUI::handleMouseClick(sf::Vector2f mousePos) {
             
             // Handle target selection
             if (waitingForTarget) {
-                for (size_t i = 0; i < playerCards.size(); ++i) {
+                std::vector<Player*> allPlayers = game->getAllPlayers();
+                for (size_t i = 0; i < playerCards.size() && i < allPlayers.size(); ++i) {
                     if (playerCards[i].background.getGlobalBounds().contains(mousePos)) {
-                        if (players[i].get() != getCurrentPlayer() && players[i]->isActive()) {
-                            executeAction(currentAction, players[i].get());
+                        if (allPlayers[i] != game->getCurrentPlayer() && allPlayers[i]->isActive()) {
+                            executeAction(currentAction, allPlayers[i]);
                             waitingForTarget = false;
                             currentAction = "";
                         } else {
@@ -620,7 +716,6 @@ void GameGUI::handleMouseClick(sf::Vector2f mousePos) {
                     delete game;
                     game = nullptr;
                 }
-                players.clear();
                 changeState(GameState::MAIN_MENU);
             }
             break;
@@ -639,6 +734,10 @@ void GameGUI::handleMouseMove(sf::Vector2f mousePos) {
             allButtons.push_back(&addPlayerButton);
             allButtons.push_back(&startGameButton);
             allButtons.push_back(&backButton);
+            // Add delete buttons from player cards
+            for (auto& card : playerCards) {
+                allButtons.push_back(&card.deleteButton);
+            }
             break;
         case GameState::PLAYING:
             for (auto& btn : actionButtons) allButtons.push_back(&btn);
@@ -676,7 +775,7 @@ void GameGUI::handleKeyPress(sf::Keyboard::Key key) {
                 changeState(GameState::MAIN_MENU);
             } else if (key == sf::Keyboard::Enter) {
                 // Add player or start game
-                if (players.size() >= 2) {
+                if (game && game->getAllPlayers().size() >= 2) {
                     startNewGame();
                 } else {
                     addNewPlayer();
@@ -701,7 +800,6 @@ void GameGUI::handleKeyPress(sf::Keyboard::Key key) {
                     delete game;
                     game = nullptr;
                 }
-                players.clear();
                 changeState(GameState::MAIN_MENU);
             }
             break;
@@ -715,38 +813,41 @@ void GameGUI::addNewPlayer() {
         return;
     }
     
-    if (players.size() >= 6) {
+    if (!game) {
+        game = new Game();
+    }
+    
+    // Check for duplicate names through Game class
+    std::vector<Player*> allPlayers = game->getAllPlayers();
+    if (allPlayers.size() >= 6) {
         updateMessage("Maximum 6 players allowed!", true);
         return;
     }
     
-    // Check for duplicate names
-    for (const auto& player : players) {
+    for (const auto& player : allPlayers) {
         if (player->getName() == name) {
             updateMessage("Player name already exists!", true);
             return;
         }
     }
     
-    if (!game) {
-        game = new Game();
-    }
-    
     try {
-        players.push_back(std::make_unique<Player>(*game, name));
+        // Create a new basic player and add to game
+        Player* newPlayer = new Player(*game, name);
         playerNameInput.clear();
         createPlayerCards();
         updateMessage("Player " + name + " added successfully!", false);
         
-        // Enable start button if we have enough players
-        startGameButton.setEnabled(players.size() >= 2);
+        // Enable start button if we have enough players (get updated player count)
+        std::vector<Player*> updatedPlayers = game->getAllPlayers();
+        startGameButton.setEnabled(updatedPlayers.size() >= 2);
     } catch (const std::exception& e) {
         updateMessage("Error adding player: " + std::string(e.what()), true);
     }
 }
 
 void GameGUI::startNewGame() {
-    if (!game || players.size() < 2) {
+    if (!game || game->getAllPlayers().size() < 2) {
         updateMessage("Need at least 2 players to start!", true);
         return;
     }
@@ -754,14 +855,14 @@ void GameGUI::startNewGame() {
     try {
         game->startGame();
         changeState(GameState::PLAYING);
-        updateMessage("Game started! " + getCurrentPlayer()->getName() + "'s turn");
+        updateMessage("Game started! " + game->getCurrentPlayer()->getName() + "'s turn");
     } catch (const std::exception& e) {
         updateMessage("Error starting game: " + std::string(e.what()), true);
     }
 }
 
 void GameGUI::executeAction(const std::string& action, Player* target) {
-    Player* currentPlayer = getCurrentPlayer();
+    Player* currentPlayer = game->getCurrentPlayer();
     if (!currentPlayer) {
         updateMessage("No current player!", true);
         return;
@@ -783,7 +884,12 @@ void GameGUI::executeAction(const std::string& action, Player* target) {
         }
         else if (action == "arrest" && target) {
             currentPlayer->arrest(*target);
-            updateMessage(currentPlayer->getName() + " arrested " + target->getName());
+            if (target->coins() == 0) {
+                updateMessage(currentPlayer->getName() + " arrested " + target->getName() + ", though " + target->getName() + " had no coins", false, true);
+            }
+            else {
+                updateMessage(currentPlayer->getName() + " arrested " + target->getName());
+            }
         }
         else if (action == "sanction" && target) {
             currentPlayer->sanction(*target);
@@ -924,7 +1030,7 @@ void GameGUI::setupGameScreen() {
     playerSectionHeader.setStyle(sf::Text::Bold);
     playerSectionHeader.setPosition(490, 55);
     
-    gameInfoHeader.setFont(mainFont);
+        gameInfoHeader.setFont(mainFont);
     gameInfoHeader.setString("GAME STATUS");
     gameInfoHeader.setCharacterSize(20);
     gameInfoHeader.setFillColor(theme.accent);
@@ -1005,7 +1111,7 @@ void GameGUI::updateGameInfo() {
         return;
     }
     
-    Player* currentPlayer = getCurrentPlayer();
+    Player* currentPlayer = game->getCurrentPlayer();
     if (!currentPlayer) {
         currentPlayerText.setString("No current player");
         gameStatusText.setString("");
@@ -1049,7 +1155,7 @@ void GameGUI::updateActionAvailability() {
         return;
     }
     
-    Player* currentPlayer = getCurrentPlayer();
+    Player* currentPlayer = game->getCurrentPlayer();
     if (!currentPlayer) {
         for (auto& button : actionButtons) {
             button.setEnabled(false);
@@ -1057,9 +1163,54 @@ void GameGUI::updateActionAvailability() {
         return;
     }
     
-    // Update each action button based on availability
+    // Update each action button based on availability using state variables
     for (auto& button : actionButtons) {
-        bool available = isActionAvailable(button.action);
+        bool available = false;
+        
+        if (button.action == "gather") {
+            // Player can gather if: active, not sanctioned, and not forced to coup
+            available = currentPlayer->isActive() && 
+                       !currentPlayer->isSanctioned() && 
+                       !(currentPlayer->coins() >= 10 && !currentPlayer->isBribeUsed());
+        } else if (button.action == "tax") {
+            // Player can tax if: active, not sanctioned, tax available, and not forced to coup
+            available = currentPlayer->isActive() && 
+                       !currentPlayer->isSanctioned() && 
+                       currentPlayer->isTaxAvailable() && 
+                       !(currentPlayer->coins() >= 10 && !currentPlayer->isBribeUsed());
+        } else if (button.action == "bribe") {
+            // Player can bribe if: active, has 4+ coins, and not forced to coup
+            available = currentPlayer->isActive() && 
+                       currentPlayer->coins() >= 4 && 
+                       !(currentPlayer->coins() >= 10 && !currentPlayer->isBribeUsed());
+        } else if (button.action == "arrest") {
+            // Player can arrest if: active, arrest available, not forced to coup, and has targets
+            available = currentPlayer->isActive() && 
+                       currentPlayer->isArrestAvailable() && 
+                       !(currentPlayer->coins() >= 10 && !currentPlayer->isBribeUsed()) && 
+                       !getTargetablePlayers().empty();
+        } else if (button.action == "sanction") {
+            // Check if player can sanction any target
+            available = false;
+            if (currentPlayer->isActive() && 
+                !(currentPlayer->coins() >= 10 && !currentPlayer->isBribeUsed())) {
+                for (Player* target : getTargetablePlayers()) {
+                    // Check if player has enough coins (3 for normal, 4 for Judge)
+                    int requiredCoins = target->isJudge() ? 4 : 3;
+                    if (currentPlayer->coins() >= requiredCoins) {
+                        available = true;
+                        break;
+                    }
+                }
+            }
+        } else if (button.action == "coup") {
+            // Player can coup if: active, has 7+ coins, and has targets
+            available = currentPlayer->isActive() && 
+                       currentPlayer->coins() >= 7 && 
+                       !getTargetablePlayers().empty();
+        }
+        // Add role-specific actions here if needed
+        
         button.setEnabled(available);
         
         // Add visual feedback for unavailable actions
@@ -1069,91 +1220,16 @@ void GameGUI::updateActionAvailability() {
     }
 }
 
-bool GameGUI::isActionAvailable(const std::string& action) const {
-    if (!game || !game->isGameStarted()) return false;
-    
-    Player* currentPlayer = getCurrentPlayer();
-    if (!currentPlayer || !currentPlayer->isActive()) return false;
-    
-    // If player has 10+ coins and hasn't used bribe, only coup is available
-    bool mustCoup = (currentPlayer->coins() >= 10 && !currentPlayer->isBribeUsed());
-    if (mustCoup && action != "coup") return false;
-    
-    // Basic actions
-    if (action == "gather") {
-        return !currentPlayer->isSanctioned();
-    }
-    else if (action == "tax") {
-        return currentPlayer->isTaxAvailable() && !currentPlayer->isSanctioned();
-    }
-    else if (action == "bribe") {
-        return currentPlayer->coins() >= 4 && !currentPlayer->isBribeUsed();
-    }
-    else if (action == "arrest") {
-        return currentPlayer->isArrestAvailable() && !getTargetablePlayers().empty();
-    }
-    else if (action == "sanction") {
-        int cost = 3;
-        // Check if any target is a judge (higher cost)
-        for (Player* target : getTargetablePlayers()) {
-            if (target->isJudge()) {
-                cost = 4;
-                break;
-            }
-        }
-        return currentPlayer->coins() >= cost && !getTargetablePlayers().empty();
-    }
-    else if (action == "coup") {
-        return currentPlayer->coins() >= 7 && !getTargetablePlayers().empty();
-    }
-    
-    // Role-specific actions
-    RoleType role = getPlayerRole(currentPlayer);
-    
-    if (action == "undo") {
-        return role == RoleType::GOVERNOR && !getTargetablePlayers().empty();
-    }
-    else if (action == "invest") {
-        return role == RoleType::BARON && currentPlayer->coins() >= 3;
-    }
-    else if (action == "spy_on") {
-        return role == RoleType::SPY && !getTargetablePlayers().empty();
-    }
-    else if (action == "block_coup") {
-        // General can block coup if there are eliminated players to revive
-        if (role == RoleType::GENERAL && currentPlayer->coins() >= 5) {
-            for (const auto& player : players) {
-                if (!player->isActive()) {
-                    return true; // There's at least one eliminated player to revive
-                }
-            }
-        }
-        return false;
-    }
-    else if (action == "block_bribe") {
-        // Judge can block bribe if there are players who used bribe
-        if (role == RoleType::JUDGE) {
-            for (Player* target : getTargetablePlayers()) {
-                if (target->isBribeUsed()) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-    
-    return false;
-}
-
 std::vector<Player*> GameGUI::getTargetablePlayers() const {
     std::vector<Player*> targets;
-    Player* currentPlayer = getCurrentPlayer();
+    Player* currentPlayer = game->getCurrentPlayer();
     
     if (!currentPlayer) return targets;
     
-    for (const auto& player : players) {
-        if (player.get() != currentPlayer && player->isActive()) {
-            targets.push_back(player.get());
+    std::vector<Player*> allPlayers = game->getActivePlayers();
+    for (Player* player : allPlayers) {
+        if (player != currentPlayer) {
+            targets.push_back(player);
         }
     }
     
@@ -1161,15 +1237,10 @@ std::vector<Player*> GameGUI::getTargetablePlayers() const {
 }
 
 std::vector<Player*> GameGUI::getActivePlayers() const {
-    std::vector<Player*> activePlayers;
-    
-    for (const auto& player : players) {
-        if (player->isActive()) {
-            activePlayers.push_back(player.get());
-        }
+    if (!game) {
+        return std::vector<Player*>();
     }
-    
-    return activePlayers;
+    return game->getActivePlayers();
 }
 
 void GameGUI::update() {
@@ -1184,23 +1255,21 @@ void GameGUI::update() {
 }
 
 void GameGUI::updatePlayerCards() {
-    if (playerCards.size() != players.size()) {
+    std::vector<Player*> allPlayers = game->getAllPlayers();
+    if (playerCards.size() != allPlayers.size()) {
         createPlayerCards();
         return;
     }
     
-    Player* currentPlayer = getCurrentPlayer();
+    Player* currentPlayer = game->getCurrentPlayer();
     
-    for (size_t i = 0; i < players.size() && i < playerCards.size(); ++i) {
-        bool isCurrent = (currentPlayer && players[i].get() == currentPlayer);
+    for (size_t i = 0; i < allPlayers.size() && i < playerCards.size(); ++i) {
+        bool isCurrent = (currentPlayer && allPlayers[i] == currentPlayer);
         
-        // Determine role for display (would need enhancement for actual role detection)
-        RoleType displayRole = RoleType::PLAYER;
+        // Use the Player's getRoleType method for proper role detection
+        RoleType displayRole = convertRoleType(allPlayers[i]->getRoleType());
         
-        // You could add role detection logic here based on the actual player types
-        // For now, using default player role
-        
-        playerCards[i].updateInfo(players[i].get(), isCurrent, displayRole);
+        playerCards[i].updateInfo(allPlayers[i], isCurrent, displayRole);
     }
 }
 
@@ -1238,17 +1307,15 @@ void GameGUI::render() {
             window.draw(instructionText);
             playerNameInput.draw(window);
             addPlayerButton.draw(window);
-            if (players.size() >= 2) {
-                startGameButton.draw(window);
-            }
+            startGameButton.draw(window);
             backButton.draw(window);
             
             for (const auto& card : playerCards) {
-                card.draw(window);
+                card.draw(window, true); // Show delete buttons during setup
             }
             break;
             
-        case GameState::PLAYING:
+        case GameState::PLAYING: {
             // Draw game panels
             window.draw(gameInfoPanel);
             window.draw(actionPanel);
@@ -1265,9 +1332,10 @@ void GameGUI::render() {
             }
             
             // Draw player cards with target highlighting
-            for (size_t i = 0; i < playerCards.size(); ++i) {
+            std::vector<Player*> allPlayers = game->getAllPlayers();
+            for (size_t i = 0; i < playerCards.size() && i < allPlayers.size(); ++i) {
                 // Highlight targetable players when waiting for target
-                if (waitingForTarget && players[i].get() != getCurrentPlayer() && players[i]->isActive()) {
+                if (waitingForTarget && allPlayers[i] != game->getCurrentPlayer() && allPlayers[i]->isActive()) {
                     // Draw a selection highlight
                     sf::RectangleShape highlight = playerCards[i].background;
                     highlight.setFillColor(sf::Color(255, 255, 0, 50)); // Semi-transparent yellow
@@ -1275,12 +1343,13 @@ void GameGUI::render() {
                     highlight.setOutlineThickness(3);
                     window.draw(highlight);
                 }
-                playerCards[i].draw(window);
+                playerCards[i].draw(window, false); // Don't show delete buttons during gameplay
             }
             
             // Draw action feedback
             window.draw(actionFeedbackText);
             break;
+        }
             
         case GameState::GAME_OVER:
             // Draw game over screen
@@ -1324,35 +1393,6 @@ void GameGUI::updateMessage(const std::string& message, bool isError, bool isWar
     actionFeedbackText.setString(message);
 }
 
-RoleType GameGUI::getPlayerRole(Player* player) const {
-    if (!player) return RoleType::PLAYER;
-    
-    // Check role types using virtual methods
-    if (player->isGeneral()) return RoleType::GENERAL;
-    if (player->isJudge()) return RoleType::JUDGE;
-    if (player->isMerchant()) return RoleType::MERCHANT;
-    
-    // For other roles, we need to use dynamic_cast
-    if (dynamic_cast<const Governor*>(player)) return RoleType::GOVERNOR;
-    if (dynamic_cast<const Baron*>(player)) return RoleType::BARON;
-    if (dynamic_cast<const Spy*>(player)) return RoleType::SPY;
-    
-    return RoleType::PLAYER;
-}
-
-Player* GameGUI::getCurrentPlayer() const {
-    if (!game || !game->isGameStarted()) return nullptr;
-    
-    // Since we need access to the current player directly, we need to add a method to Game class
-    // For now, let's use a workaround by checking which player's turn it is
-    for (const auto& player : players) {
-        if (game->isPlayerTurn(player.get())) {
-            return player.get();
-        }
-    }
-    return nullptr;
-}
-
 void GameGUI::createDecorativeElements() {
     decorativeCoins.clear();
     
@@ -1374,4 +1414,13 @@ void GameGUI::createDecorativeElements() {
     }
 }
 
+RoleType GameGUI::convertRoleType(const std::string& roleStr) const {
+    if (roleStr == "Governor") return RoleType::GOVERNOR;
+    else if (roleStr == "Baron") return RoleType::BARON;
+    else if (roleStr == "Spy") return RoleType::SPY;
+    else if (roleStr == "General") return RoleType::GENERAL;
+    else if (roleStr == "Judge") return RoleType::JUDGE;
+    else if (roleStr == "Merchant") return RoleType::MERCHANT;
+    else return RoleType::PLAYER;
+}
 } // namespace coup

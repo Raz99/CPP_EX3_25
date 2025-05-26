@@ -10,6 +10,9 @@ namespace coup {
         // Constructor
         Baron(Game& game, const std::string& name);
         
+        // Override role type
+        std::string getRoleType() const override { return "Baron"; }
+        
         // Invest 3 coins to get 6
         void invest();
         

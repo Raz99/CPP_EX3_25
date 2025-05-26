@@ -46,12 +46,27 @@ namespace coup {
         // Check if game is started
         bool isGameStarted() const;
         
+        // Get current player
+        Player* getCurrentPlayer() const;
+        
+        // Get all players in the game
+        std::vector<Player*> getAllPlayers() const;
+        
+        // Get active players
+        std::vector<Player*> getActivePlayers() const;
+        
         // Track last arrested player
         // Set last arrested player
         void setLastArrestedPlayer(Player* player);
 
         // Get last arrested player
         Player* getLastArrestedPlayer() const;
+        
+        // Clear all players from the game (only allowed when game not started)
+        void clearAllPlayers();
+        
+        // Remove a specific player from the game (only allowed when game not started)
+        void removePlayer(Player* player);
     };
 }
 

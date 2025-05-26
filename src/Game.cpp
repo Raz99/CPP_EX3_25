@@ -4,6 +4,8 @@
 
 #include <iostream> // for printing
 #include <stdexcept>
+#include <algorithm> // for std::find
+#include <random> // for assigning random roles
 
 namespace coup {
     // Constructor - initialize with first player
@@ -184,6 +186,30 @@ namespace coup {
         return game_started;
     }
     
+    // Get current player
+    Player* Game::getCurrentPlayer() const {
+        if (!game_started || players_list.empty()) {
+            return nullptr;
+        }
+        return players_list[current_player_index];
+    }
+    
+    // Get all players in the game
+    std::vector<Player*> Game::getAllPlayers() const {
+        return players_list;
+    }
+    
+    // Get active players
+    std::vector<Player*> Game::getActivePlayers() const {
+        std::vector<Player*> activePlayers;
+        for (Player* player : players_list) {
+            if (player->isActive()) {
+                activePlayers.push_back(player);
+            }
+        }
+        return activePlayers;
+    }
+    
     // Track last arrested player
     void Game::setLastArrestedPlayer(Player* player) {
         last_arrested_player = player;
@@ -191,5 +217,48 @@ namespace coup {
     
     Player* Game::getLastArrestedPlayer() const {
         return last_arrested_player;
+    }
+    
+    // Clear all players from the game (only allowed when game not started)
+    void Game::clearAllPlayers() {
+        // Only allow clearing players if game hasn't started
+        if (game_started) {
+            throw std::runtime_error("Cannot clear players after game has started");
+        }
+        
+        // Delete all player objects
+        for (Player* player : players_list) {
+            delete player;
+        }
+        
+        // Clear the list
+        players_list.clear();
+        current_player_index = 0;
+        last_arrested_player = nullptr;
+    }
+    
+    // Remove a specific player from the game (only allowed when game not started)
+    void Game::removePlayer(Player* player) {
+        // Only allow removing players if game hasn't started
+        if (game_started) {
+            throw std::runtime_error("Cannot remove players after game has started");
+        }
+        
+        // Find and remove the player
+        auto it = std::find(players_list.begin(), players_list.end(), player);
+        if (it != players_list.end()) {
+            delete *it; // Delete the player object
+            players_list.erase(it);
+            
+            // Reset indices if needed
+            if (current_player_index >= static_cast<int>(players_list.size())) {
+                current_player_index = 0;
+            }
+            
+            // Clear last arrested player if it was this player
+            if (last_arrested_player == player) {
+                last_arrested_player = nullptr;
+            }
+        }
     }
 }

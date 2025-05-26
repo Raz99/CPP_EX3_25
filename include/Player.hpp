@@ -38,6 +38,9 @@ namespace coup {
         virtual bool isGeneral() const { return false; } // Check if player is a General (default: false)
         virtual bool isJudge() const { return false; } // Check if player is a Judge (default: false)
         virtual bool isMerchant() const { return false; } // Check if player is a Merchant (default: false)
+        
+        // Get player role type for GUI display
+        virtual std::string getRoleType() const { return "Player"; }
 
         // Basic actions that all players can perform
         void gather(); // Take 1 coin from bank

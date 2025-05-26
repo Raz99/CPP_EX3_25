@@ -10,6 +10,9 @@ namespace coup {
         // Constructor - inherits from Player
         Governor(Game& game, const std::string& name);
         
+        // Override role type
+        std::string getRoleType() const override { return "Governor"; }
+        
         // Override tax method to take 3 coins instead of 2
         void tax() override;
         

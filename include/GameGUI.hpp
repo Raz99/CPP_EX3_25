@@ -88,13 +88,14 @@ namespace coup
         sf::Text roleText; // Text label of player's role
         sf::CircleShape playerAvatar; // Visual representation of player
         sf::RectangleShape coinIcon; // Icon for coin display
+        EnhancedButton deleteButton; // Button to delete this player during setup
         bool isCurrentPlayer; // Whether this is the active player
         bool isActive; // Whether player is still in the game
         RoleType role; // Player's character role
         PlayerCard(sf::Vector2f position, sf::Vector2f size); // Constructor for a new player card
         void updateInfo(const Player *player, bool current, 
             RoleType playerRole = RoleType::PLAYER); // Updates card with current player information
-        void draw(sf::RenderWindow &window) const; // Draws the player card to the window.
+        void draw(sf::RenderWindow &window, bool showDeleteButton = false) const; // Draws the player card to the window.
         void setFont(const sf::Font &font); // Sets the font for all text elements
     };
 
@@ -143,7 +144,6 @@ namespace coup
             sf::Font mainFont; // Standard font for UI elements
             sf::Font titleFont; // Font used for titles and headers
             Game *game; // Pointer to the game logic
-            std::vector<std::unique_ptr<Player>> players; // Player objects
             GameState currentState; // Current UI state
 
             // UI text elements for different game states
@@ -269,15 +269,14 @@ namespace coup
             Player *getCurrentPlayer() const; // Gets the player with the current turn
             std::vector<Player *> getActivePlayers() const; // Gets all players still in the game
             std::vector<Player *> getTargetablePlayers() const; // Gets players that can be targeted
-            bool isActionAvailable(const std::string &action) const; // Checks if an action can be performed
-            RoleType getPlayerRole(Player *player) const; // Gets the role type of a player
+            RoleType convertRoleType(const std::string& roleStr) const; // Converts role string to enum
             std::string getRoleName(RoleType role) const; // Converts role enum to display name
             sf::Color getRoleColor(RoleType role) const; // Gets the color associated with a role
             void updateMessage(const std::string &message, bool isError = false, bool isWarning = false); // Shows feedback message
             void createDecorativeElements(); // Creates visual decorations
             void setupGamePanels(); // Sets up the UI layout panels
             void updateGameInfo(); // Updates game status display
-            void updateActionAvailability(); // Enables/disables action buttons based on game state
+            void updateActionAvailability(); // Updates which action buttons are enabled/disabled
 
             // Layout helpers
             sf::Vector2f getCenterPosition(sf::Vector2f size) const; // Gets the center position for an element
