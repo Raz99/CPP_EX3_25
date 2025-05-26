@@ -332,7 +332,7 @@ namespace coup {
             case RoleType::GENERAL: return "General";
             case RoleType::JUDGE: return "Judge";
             case RoleType::MERCHANT: return "Merchant";
-            default: return "Unknown";
+            default: return "Unassigned";
         }
     }
     
