@@ -687,7 +687,9 @@ namespace coup {
                 for (auto& button : actionButtons) {
                     if (button.contains(mousePos)) {
                         currentAction = button.action;
-                        if (currentAction == "arrest" || currentAction == "sanction" || currentAction == "coup") {
+                        if (currentAction == "arrest" || currentAction == "sanction" || currentAction == "coup" || 
+                            currentAction == "undo" || currentAction == "spy_on" || currentAction == "block_coup" || 
+                            currentAction == "block_bribe") {
                             waitingForTarget = true;
                             updateMessage("Select a target player");
                         } else {
@@ -863,9 +865,7 @@ namespace coup {
         }
         
         try {
-            // Remove role assignment since players already have roles assigned during add_player.
-            // game->assignRolesToExistingPlayers(); // Removed to avoid duplication.
-            game->startGame(); // Start the game using existing players.
+            game->startGame(); // Start the game using existing players
             changeState(GameState::PLAYING);
             updateMessage("Game started! " + game->getCurrentPlayer()->getName() + "'s turn");
         } catch (const std::exception& e) {
@@ -936,7 +936,7 @@ namespace coup {
                 if (spy) {
                     spy->spy_on(*target);
                     updateMessage(spy->getName() + " spied on " + target->getName() + 
-                                " (Coins: " + std::to_string(target->coins()) + ", blocked arrest)");
+                                " (Coins: " + std::to_string(target->coins()) + ") and revoked their arrest ability");
                 } else {
                     updateMessage("Only Spies can spy on players!", true);
                 }
@@ -1243,6 +1243,34 @@ namespace coup {
                 // Player can coup if: active, has 7+ coins, and has targets
                 available = currentPlayer->isActive() && 
                         currentPlayer->coins() >= 7 && 
+                        !getTargetablePlayers().empty();
+            }
+            // Role-specific actions
+            else if (button.action == "undo") {
+                Governor* governor = dynamic_cast<Governor*>(currentPlayer);
+                available = governor && currentPlayer->isActive() && 
+                        !(currentPlayer->coins() >= 10 && !currentPlayer->isBribeUsed()) &&
+                        !getTargetablePlayers().empty();
+            } else if (button.action == "invest") {
+                Baron* baron = dynamic_cast<Baron*>(currentPlayer);
+                available = baron && currentPlayer->isActive() && 
+                        currentPlayer->coins() >= 3 &&
+                        !(currentPlayer->coins() >= 10 && !currentPlayer->isBribeUsed());
+            } else if (button.action == "spy_on") {
+                Spy* spy = dynamic_cast<Spy*>(currentPlayer);
+                available = spy && currentPlayer->isActive() && 
+                        !(currentPlayer->coins() >= 10 && !currentPlayer->isBribeUsed()) &&
+                        !getTargetablePlayers().empty();
+            } else if (button.action == "block_coup") {
+                General* general = dynamic_cast<General*>(currentPlayer);
+                available = general && currentPlayer->isActive() && 
+                        currentPlayer->coins() >= 5 &&
+                        !(currentPlayer->coins() >= 10 && !currentPlayer->isBribeUsed()) &&
+                        !getTargetablePlayers().empty();
+            } else if (button.action == "block_bribe") {
+                Judge* judge = dynamic_cast<Judge*>(currentPlayer);
+                available = judge && currentPlayer->isActive() && 
+                        !(currentPlayer->coins() >= 10 && !currentPlayer->isBribeUsed()) &&
                         !getTargetablePlayers().empty();
             }
             // Add role-specific actions here if needed

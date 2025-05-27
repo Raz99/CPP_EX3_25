@@ -82,9 +82,6 @@ namespace coup {
         void removePlayer(Player* player);
 
         // Methods for Role Assignment
-        // Assign random roles to existing players in the game
-        void assignRandomRoles();
-        
         // Assign roles to existing players without recreating them
         void assignRolesToExistingPlayers();
         

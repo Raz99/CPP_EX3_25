@@ -271,16 +271,8 @@ namespace coup {
             }
         }
     }
-
-    // Methods for Role Assignment
-    // Modified assignRandomRoles() to avoid player duplication when game GUI already creates players
-    void Game::assignRandomRoles() {
-        // Roles are already assigned when players are added from GameGUI.
-        // Simply reset game state.
-        current_player_index = 0;
-        last_arrested_player = nullptr;
-    }
     
+    // Methods for Role Assignment
     // Assign roles to existing players without recreating them
     void Game::assignRolesToExistingPlayers() {
         // Check if there are players to assign roles to
