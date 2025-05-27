@@ -540,21 +540,15 @@ namespace coup {
                 break;
                 
             case RoleType::SPY:
-                roleActions = {
-                    {"Spy On Player", "spy_on"}
-                };
+                // Don't add spy_on here - it's a reactive ability
                 break;
                 
             case RoleType::GENERAL:
-                roleActions = {
-                    {"Block Coup (5 coins)", "block_coup"}
-                };
+                // Don't add block_coup here - it's a reactive ability
                 break;
                 
             case RoleType::JUDGE:
-                roleActions = {
-                    {"Block Bribe", "block_bribe"}
-                };
+                // Don't add block_bribe here - it's a reactive ability
                 break;
                 
             case RoleType::MERCHANT:
@@ -575,6 +569,56 @@ namespace coup {
             actionButtons.emplace_back(pos, buttonSize, 
                                     roleActions[i].first, roleActions[i].second, roleColor);
             actionButtons.back().setFont(mainFont);
+        }
+    }
+
+    void GameGUI::addReactiveAbilityButtons() {
+        if (!game) return;
+        
+        std::vector<Player*> allPlayers = game->getAllPlayers();
+        sf::Vector2f buttonSize(180, 45);
+        sf::Color reactiveColor = sf::Color(255, 140, 0); // Orange color for reactive abilities
+        
+        // Position reactive buttons in a separate column
+        sf::Vector2f reactiveStartPos(280, 280);
+        int buttonIndex = 0;
+        int spacing = 55;
+        
+        // Add reactive ability buttons for each role type that has them
+        for (Player* player : allPlayers) {
+            if (!player->isActive()) continue;
+            
+            RoleType playerRole = convertRoleType(player->getRoleType());
+            
+            switch (playerRole) {
+                case RoleType::SPY: {
+                    sf::Vector2f pos(reactiveStartPos.x, reactiveStartPos.y + buttonIndex * spacing);
+                    actionButtons.emplace_back(pos, buttonSize, 
+                                            "Spy On Player", "spy_on", reactiveColor);
+                    actionButtons.back().setFont(mainFont);
+                    buttonIndex++;
+                    break;
+                }
+                case RoleType::GENERAL: {
+                    sf::Vector2f pos(reactiveStartPos.x, reactiveStartPos.y + buttonIndex * spacing);
+                    actionButtons.emplace_back(pos, buttonSize, 
+                                            "Block Coup (5 coins)", "block_coup", reactiveColor);
+                    actionButtons.back().setFont(mainFont);
+                    buttonIndex++;
+                    break;
+                }
+                case RoleType::JUDGE: {
+                    sf::Vector2f pos(reactiveStartPos.x, reactiveStartPos.y + buttonIndex * spacing);
+                    actionButtons.emplace_back(pos, buttonSize, 
+                                            "Block Bribe", "block_bribe", reactiveColor);
+                    actionButtons.back().setFont(mainFont);
+                    buttonIndex++;
+                    break;
+                }
+                default:
+                    // No reactive abilities for this role
+                    break;
+            }
         }
     }
 
@@ -932,31 +976,58 @@ namespace coup {
                 }
             }
             else if (action == "spy_on" && target) {
-                Spy* spy = dynamic_cast<Spy*>(currentPlayer);
+                // Find any active Spy player who can perform this action
+                std::vector<Player*> allPlayers = game->getAllPlayers();
+                Spy* spy = nullptr;
+                for (Player* player : allPlayers) {
+                    Spy* playerAsSpy = dynamic_cast<Spy*>(player);
+                    if (playerAsSpy && player->isActive()) {
+                        spy = playerAsSpy;
+                        break;
+                    }
+                }
                 if (spy) {
                     spy->spy_on(*target);
                     updateMessage(spy->getName() + " spied on " + target->getName() + 
-                                " (Coins: " + std::to_string(target->coins()) + ") and revoked their arrest ability");
+                                " (Coins: " + std::to_string(target->coins()) + ") and revoked their arrest ability for their next turn");
                 } else {
-                    updateMessage("Only Spies can spy on players!", true);
+                    updateMessage("No active Spy available to spy on players!", true);
                 }
             }
             else if (action == "block_coup" && target) {
-                General* general = dynamic_cast<General*>(currentPlayer);
+                // Find any active General player who can perform this action
+                std::vector<Player*> allPlayers = game->getAllPlayers();
+                General* general = nullptr;
+                for (Player* player : allPlayers) {
+                    General* playerAsGeneral = dynamic_cast<General*>(player);
+                    if (playerAsGeneral && player->isActive() && player->coins() >= 5) {
+                        general = playerAsGeneral;
+                        break;
+                    }
+                }
                 if (general) {
                     general->block_coup(*target);
                     updateMessage(general->getName() + " blocked coup and revived " + target->getName());
                 } else {
-                    updateMessage("Only Generals can block coups!", true);
+                    updateMessage("No active General with 5+ coins available to block coup!", true);
                 }
             }
             else if (action == "block_bribe" && target) {
-                Judge* judge = dynamic_cast<Judge*>(currentPlayer);
+                // Find any active Judge player who can perform this action
+                std::vector<Player*> allPlayers = game->getAllPlayers();
+                Judge* judge = nullptr;
+                for (Player* player : allPlayers) {
+                    Judge* playerAsJudge = dynamic_cast<Judge*>(player);
+                    if (playerAsJudge && player->isActive()) {
+                        judge = playerAsJudge;
+                        break;
+                    }
+                }
                 if (judge) {
                     judge->block_bribe(*target);
                     updateMessage(judge->getName() + " blocked " + target->getName() + "'s bribe");
                 } else {
-                    updateMessage("Only Judges can block bribes!", true);
+                    updateMessage("No active Judge available to block bribes!", true);
                 }
             }
             
@@ -972,6 +1043,9 @@ namespace coup {
                 int spacing = 55;
                 addRoleSpecificButtons(role, startPos, buttonSize, spacing, 0);
             }
+            
+            // Add reactive ability buttons for all players
+            addReactiveAbilityButtons();
             
             // Check for game over
             try {
@@ -1013,18 +1087,21 @@ namespace coup {
         // Setup main game panels
         setupGamePanels();
 
-        // Add role-specific buttons for current player
+        // Add role-specific buttons for current player (for active abilities)
         if (game && game->getCurrentPlayer()) {
             Player* currentPlayer = game->getCurrentPlayer();
             std::string roleType = currentPlayer->getRoleType();
             RoleType role = convertRoleType(roleType);
             
-            // Add role-specific buttons
+            // Add role-specific buttons for current player
             sf::Vector2f startPos(70, 280);
             sf::Vector2f buttonSize(180, 45);
             int spacing = 55;
             addRoleSpecificButtons(role, startPos, buttonSize, spacing, 0);
         }
+        
+        // Add reactive ability buttons for all players
+        addReactiveAbilityButtons();
         
         // Setup game info text
         gameInfoText.setFont(mainFont);
@@ -1256,22 +1333,61 @@ namespace coup {
                 available = baron && currentPlayer->isActive() && 
                         currentPlayer->coins() >= 3 &&
                         !(currentPlayer->coins() >= 10 && !currentPlayer->isBribeUsed());
-            } else if (button.action == "spy_on") {
-                Spy* spy = dynamic_cast<Spy*>(currentPlayer);
-                available = spy && currentPlayer->isActive() && 
-                        !(currentPlayer->coins() >= 10 && !currentPlayer->isBribeUsed()) &&
-                        !getTargetablePlayers().empty();
+            } 
+            // Reactive abilities - available to any player with the appropriate role
+            else if (button.action == "spy_on") {
+                // Find any active Spy player
+                std::vector<Player*> allPlayers = game->getAllPlayers();
+                available = false;
+                for (Player* player : allPlayers) {
+                    Spy* spy = dynamic_cast<Spy*>(player);
+                    if (spy && player->isActive() && !getTargetablePlayers().empty()) {
+                        available = true;
+                        break;
+                    }
+                }
             } else if (button.action == "block_coup") {
-                General* general = dynamic_cast<General*>(currentPlayer);
-                available = general && currentPlayer->isActive() && 
-                        currentPlayer->coins() >= 5 &&
-                        !(currentPlayer->coins() >= 10 && !currentPlayer->isBribeUsed()) &&
-                        !getTargetablePlayers().empty();
+                // Find any active General player with 5+ coins and inactive players to revive
+                std::vector<Player*> allPlayers = game->getAllPlayers();
+                available = false;
+                for (Player* player : allPlayers) {
+                    General* general = dynamic_cast<General*>(player);
+                    if (general && player->isActive() && player->coins() >= 5) {
+                        // Check if there are any inactive players that could have been couped
+                        bool hasInactivePlayers = false;
+                        for (Player* otherPlayer : allPlayers) {
+                            if (!otherPlayer->isActive()) {
+                                hasInactivePlayers = true;
+                                break;
+                            }
+                        }
+                        if (hasInactivePlayers) {
+                            available = true;
+                            break;
+                        }
+                    }
+                }
             } else if (button.action == "block_bribe") {
-                Judge* judge = dynamic_cast<Judge*>(currentPlayer);
-                available = judge && currentPlayer->isActive() && 
-                        !(currentPlayer->coins() >= 10 && !currentPlayer->isBribeUsed()) &&
-                        !getTargetablePlayers().empty();
+                // Find any active Judge player when there are players who have used bribe
+                std::vector<Player*> allPlayers = game->getAllPlayers();
+                available = false;
+                for (Player* player : allPlayers) {
+                    Judge* judge = dynamic_cast<Judge*>(player);
+                    if (judge && player->isActive()) {
+                        // Check if any player has used bribe
+                        bool hasBribeUser = false;
+                        for (Player* otherPlayer : allPlayers) {
+                            if (otherPlayer->isBribeUsed()) {
+                                hasBribeUser = true;
+                                break;
+                            }
+                        }
+                        if (hasBribeUser) {
+                            available = true;
+                            break;
+                        }
+                    }
+                }
             }
             // Add role-specific actions here if needed
             

@@ -14,11 +14,6 @@ namespace coup {
             throw std::runtime_error("Game has not started yet");
         }
         
-        // Ensure it's the player's turn
-        if (!game.isPlayerTurn(this)) {
-            throw std::runtime_error("Not your turn");
-        }
-
         // Ensure player is active
         if (!active) {
             throw std::runtime_error("Player is eliminated");
@@ -34,10 +29,7 @@ namespace coup {
             throw std::runtime_error("Target player is eliminated");
         }
         
-        // == CHANGE THIS ==
-        // This will be handled in GUI
-        // Display target's coins
-        // std::cout << "Spy " << name << " sees that " << target.getName() << " has " << target.coins() << " coins." << std::endl;
+        // Display target's coins - This will be handled in GUI
 
         target.setArrestAvailability(false); // Block the target's arrest ability for their next turn
         // No need to call nextTurn() because this action doesn't count as a turn

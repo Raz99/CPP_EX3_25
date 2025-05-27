@@ -254,6 +254,7 @@ namespace coup
             void createActionButtons(); // Creates action buttons for gameplay
             void addRoleSpecificButtons(RoleType role, sf::Vector2f startPos, sf::Vector2f buttonSize,
                 int spacing, int startIndex); // Adds role-specific action buttons
+            void addReactiveAbilityButtons(); // Adds reactive ability buttons for all players
             void createRoleButtons(); // Creates role selection buttons
             void createPlayerCards(); // Creates visual cards for each player
             void updatePlayerCards(); // Updates player cards with current game state
