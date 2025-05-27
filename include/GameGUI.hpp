@@ -189,8 +189,17 @@ namespace coup
             std::string lastMessage; // Last feedback message
             bool waitingForTarget; // Waiting for player to select target
             bool waitingForRole; // Waiting for player to select role
+            bool waitingForReactivePlayer; // Waiting for player to select which reactive ability user
             Player *selectedTarget; // Currently targeted player
             RoleType selectedRole; // Currently selected role
+            std::string pendingReactiveAction; // Reactive action waiting for player selection
+            Player* pendingReactiveTarget; // Target for pending reactive action
+            std::vector<Player*> eligibleReactivePlayers; // Players eligible for the reactive action
+            
+            // Selection overlay UI elements
+            sf::RectangleShape selectionOverlay; // Background overlay for selection
+            sf::Text selectionTitle; // Title for selection overlay
+            std::vector<EnhancedButton> reactivePlayerButtons; // Buttons for selecting reactive players
 
             /**
              * Color theme and visual styling for the UI
@@ -278,6 +287,12 @@ namespace coup
             void setupGamePanels(); // Sets up the UI layout panels
             void updateGameInfo(); // Updates game status display
             void updateActionAvailability(); // Updates which action buttons are enabled/disabled
+
+            // Helper methods for reactive abilities
+            std::vector<Player*> getEligibleReactivePlayers(const std::string& action) const; // Gets players eligible for reactive action
+            void showReactivePlayerSelection(const std::string& action, Player* target, const std::vector<Player*>& eligiblePlayers); // Shows player selection overlay
+            void hideReactivePlayerSelection(); // Hides player selection overlay
+            void executeReactiveAction(const std::string& action, Player* reactivePlayer, Player* target); // Executes reactive action with selected player
 
             // Layout helpers
             sf::Vector2f getCenterPosition(sf::Vector2f size) const; // Gets the center position for an element

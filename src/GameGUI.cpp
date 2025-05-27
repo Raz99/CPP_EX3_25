@@ -347,7 +347,9 @@ namespace coup {
         currentState(GameState::MAIN_MENU), 
         waitingForTarget(false), 
         waitingForRole(false),
+        waitingForReactivePlayer(false),
         selectedTarget(nullptr),
+        pendingReactiveTarget(nullptr),
         playerNameInput(sf::Vector2f(500, 400), sf::Vector2f(300, 40), "Enter player name..."),
         addPlayerButton(sf::Vector2f(820, 400), sf::Vector2f(150, 40), "Add Player", "add_player"),
         startGameButton(sf::Vector2f(600, 500), sf::Vector2f(200, 50), "Start Game", "start_game"),
@@ -367,6 +369,17 @@ namespace coup {
         theme.success = sf::Color(50, 205, 50);
         theme.error = sf::Color(220, 20, 60);
         theme.warning = sf::Color(255, 165, 0);
+        
+        // Setup selection overlay
+        selectionOverlay.setSize(sf::Vector2f(WINDOW_WIDTH, WINDOW_HEIGHT));
+        selectionOverlay.setFillColor(sf::Color(0, 0, 0, 180)); // Semi-transparent black
+        selectionOverlay.setPosition(0, 0);
+        
+        selectionTitle.setCharacterSize(32);
+        selectionTitle.setFillColor(theme.accent);
+        selectionTitle.setStyle(sf::Text::Bold);
+        selectionTitle.setPosition(getCenterPosition(sf::Vector2f(400, 40)));
+        selectionTitle.move(0, -150);
     }
 
     GameGUI::~GameGUI() {
@@ -727,6 +740,20 @@ namespace coup {
                 break;
                 
             case GameState::PLAYING:
+                // Handle reactive player selection first (overlay takes priority)
+                if (waitingForReactivePlayer) {
+                    for (size_t i = 0; i < reactivePlayerButtons.size(); ++i) {
+                        if (reactivePlayerButtons[i].contains(mousePos)) {
+                            if (i < eligibleReactivePlayers.size()) {
+                                executeReactiveAction(pendingReactiveAction, eligibleReactivePlayers[i], pendingReactiveTarget);
+                                hideReactivePlayerSelection();
+                                return; // Exit early to prevent other clicks
+                            }
+                        }
+                    }
+                    return; // Block all other clicks while waiting for reactive player selection
+                }
+                
                 // Handle game actions
                 for (auto& button : actionButtons) {
                     if (button.contains(mousePos)) {
@@ -791,6 +818,10 @@ namespace coup {
                 break;
             case GameState::PLAYING:
                 for (auto& btn : actionButtons) allButtons.push_back(&btn);
+                // Add reactive player selection buttons if active
+                if (waitingForReactivePlayer) {
+                    for (auto& btn : reactivePlayerButtons) allButtons.push_back(&btn);
+                }
                 break;
             case GameState::GAME_OVER:
                 allButtons.push_back(&returnToMenuButton);
@@ -976,58 +1007,45 @@ namespace coup {
                 }
             }
             else if (action == "spy_on" && target) {
-                // Find any active Spy player who can perform this action
-                std::vector<Player*> allPlayers = game->getAllPlayers();
-                Spy* spy = nullptr;
-                for (Player* player : allPlayers) {
-                    Spy* playerAsSpy = dynamic_cast<Spy*>(player);
-                    if (playerAsSpy && player->isActive()) {
-                        spy = playerAsSpy;
-                        break;
-                    }
-                }
-                if (spy) {
-                    spy->spy_on(*target);
-                    updateMessage(spy->getName() + " spied on " + target->getName() + 
-                                " (Coins: " + std::to_string(target->coins()) + ") and revoked their arrest ability for their next turn");
-                } else {
+                // Find eligible Spy players for this action
+                std::vector<Player*> eligiblePlayers = getEligibleReactivePlayers(action);
+                
+                if (eligiblePlayers.empty()) {
                     updateMessage("No active Spy available to spy on players!", true);
+                } else if (eligiblePlayers.size() == 1) {
+                    // Automatic selection for single player
+                    executeReactiveAction(action, eligiblePlayers[0], target);
+                } else {
+                    // Multiple players available - show selection overlay
+                    showReactivePlayerSelection(action, target, eligiblePlayers);
                 }
             }
             else if (action == "block_coup" && target) {
-                // Find any active General player who can perform this action
-                std::vector<Player*> allPlayers = game->getAllPlayers();
-                General* general = nullptr;
-                for (Player* player : allPlayers) {
-                    General* playerAsGeneral = dynamic_cast<General*>(player);
-                    if (playerAsGeneral && player->isActive() && player->coins() >= 5) {
-                        general = playerAsGeneral;
-                        break;
-                    }
-                }
-                if (general) {
-                    general->block_coup(*target);
-                    updateMessage(general->getName() + " blocked coup and revived " + target->getName());
-                } else {
+                // Find eligible General players for this action
+                std::vector<Player*> eligiblePlayers = getEligibleReactivePlayers(action);
+                
+                if (eligiblePlayers.empty()) {
                     updateMessage("No active General with 5+ coins available to block coup!", true);
+                } else if (eligiblePlayers.size() == 1) {
+                    // Automatic selection for single player
+                    executeReactiveAction(action, eligiblePlayers[0], target);
+                } else {
+                    // Multiple players available - show selection overlay
+                    showReactivePlayerSelection(action, target, eligiblePlayers);
                 }
             }
             else if (action == "block_bribe" && target) {
-                // Find any active Judge player who can perform this action
-                std::vector<Player*> allPlayers = game->getAllPlayers();
-                Judge* judge = nullptr;
-                for (Player* player : allPlayers) {
-                    Judge* playerAsJudge = dynamic_cast<Judge*>(player);
-                    if (playerAsJudge && player->isActive()) {
-                        judge = playerAsJudge;
-                        break;
-                    }
-                }
-                if (judge) {
-                    judge->block_bribe(*target);
-                    updateMessage(judge->getName() + " blocked " + target->getName() + "'s bribe");
-                } else {
+                // Find eligible Judge players for this action
+                std::vector<Player*> eligiblePlayers = getEligibleReactivePlayers(action);
+                
+                if (eligiblePlayers.empty()) {
                     updateMessage("No active Judge available to block bribes!", true);
+                } else if (eligiblePlayers.size() == 1) {
+                    // Automatic selection for single player
+                    executeReactiveAction(action, eligiblePlayers[0], target);
+                } else {
+                    // Multiple players available - show selection overlay
+                    showReactivePlayerSelection(action, target, eligiblePlayers);
                 }
             }
             
@@ -1539,6 +1557,16 @@ namespace coup {
                 break;
         }
         
+        // Draw reactive player selection overlay if waiting for selection
+        if (waitingForReactivePlayer) {
+            window.draw(selectionOverlay);
+            window.draw(selectionTitle);
+            
+            for (const auto& button : reactivePlayerButtons) {
+                button.draw(window);
+            }
+        }
+        
         // Always draw message
         window.draw(messageText);
         
@@ -1602,5 +1630,125 @@ namespace coup {
         else if (roleStr == "Judge") return RoleType::JUDGE;
         else if (roleStr == "Merchant") return RoleType::MERCHANT;
         else return RoleType::PLAYER;
+    }
+
+    std::vector<Player*> GameGUI::getEligibleReactivePlayers(const std::string& action) const {
+        std::vector<Player*> eligiblePlayers;
+        if (!game) return eligiblePlayers;
+        
+        std::vector<Player*> allPlayers = game->getAllPlayers();
+        
+        for (Player* player : allPlayers) {
+            if (!player->isActive()) continue;
+            
+            if (action == "spy_on") {
+                Spy* spy = dynamic_cast<Spy*>(player);
+                if (spy) {
+                    eligiblePlayers.push_back(player);
+                }
+            }
+            else if (action == "block_coup") {
+                General* general = dynamic_cast<General*>(player);
+                if (general && player->coins() >= 5) {
+                    eligiblePlayers.push_back(player);
+                }
+            }
+            else if (action == "block_bribe") {
+                Judge* judge = dynamic_cast<Judge*>(player);
+                if (judge) {
+                    eligiblePlayers.push_back(player);
+                }
+            }
+        }
+        
+        return eligiblePlayers;
+    }
+
+    void GameGUI::showReactivePlayerSelection(const std::string& action, Player* target, const std::vector<Player*>& eligiblePlayers) {
+        waitingForReactivePlayer = true;
+        pendingReactiveAction = action;
+        pendingReactiveTarget = target;
+        eligibleReactivePlayers = eligiblePlayers;
+        
+        // Setup selection title
+        std::string roleType = (action == "spy_on") ? "Spy" : 
+                               (action == "block_coup") ? "General" : 
+                               (action == "block_bribe") ? "Judge" : "Player";
+        selectionTitle.setString("Choose " + roleType + " to perform action:");
+        
+        // Center the title
+        sf::FloatRect bounds = selectionTitle.getLocalBounds();
+        selectionTitle.setPosition((WINDOW_WIDTH - bounds.width) / 2, 200);
+        
+        // Create buttons for each eligible player
+        reactivePlayerButtons.clear();
+        sf::Vector2f buttonSize(250, 50);
+        sf::Vector2f startPos((WINDOW_WIDTH - buttonSize.x) / 2, 280);
+        int spacing = 60;
+        
+        for (size_t i = 0; i < eligiblePlayers.size(); ++i) {
+            sf::Vector2f pos(startPos.x, startPos.y + i * spacing);
+            std::string buttonText = eligiblePlayers[i]->getName() + " (Coins: " + std::to_string(eligiblePlayers[i]->coins()) + ")";
+            
+            reactivePlayerButtons.emplace_back(pos, buttonSize, buttonText, "select_reactive_player_" + std::to_string(i), theme.primary);
+            reactivePlayerButtons.back().setFont(mainFont);
+        }
+    }
+
+    void GameGUI::hideReactivePlayerSelection() {
+        waitingForReactivePlayer = false;
+        pendingReactiveAction = "";
+        pendingReactiveTarget = nullptr;
+        eligibleReactivePlayers.clear();
+        reactivePlayerButtons.clear();
+    }
+
+    void GameGUI::executeReactiveAction(const std::string& action, Player* reactivePlayer, Player* target) {
+        try {
+            if (action == "spy_on" && target) {
+                Spy* spy = dynamic_cast<Spy*>(reactivePlayer);
+                if (spy) {
+                    spy->spy_on(*target);
+                    updateMessage(spy->getName() + " spied on " + target->getName() + 
+                                " (Coins: " + std::to_string(target->coins()) + ") and revoked their arrest ability for their next turn");
+                } else {
+                    updateMessage("Selected player is not a Spy!", true);
+                }
+            }
+            else if (action == "block_coup" && target) {
+                General* general = dynamic_cast<General*>(reactivePlayer);
+                if (general && reactivePlayer->coins() >= 5) {
+                    general->block_coup(*target);
+                    updateMessage(general->getName() + " blocked coup and revived " + target->getName());
+                } else {
+                    updateMessage("Selected player is not a General with 5+ coins!", true);
+                }
+            }
+            else if (action == "block_bribe" && target) {
+                Judge* judge = dynamic_cast<Judge*>(reactivePlayer);
+                if (judge) {
+                    judge->block_bribe(*target);
+                    updateMessage(judge->getName() + " blocked " + target->getName() + "'s bribe");
+                } else {
+                    updateMessage("Selected player is not a Judge!", true);
+                }
+            }
+            
+            // Update game state
+            updatePlayerCards();
+            createActionButtons();
+            Player* currentPlayer = game->getCurrentPlayer();
+            if (currentPlayer) {
+                RoleType role = convertRoleType(currentPlayer->getRoleType());
+                sf::Vector2f startPos(70, 280);
+                sf::Vector2f buttonSize(180, 45);
+                int spacing = 55;
+                addRoleSpecificButtons(role, startPos, buttonSize, spacing, 0);
+            }
+            addReactiveAbilityButtons();
+            
+        } catch (const std::exception& e) {
+            updateMessage("Error: " + std::string(e.what()), true);
+        }
     }
 } // namespace coup
