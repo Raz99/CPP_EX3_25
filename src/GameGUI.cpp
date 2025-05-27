@@ -438,7 +438,6 @@ namespace coup {
         
         std::vector<std::pair<std::string, std::string>> buttons = {
             {"New Game", "new_game"},
-            {"How to Play", "how_to_play"},
             {"Exit", "exit"}
         };
         
