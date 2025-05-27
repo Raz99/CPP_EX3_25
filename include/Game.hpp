@@ -85,6 +85,9 @@ namespace coup {
         bool canGeneralBlockCoupToPreventGameEnd() const;
 
         // Methods for Role Assignment
+        // Get random generator for role assignment
+        std::mt19937& getRandomGenerator() { return random_generator; }
+
         // Assign roles to existing players without recreating them
         void assignRolesToExistingPlayers();
         

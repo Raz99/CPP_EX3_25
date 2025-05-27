@@ -613,7 +613,7 @@ namespace coup {
                     }
                     break;
                 case RoleType::GENERAL:
-                    if (player->coins() >= 5) { // Remove the isActive() check here
+                    if (player->coins() >= 5) {
                         hasActiveGeneral = true;
                     }
                     break;
@@ -1030,7 +1030,7 @@ namespace coup {
             // Assign a random role to the new player
             std::vector<RoleType> roles = { RoleType::GOVERNOR, RoleType::SPY, RoleType::BARON, 
                                             RoleType::GENERAL, RoleType::JUDGE, RoleType::MERCHANT };
-            RoleType assignedRole = roles[std::rand() % roles.size()];
+            RoleType assignedRole = roles[game->getRandomGenerator()() % roles.size()];
             
             // Create a new player with the assigned role (this already adds the player to the game)
             game->createPlayerWithRole(name, assignedRole);
@@ -1166,6 +1166,7 @@ namespace coup {
             }
             
             updatePlayerCards();
+            updateGameInfo();
 
             // Recreate action buttons to update role-specific ones
             createActionButtons();

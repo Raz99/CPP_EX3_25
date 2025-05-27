@@ -20,7 +20,7 @@ namespace coup {
         }
 
         // Ensure player is active
-        if (!active) {
+        if (!isActive()) {
             throw std::runtime_error("Player is eliminated");
         }
 
