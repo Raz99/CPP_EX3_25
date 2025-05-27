@@ -205,12 +205,12 @@ namespace coup
                 sf::Color warning; // Color for warning messages
             } theme; // Current theme instance
 
-            /// Layout dimension constants
+            // Layout dimension constants
             static const int WINDOW_WIDTH = 1400; // Main window width
             static const int WINDOW_HEIGHT = 900; // Main window height
-            static const int BUTTON_WIDTH = 180; // Standard button width
+            static const int BUTTON_WIDTH = 200; // Increased from 180
             static const int BUTTON_HEIGHT = 50; // Standard button height
-            static const int SMALL_BUTTON_WIDTH = 120; // Small button width
+            static const int SMALL_BUTTON_WIDTH = 140; // Increased from 120
             static const int SMALL_BUTTON_HEIGHT = 35; // Small button height
             static const int CARD_WIDTH = 220; // Player card width
             static const int CARD_HEIGHT = 140; // Player card height

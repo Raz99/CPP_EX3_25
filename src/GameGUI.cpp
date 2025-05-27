@@ -80,8 +80,15 @@ namespace coup {
 
     void EnhancedButton::setFont(const sf::Font& font) {
         text.setFont(font);
-    // Center text
+        // text.setCharacterSize(16);
+
+        // Center text
         sf::FloatRect textBounds = text.getLocalBounds();
+        sf::Vector2f buttonCenter = shape.getPosition() + shape.getSize() / 2.0f;
+        // text.setPosition(
+        // buttonCenter.x - textBounds.width / 2.0f - textBounds.left,
+        // buttonCenter.y - textBounds.height / 2.0f - textBounds.top
+        // );
         text.setPosition(
             shape.getPosition().x + (shape.getSize().x - textBounds.width) / 2 - textBounds.left + 15,
             shape.getPosition().y + (shape.getSize().y - textBounds.height) / 2 - textBounds.top
@@ -468,7 +475,7 @@ namespace coup {
         instructionText.setCharacterSize(24);
         instructionText.setFillColor(theme.text);
         instructionText.setPosition(getCenterPosition(sf::Vector2f(400, 30)));
-        instructionText.move(0, -150);
+        instructionText.move(0, 20);
         
         createPlayerCards();
     }
@@ -484,7 +491,7 @@ namespace coup {
         sf::Vector2f cardSize(CARD_WIDTH, CARD_HEIGHT);
         sf::Vector2f spacing(20, 20);
         // Position cards within the player panel
-        sf::Vector2f startPos(490, 80);
+        sf::Vector2f startPos(570, 80);
         
         for (size_t i = 0; i < allPlayers.size(); ++i) {
             int row = i / playersPerRow;
@@ -519,7 +526,7 @@ namespace coup {
         
         // Position buttons in action panel
         sf::Vector2f startPos(70, 280);
-        sf::Vector2f buttonSize(180, 45);
+        sf::Vector2f buttonSize(200, 45);
         int spacing = 55;
         
         // Add basic action buttons
@@ -537,11 +544,11 @@ namespace coup {
         if (!game) return;
         
         std::vector<Player*> allPlayers = game->getAllPlayers();
-        sf::Vector2f buttonSize(180, 45);
+        sf::Vector2f buttonSize(220, 45);
         sf::Color reactiveColor = sf::Color(255, 140, 0); // Orange color for reactive abilities
         
         // Position reactive buttons in a separate column
-        sf::Vector2f reactiveStartPos(280, 280);
+        sf::Vector2f reactiveStartPos(290, 280);
         int buttonIndex = 0;
         int spacing = 55;
         
@@ -1226,7 +1233,7 @@ namespace coup {
         gameStatusText.setFont(mainFont);
         gameStatusText.setCharacterSize(16);
         gameStatusText.setFillColor(theme.textSecondary);
-        gameStatusText.setPosition(70, 160);
+        gameStatusText.setPosition(70, 120);
         
         // Setup action feedback
         actionFeedbackText.setFont(mainFont);
@@ -1295,22 +1302,22 @@ namespace coup {
 
     void GameGUI::setupGamePanels() {
         // Game information panel (left side)
-        gameInfoPanel.setSize(sf::Vector2f(400, 180));
+        gameInfoPanel.setSize(sf::Vector2f(480, 180));
         gameInfoPanel.setPosition(50, 50);
         gameInfoPanel.setFillColor(sf::Color(30, 30, 45, 200));
         gameInfoPanel.setOutlineThickness(2);
         gameInfoPanel.setOutlineColor(theme.primary);
         
-        // Action panel (left side, below game info)
-        actionPanel.setSize(sf::Vector2f(400, 400));
+        // Action panel (left side, below game info) - increased width
+        actionPanel.setSize(sf::Vector2f(480, 400));
         actionPanel.setPosition(50, 250);
         actionPanel.setFillColor(sf::Color(30, 30, 45, 200));
         actionPanel.setOutlineThickness(2);
         actionPanel.setOutlineColor(theme.secondary);
         
-        // Player panel (right side)
-        playerPanel.setSize(sf::Vector2f(880, 580));
-        playerPanel.setPosition(470, 50);
+        // Player panel (right side) - adjusted position
+        playerPanel.setSize(sf::Vector2f(820, 580));
+        playerPanel.setPosition(550, 50);
         playerPanel.setFillColor(sf::Color(25, 25, 40, 180));
         playerPanel.setOutlineThickness(2);
         playerPanel.setOutlineColor(theme.accent);
@@ -1768,30 +1775,28 @@ namespace coup {
                                (action == "block_coup") ? "General" : 
                                (action == "block_bribe") ? "Judge" : "Player";
         selectionTitle.setString("Choose " + roleType);
-        
-        // Center the title
-        sf::FloatRect bounds = selectionTitle.getLocalBounds();
-        selectionTitle.setPosition((WINDOW_WIDTH - bounds.width) / 2, 200);
 
-        // Add "Who's gonna use it?" title
+        // "Who's gonna use it?" title
         selectionTitle.setFont(mainFont);
         selectionTitle.setString("Who's gonna use it?");
-        selectionTitle.setCharacterSize(20);
-        selectionTitle.setFillColor(theme.textSecondary);
-        sf::FloatRect subtitleBounds = selectionTitle.getLocalBounds();
-        selectionTitle.setPosition((WINDOW_WIDTH - subtitleBounds.width) / 2, 240);
+        selectionTitle.setCharacterSize(24);
+        selectionTitle.setFillColor(theme.accent);
+        selectionTitle.setStyle(sf::Text::Bold);
+        sf::FloatRect bounds = selectionTitle.getLocalBounds();
+        selectionTitle.setPosition((WINDOW_WIDTH - bounds.width) / 2, 200);
         
         // Create buttons for each eligible player
         reactivePlayerButtons.clear();
-        sf::Vector2f buttonSize(250, 50);
+        sf::Vector2f buttonSize(300, 50); // Increased width from 250 to 300
         sf::Vector2f startPos((WINDOW_WIDTH - buttonSize.x) / 2, 280);
         int spacing = 60;
         
         for (size_t i = 0; i < eligiblePlayers.size(); ++i) {
             sf::Vector2f pos(startPos.x, startPos.y + i * spacing);
-            std::string buttonText = eligiblePlayers[i]->getName();
+            std::string buttonText = eligiblePlayers[i]->getName() + " (" + roleType + ")";
             
-            reactivePlayerButtons.emplace_back(pos, buttonSize, buttonText, "select_reactive_player_" + std::to_string(i), theme.primary);
+            reactivePlayerButtons.emplace_back(pos, buttonSize, buttonText, 
+                "select_reactive_player_" + std::to_string(i), theme.primary);
             reactivePlayerButtons.back().setFont(mainFont);
         }
     }
