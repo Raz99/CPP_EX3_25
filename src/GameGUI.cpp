@@ -594,7 +594,7 @@ namespace coup {
         if (hasActiveGeneral) {
             sf::Vector2f pos(reactiveStartPos.x, reactiveStartPos.y + buttonIndex * spacing);
             actionButtons.emplace_back(pos, buttonSize, 
-                                    "Block Coup (5 coins)", "block_coup", reactiveColor);
+                                    "Block Coup", "block_coup", reactiveColor);
             actionButtons.back().setFont(mainFont);
             buttonIndex++;
         }
@@ -623,7 +623,7 @@ namespace coup {
             else if (role == RoleType::BARON) {
                 sf::Vector2f pos(reactiveStartPos.x, reactiveStartPos.y + buttonIndex * spacing);
                 actionButtons.emplace_back(pos, buttonSize, 
-                                        "Invest (3 coins)", "invest", roleColor);
+                                        "Invest", "invest", roleColor);
                 actionButtons.back().setFont(mainFont);
                 buttonIndex++;
             }
@@ -1916,7 +1916,7 @@ namespace coup {
         
         // Add decline button
         sf::Vector2f declinePos(startPos.x, startPos.y + buttonIndex * spacing);
-        reactivePlayerButtons.emplace_back(declinePos, buttonSize, "Decline (End Game)", 
+        reactivePlayerButtons.emplace_back(declinePos, buttonSize, "Decline", 
             "general_block_no", sf::Color(220, 20, 60));
         
         for (auto& button : reactivePlayerButtons) {
