@@ -14,14 +14,16 @@ namespace coup {
             throw std::runtime_error("Game has not started yet");
         }
         
-        // Ensure player is active
-        if (!active) {
-            throw std::runtime_error("Player is eliminated");
-        }
-        
         // Ensure player has enough coins
         if (coin_count < 5) {
             throw std::runtime_error("Not enough coins to block coup");
+        }
+
+        // Allow blocking coup if:
+        // 1. General is active (can block coup on any inactive player)
+        // 2. General is inactive but blocking their own coup (self-revival)
+        if (!active && &target != this) {
+            throw std::runtime_error("Inactive General can only block their own coup");
         }
 
         // Ensure target is couped

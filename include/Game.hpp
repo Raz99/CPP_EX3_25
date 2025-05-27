@@ -81,6 +81,9 @@ namespace coup {
         // Remove a specific player from the game (only allowed when game not started)
         void removePlayer(Player* player);
 
+        // Check if a General can block coup to prevent game from ending
+        bool canGeneralBlockCoupToPreventGameEnd() const;
+
         // Methods for Role Assignment
         // Assign roles to existing players without recreating them
         void assignRolesToExistingPlayers();

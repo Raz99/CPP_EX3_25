@@ -137,18 +137,38 @@ namespace coup {
         while(!next_player->isActive()) {
             current_player_index = (current_player_index + 1) % players_list.size();
 
-            // If we looped back to the original player, then there's only one player left
+            // If we looped back to the original player, check if game should continue
             if(current_player_index == old_player_index) {
-                return; // No more active players
+                // Count active players and check for General
+                int active_count = 0;
+                bool has_active_general_with_coins = false;
+                for (Player* player : players_list) {
+                    if (player->isActive()) {
+                        active_count++;
+                        if (player->isGeneral() && player->coins() >= 5) {
+                            has_active_general_with_coins = true;
+                        }
+                    }
+                }
+                
+                // If there are exactly 2 active players and one is a General with 5+ coins,
+                // don't end the game yet - let the GUI handle the block_coup decision
+                if (active_count == 2 && has_active_general_with_coins) {
+                    // Find the first active player and set as current
+                    for (size_t i = 0; i < players_list.size(); i++) {
+                        if (players_list[i]->isActive()) {
+                            current_player_index = i;
+                            break;
+                        }
+                    }
+                    return;
+                }
+                
+                return; // No more active players or game should end
             }
 
             next_player = players_list[current_player_index];
         }
-
-        // // Check if player has 10+ coins - must perform coup
-        // if (next_player->coins() >= 10) {
-        //     // std::cout << next_player->getName() << " must perform coup this turn (has 10+ coins)" << std::endl;
-        // }
 
         // If the next player is a Merchant, check for bonus coin
         if(next_player->isMerchant()) {
@@ -270,6 +290,25 @@ namespace coup {
                 last_arrested_player = nullptr;
             }
         }
+    }
+
+    // Check if a General can block coup to prevent game from ending
+    bool Game::canGeneralBlockCoupToPreventGameEnd() const {
+        if (!game_started) return false;
+        
+        int active_count = 0;
+        bool has_active_general_with_coins = false;
+        
+        for (Player* player : players_list) {
+            if (player->isActive()) {
+                active_count++;
+                if (player->isGeneral() && player->coins() >= 5) {
+                    has_active_general_with_coins = true;
+                }
+            }
+        }
+        
+        return (active_count == 2 && has_active_general_with_coins);
     }
     
     // Methods for Role Assignment

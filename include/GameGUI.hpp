@@ -35,21 +35,6 @@ namespace coup
         GAME_OVER // End game screen showing results
     };
 
-    // /**
-    //  * Character roles available in the game.
-    //  * Each role has different abilities and skills.
-    //  */
-    // enum class RoleType
-    // {
-    //     // PLAYER, // Default player type
-    //     GOVERNOR, // Can collect taxes
-    //     SPY, // Can perform coups at lower cost
-    //     BARON, // Can steal coins from other players
-    //     GENERAL, // Can force other players to give coins
-    //     JUDGE, // Can block stealing actions
-    //     MERCHANT // Can gain extra coins during income
-    // };
-
     /**
      * Enhanced Button with hover effects and icons.
      * A button component for the game UI that can be clicked to perform actions.
@@ -200,6 +185,7 @@ namespace coup
             sf::RectangleShape selectionOverlay; // Background overlay for selection
             sf::Text selectionTitle; // Title for selection overlay
             std::vector<EnhancedButton> reactivePlayerButtons; // Buttons for selecting reactive players
+            sf::Text generalDecisionQuestion; // Question for general block/coup decision
 
             /**
              * Color theme and visual styling for the UI
@@ -293,6 +279,7 @@ namespace coup
             void showReactivePlayerSelection(const std::string& action, Player* target, const std::vector<Player*>& eligiblePlayers); // Shows player selection overlay
             void hideReactivePlayerSelection(); // Hides player selection overlay
             void executeReactiveAction(const std::string& action, Player* reactivePlayer, Player* target); // Executes reactive action with selected player
+            void showGeneralBlockCoupDecision(); // Shows decision dialog for General blocking coup
 
             // Layout helpers
             sf::Vector2f getCenterPosition(sf::Vector2f size) const; // Gets the center position for an element
