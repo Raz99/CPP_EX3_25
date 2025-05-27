@@ -585,7 +585,7 @@ namespace coup {
         }
     }
 
-    void GameGUI::addReactiveAbilityButtons() {
+        void GameGUI::addReactiveAbilityButtons() {
         if (!game) return;
         
         std::vector<Player*> allPlayers = game->getAllPlayers();
@@ -597,41 +597,57 @@ namespace coup {
         int buttonIndex = 0;
         int spacing = 55;
         
-        // Add reactive ability buttons for each role type that has them
+        // Track which reactive abilities are available (only add one button per ability type)
+        bool hasActiveSpy = false;
+        bool hasActiveGeneral = false;
+        bool hasActiveJudge = false;
+        
+        // Check what reactive abilities are available
         for (Player* player : allPlayers) {
             if (!player->isActive()) continue;
             
             RoleType playerRole = convertRoleType(player->getRoleType());
             
             switch (playerRole) {
-                case RoleType::SPY: {
-                    sf::Vector2f pos(reactiveStartPos.x, reactiveStartPos.y + buttonIndex * spacing);
-                    actionButtons.emplace_back(pos, buttonSize, 
-                                            "Spy On Player", "spy_on", reactiveColor);
-                    actionButtons.back().setFont(mainFont);
-                    buttonIndex++;
+                case RoleType::SPY:
+                    hasActiveSpy = true;
                     break;
-                }
-                case RoleType::GENERAL: {
-                    sf::Vector2f pos(reactiveStartPos.x, reactiveStartPos.y + buttonIndex * spacing);
-                    actionButtons.emplace_back(pos, buttonSize, 
-                                            "Block Coup (5 coins)", "block_coup", reactiveColor);
-                    actionButtons.back().setFont(mainFont);
-                    buttonIndex++;
+                case RoleType::GENERAL:
+                    if (player->coins() >= 5) { // General needs 5+ coins to block coup
+                        hasActiveGeneral = true;
+                    }
                     break;
-                }
-                case RoleType::JUDGE: {
-                    sf::Vector2f pos(reactiveStartPos.x, reactiveStartPos.y + buttonIndex * spacing);
-                    actionButtons.emplace_back(pos, buttonSize, 
-                                            "Block Bribe", "block_bribe", reactiveColor);
-                    actionButtons.back().setFont(mainFont);
-                    buttonIndex++;
+                case RoleType::JUDGE:
+                    hasActiveJudge = true;
                     break;
-                }
                 default:
-                    // No reactive abilities for this role
                     break;
             }
+        }
+        
+        // Add one button per available reactive ability type
+        if (hasActiveSpy) {
+            sf::Vector2f pos(reactiveStartPos.x, reactiveStartPos.y + buttonIndex * spacing);
+            actionButtons.emplace_back(pos, buttonSize, 
+                                    "Spy On", "spy_on", reactiveColor);
+            actionButtons.back().setFont(mainFont);
+            buttonIndex++;
+        }
+        
+        if (hasActiveGeneral) {
+            sf::Vector2f pos(reactiveStartPos.x, reactiveStartPos.y + buttonIndex * spacing);
+            actionButtons.emplace_back(pos, buttonSize, 
+                                    "Block Coup (5 coins)", "block_coup", reactiveColor);
+            actionButtons.back().setFont(mainFont);
+            buttonIndex++;
+        }
+        
+        if (hasActiveJudge) {
+            sf::Vector2f pos(reactiveStartPos.x, reactiveStartPos.y + buttonIndex * spacing);
+            actionButtons.emplace_back(pos, buttonSize, 
+                                    "Block Bribe", "block_bribe", reactiveColor);
+            actionButtons.back().setFont(mainFont);
+            buttonIndex++;
         }
     }
 
@@ -772,14 +788,41 @@ namespace coup {
                 // Handle target selection
                 if (waitingForTarget) {
                     std::vector<Player*> allPlayers = game->getAllPlayers();
+                    // for (size_t i = 0; i < playerCards.size() && i < allPlayers.size(); ++i) {
+                    //     if (playerCards[i].background.getGlobalBounds().contains(mousePos)) {
+                    //         if (allPlayers[i] != game->getCurrentPlayer() && allPlayers[i]->isActive()) {
+                    //             executeAction(currentAction, allPlayers[i]);
+                    //             waitingForTarget = false;
+                    //             currentAction = "";
+                    //         }
+                    //         else {
+                    //             updateMessage("Invalid target - select an active opponent", true);
+                    //         }
+                    //     }
+                    // }
                     for (size_t i = 0; i < playerCards.size() && i < allPlayers.size(); ++i) {
                         if (playerCards[i].background.getGlobalBounds().contains(mousePos)) {
-                            if (allPlayers[i] != game->getCurrentPlayer() && allPlayers[i]->isActive()) {
+                            // Check if target is valid based on action type
+                            bool validTarget = false;
+                            
+                            if (currentAction == "spy_on" || currentAction == "block_coup" || currentAction == "block_bribe") {
+                                // Reactive abilities can target any active player (including current player)
+                                validTarget = allPlayers[i]->isActive();
+                            } else {
+                                // Regular actions cannot target the current player
+                                validTarget = allPlayers[i] != game->getCurrentPlayer() && allPlayers[i]->isActive();
+                            }
+                            
+                            if (validTarget) {
                                 executeAction(currentAction, allPlayers[i]);
                                 waitingForTarget = false;
                                 currentAction = "";
                             } else {
-                                updateMessage("Invalid target - select an active opponent", true);
+                                if (currentAction == "spy_on" || currentAction == "block_coup" || currentAction == "block_bribe") {
+                                    updateMessage("Invalid target - select an active player", true);
+                                } else {
+                                    updateMessage("Invalid target - select an active opponent", true);
+                                }
                             }
                         }
                     }
@@ -1674,11 +1717,19 @@ namespace coup {
         std::string roleType = (action == "spy_on") ? "Spy" : 
                                (action == "block_coup") ? "General" : 
                                (action == "block_bribe") ? "Judge" : "Player";
-        selectionTitle.setString("Choose " + roleType + " to perform action:");
+        selectionTitle.setString("Choose " + roleType);
         
         // Center the title
         sf::FloatRect bounds = selectionTitle.getLocalBounds();
         selectionTitle.setPosition((WINDOW_WIDTH - bounds.width) / 2, 200);
+
+        // Add "Who's gonna use it?" title
+        selectionTitle.setFont(mainFont);
+        selectionTitle.setString("Who's gonna use it?");
+        selectionTitle.setCharacterSize(20);
+        selectionTitle.setFillColor(theme.textSecondary);
+        sf::FloatRect subtitleBounds = selectionTitle.getLocalBounds();
+        selectionTitle.setPosition((WINDOW_WIDTH - subtitleBounds.width) / 2, 240);
         
         // Create buttons for each eligible player
         reactivePlayerButtons.clear();
@@ -1688,7 +1739,7 @@ namespace coup {
         
         for (size_t i = 0; i < eligiblePlayers.size(); ++i) {
             sf::Vector2f pos(startPos.x, startPos.y + i * spacing);
-            std::string buttonText = eligiblePlayers[i]->getName() + " (Coins: " + std::to_string(eligiblePlayers[i]->coins()) + ")";
+            std::string buttonText = eligiblePlayers[i]->getName();
             
             reactivePlayerButtons.emplace_back(pos, buttonSize, buttonText, "select_reactive_player_" + std::to_string(i), theme.primary);
             reactivePlayerButtons.back().setFont(mainFont);
@@ -1736,6 +1787,7 @@ namespace coup {
             
             // Update game state
             updatePlayerCards();
+            updateGameInfo(); // Force update of game info to reflect changes
             createActionButtons();
             Player* currentPlayer = game->getCurrentPlayer();
             if (currentPlayer) {

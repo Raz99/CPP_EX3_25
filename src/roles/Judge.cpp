@@ -34,6 +34,9 @@ namespace coup {
             throw std::runtime_error("Target player has not used bribe");
         }
 
+        // Block the bribe by resetting the bribe_used flag
+        target.resetBribeUsed();
+
         // std::cout << "Judge " << name << " blocks " << target.getName() 
         //           << "'s bribe, causing them to lose their 4 coins." << std::endl;    }
     }
