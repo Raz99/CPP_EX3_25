@@ -510,12 +510,12 @@ namespace coup {
         
         // Basic actions available to all players
         std::vector<std::pair<std::string, std::string>> basicActions = {
-            {"Gather (1 coin)", "gather"},
-            {"Tax (2 coins)", "tax"},
-            {"Bribe (4 coins)", "bribe"},
+            {"Gather", "gather"},
+            {"Tax", "tax"},
+            {"Bribe", "bribe"},
             {"Arrest", "arrest"},
-            {"Sanction (3 coins)", "sanction"},
-            {"Coup (7 coins)", "coup"}
+            {"Sanction", "sanction"},
+            {"Coup", "coup"}
         };
         
         // Position buttons in action panel
@@ -532,57 +532,6 @@ namespace coup {
         }
         
         // Role-specific buttons will be added dynamically based on current player's role
-    }
-
-    void GameGUI::addRoleSpecificButtons(RoleType role, sf::Vector2f startPos, sf::Vector2f buttonSize, 
-                                    int spacing, int startIndex) {
-        std::vector<std::pair<std::string, std::string>> roleActions;
-        sf::Color roleColor = theme.accent; // Gold color for special abilities
-        
-        switch (role) {
-            case RoleType::GOVERNOR:
-                roleActions = {
-                    {"Undo Tax Block", "undo"}
-                };
-                break;
-                
-            case RoleType::BARON:
-                roleActions = {
-                    {"Invest (3 -> 6 coins)", "invest"}
-                };
-                break;
-                
-            case RoleType::SPY:
-                // Don't add spy_on here - it's a reactive ability
-                break;
-                
-            case RoleType::GENERAL:
-                // Don't add block_coup here - it's a reactive ability
-                break;
-                
-            case RoleType::JUDGE:
-                // Don't add block_bribe here - it's a reactive ability
-                break;
-                
-            case RoleType::MERCHANT:
-                // Merchant has passive ability only
-                break;
-
-            case RoleType::PLAYER:
-                // No specific actions for unassigned roles
-                break;
-                
-            default:
-                break;
-        }
-        
-        // Add role-specific buttons - place them below basic actions instead of to the right
-        for (size_t i = 0; i < roleActions.size(); ++i) {
-            sf::Vector2f pos(startPos.x, startPos.y + (6 + startIndex + i) * spacing); // Start after the 6 basic actions
-            actionButtons.emplace_back(pos, buttonSize, 
-                                    roleActions[i].first, roleActions[i].second, roleColor);
-            actionButtons.back().setFont(mainFont);
-        }
     }
 
         void GameGUI::addReactiveAbilityButtons() {
@@ -650,6 +599,28 @@ namespace coup {
                                     "Block Bribe", "block_bribe", reactiveColor);
             actionButtons.back().setFont(mainFont);
             buttonIndex++;
+        }
+
+        // Add role-specific buttons for current player right here
+        if (game->getCurrentPlayer()) {
+            Player* currentPlayer = game->getCurrentPlayer();
+            RoleType role = convertRoleType(currentPlayer->getRoleType());
+            sf::Color roleColor = sf::Color(255, 215, 0); // Gold color for special abilities
+            
+            if (role == RoleType::GOVERNOR) {
+                sf::Vector2f pos(reactiveStartPos.x, reactiveStartPos.y + buttonIndex * spacing);
+                actionButtons.emplace_back(pos, buttonSize, 
+                                        "Undo Tax", "undo", roleColor);
+                actionButtons.back().setFont(mainFont);
+                buttonIndex++;
+            }
+            else if (role == RoleType::BARON) {
+                sf::Vector2f pos(reactiveStartPos.x, reactiveStartPos.y + buttonIndex * spacing);
+                actionButtons.emplace_back(pos, buttonSize, 
+                                        "Invest (3 coins)", "invest", roleColor);
+                actionButtons.back().setFont(mainFont);
+                buttonIndex++;
+            }
         }
     }
 
@@ -1077,11 +1048,16 @@ namespace coup {
             }
             else if (action == "tax") {
                 currentPlayer->tax();
-                updateMessage(currentPlayer->getName() + " collected tax (2 coins)");
+                Governor* governor = dynamic_cast<Governor*>(currentPlayer);
+                if(governor) {
+                    updateMessage(currentPlayer->getName() + " collected tax (3 coins for Governor)");
+                } else {
+                    updateMessage(currentPlayer->getName() + " collected tax (2 coins)");
+                }
             }
             else if (action == "bribe") {
                 currentPlayer->bribe();
-                updateMessage(currentPlayer->getName() + " paid bribe for extra action");
+                updateMessage(currentPlayer->getName() + " paid bribe (4 coins) for extra action");
             }
             else if (action == "arrest" && target) {
                 currentPlayer->arrest(*target);
@@ -1094,11 +1070,11 @@ namespace coup {
             }
             else if (action == "sanction" && target) {
                 currentPlayer->sanction(*target);
-                updateMessage(currentPlayer->getName() + " sanctioned " + target->getName());
+                updateMessage(currentPlayer->getName() + " sanctioned (3 coins) " + target->getName());
             }
             else if (action == "coup" && target) {
                 currentPlayer->coup(*target);
-                updateMessage(currentPlayer->getName() + " performed coup on " + target->getName());
+                updateMessage(currentPlayer->getName() + " performed coup (7 coins) on " + target->getName());
             }
             
             // Role-specific actions
@@ -1170,14 +1146,6 @@ namespace coup {
 
             // Recreate action buttons to update role-specific ones
             createActionButtons();
-            Player* currentPlayer = game->getCurrentPlayer();
-            if (currentPlayer) {
-                RoleType role = convertRoleType(currentPlayer->getRoleType());
-                sf::Vector2f startPos(70, 280);
-                sf::Vector2f buttonSize(180, 45);
-                int spacing = 55;
-                addRoleSpecificButtons(role, startPos, buttonSize, spacing, 0);
-            }
             
             // Add reactive ability buttons for all players
             addReactiveAbilityButtons();
@@ -1238,19 +1206,6 @@ namespace coup {
         
         // Setup main game panels
         setupGamePanels();
-
-        // Add role-specific buttons for current player (for active abilities)
-        if (game && game->getCurrentPlayer()) {
-            Player* currentPlayer = game->getCurrentPlayer();
-            std::string roleType = currentPlayer->getRoleType();
-            RoleType role = convertRoleType(roleType);
-            
-            // Add role-specific buttons for current player
-            sf::Vector2f startPos(70, 280);
-            sf::Vector2f buttonSize(180, 45);
-            int spacing = 55;
-            addRoleSpecificButtons(role, startPos, buttonSize, spacing, 0);
-        }
         
         // Add reactive ability buttons for all players
         addReactiveAbilityButtons();
@@ -1885,14 +1840,6 @@ namespace coup {
             updatePlayerCards();
             updateGameInfo(); // Force update of game info to reflect changes
             createActionButtons();
-            Player* currentPlayer = game->getCurrentPlayer();
-            if (currentPlayer) {
-                RoleType role = convertRoleType(currentPlayer->getRoleType());
-                sf::Vector2f startPos(70, 280);
-                sf::Vector2f buttonSize(180, 45);
-                int spacing = 55;
-                addRoleSpecificButtons(role, startPos, buttonSize, spacing, 0);
-            }
             addReactiveAbilityButtons();
             
         } catch (const std::exception& e) {
