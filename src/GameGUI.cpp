@@ -764,16 +764,31 @@ namespace coup {
                         if (reactivePlayerButtons[i].contains(mousePos)) {
                             // Handle General coup decision
                             if (pendingReactiveAction == "general_coup_decision") {
-                                if (reactivePlayerButtons[i].action == "general_block_yes") {
-                                    // General chooses to block - continue game
-                                    updateMessage(pendingReactiveTarget->getName() + " (General) chose to block coup - game continues!");
-                                    hideReactivePlayerSelection();
-                                    return;
+                                if (reactivePlayerButtons[i].action.substr(0, 15) == "general_revive_") {
+                                    // Extract the player index from the action string
+                                    int playerIndex = std::stoi(reactivePlayerButtons[i].action.substr(15));
+                                    if (playerIndex < eligibleReactivePlayers.size()) {
+                                        Player* targetPlayer = eligibleReactivePlayers[playerIndex];
+                                        
+                                        // General chooses to block coup on selected player
+                                        try {
+                                            General* general = dynamic_cast<General*>(pendingReactiveTarget);
+                                            if (general) {
+                                                general->block_coup(*targetPlayer);
+                                                updateMessage(pendingReactiveTarget->getName() + " (General) chose to revive " + 
+                                                            targetPlayer->getName() + " - game continues!");
+                                            }
+                                        } catch (const std::exception& e) {
+                                            updateMessage("Error: " + std::string(e.what()), true);
+                                        }
+                                        hideReactivePlayerSelection();
+                                        return;
+                                    }
                                 } else if (reactivePlayerButtons[i].action == "general_block_no") {
                                     // General chooses not to block - end game
                                     try {
                                         std::string winner = game->winner();
-                                        updateMessage("Game Over! Winner: " + winner);
+                                        updateMessage(pendingReactiveTarget->getName() + " (General) declined to block coup - Game Over! Winner: " + winner);
                                         changeState(GameState::GAME_OVER);
                                     } catch (const std::exception&) {
                                         updateMessage("Game ended", false);
@@ -1170,8 +1185,18 @@ namespace coup {
             try {
                 std::string winner = game->winner();
                 
-                // Before declaring game over, check if a General can block coup
-                if (game->canGeneralBlockCoupToPreventGameEnd()) {
+                // Before declaring game over, check if ANY General can block coup to prevent game end
+                std::vector<Player*> allPlayers = game->getAllPlayers();
+                bool hasGeneralWithCoins = false;
+                
+                for (Player* player : allPlayers) {
+                    if (player->isGeneral() && player->coins() >= 5) {
+                        hasGeneralWithCoins = true;
+                        break;
+                    }
+                }
+                
+                if (hasGeneralWithCoins) {
                     // Show General block coup decision dialog instead of ending game
                     showGeneralBlockCoupDecision();
                 } else {
@@ -1877,12 +1902,12 @@ namespace coup {
     void GameGUI::showGeneralBlockCoupDecision() {
         if (!game) return;
         
-        // Find the General who can block coup
+        // Find ANY General who can block coup (active or inactive)
         Player* generalPlayer = nullptr;
         std::vector<Player*> allPlayers = game->getAllPlayers();
         
         for (Player* player : allPlayers) {
-            if (player->isActive() && player->isGeneral() && player->coins() >= 5) {
+            if (player->isGeneral() && player->coins() >= 5) {
                 generalPlayer = player;
                 break;
             }
@@ -1909,23 +1934,38 @@ namespace coup {
         // Add subtitle asking the question
         sf::Text questionText;
         questionText.setFont(mainFont);
-        questionText.setString("Do you want to block the coup to prevent game from ending?");
+        questionText.setString("Choose a player to block coup on (or decline to end game):");
         questionText.setCharacterSize(20);
         questionText.setFillColor(theme.textSecondary);
         sf::FloatRect questionBounds = questionText.getLocalBounds();
         questionText.setPosition((WINDOW_WIDTH - questionBounds.width) / 2, 250);
         
-        // Store the question text (you'll need to add this as a member variable)
+        // Store the question text
         generalDecisionQuestion = questionText;
         
-        // Create Yes/No buttons
+        // Create buttons for each inactive player + decline option
         reactivePlayerButtons.clear();
-        sf::Vector2f buttonSize(150, 50);
-        sf::Vector2f yesPos((WINDOW_WIDTH / 2) - buttonSize.x - 20, 320);
-        sf::Vector2f noPos((WINDOW_WIDTH / 2) + 20, 320);
+        sf::Vector2f buttonSize(200, 45);
+        sf::Vector2f startPos((WINDOW_WIDTH - buttonSize.x) / 2, 300);
+        int spacing = 55;
+        int buttonIndex = 0;
         
-        reactivePlayerButtons.emplace_back(yesPos, buttonSize, "Yes (5 coins)", "general_block_yes", sf::Color(50, 205, 50));
-        reactivePlayerButtons.emplace_back(noPos, buttonSize, "No", "general_block_no", sf::Color(220, 20, 60));
+        // Add buttons for inactive players
+        for (Player* player : allPlayers) {
+            if (!player->isActive()) {
+                sf::Vector2f pos(startPos.x, startPos.y + buttonIndex * spacing);
+                std::string buttonText = "Revive " + player->getName();
+                reactivePlayerButtons.emplace_back(pos, buttonSize, buttonText, 
+                    "general_revive_" + std::to_string(buttonIndex), sf::Color(50, 205, 50));
+                eligibleReactivePlayers.push_back(player); // Store the player for later reference
+                buttonIndex++;
+            }
+        }
+        
+        // Add decline button
+        sf::Vector2f declinePos(startPos.x, startPos.y + buttonIndex * spacing);
+        reactivePlayerButtons.emplace_back(declinePos, buttonSize, "Decline (End Game)", 
+            "general_block_no", sf::Color(220, 20, 60));
         
         for (auto& button : reactivePlayerButtons) {
             button.setFont(mainFont);

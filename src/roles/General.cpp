@@ -19,13 +19,6 @@ namespace coup {
             throw std::runtime_error("Not enough coins to block coup");
         }
 
-        // Allow blocking coup if:
-        // 1. General is active (can block coup on any inactive player)
-        // 2. General is inactive but blocking their own coup (self-revival)
-        if (!active && &target != this) {
-            throw std::runtime_error("Inactive General can only block their own coup");
-        }
-
         // Ensure target is couped
         if (target.isActive()) {
             throw std::runtime_error("Target player is not couped");
