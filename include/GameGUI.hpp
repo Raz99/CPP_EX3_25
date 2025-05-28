@@ -207,13 +207,13 @@ namespace coup
 
             // Layout dimension constants
             static const int WINDOW_WIDTH = 1400; // Main window width
-            static const int WINDOW_HEIGHT = 900; // Main window height
+            static const int WINDOW_HEIGHT = 800; // Main window height (reduced to fit 1080p screens better)
             static const int BUTTON_WIDTH = 200; // Increased from 180
             static const int BUTTON_HEIGHT = 50; // Standard button height
             static const int SMALL_BUTTON_WIDTH = 140; // Increased from 120
             static const int SMALL_BUTTON_HEIGHT = 35; // Small button height
             static const int CARD_WIDTH = 220; // Player card width
-            static const int CARD_HEIGHT = 140; // Player card height
+            static const int CARD_HEIGHT = 130; // Player card height (reduced)
 
             /// Section header text elements
             sf::Text actionSectionHeader; // Header for action section

@@ -396,11 +396,7 @@ namespace coup {
     bool GameGUI::initialize() {
     // Load fonts
         if (!mainFont.loadFromFile("tahoma.ttf")) {
-            std::cout << "Warning: Could not load tahoma.ttf. Trying absolute path..." << std::endl;
-            // Try with absolute path
-            if (!mainFont.loadFromFile("/home/razco/Uni/CPP/CPP_EX3_25/tahoma.ttf")) {
-                std::cout << "Error: Could not load tahoma.ttf. The game UI may not display properly." << std::endl;
-            }
+            std::cout << "Error: Could not load tahoma.ttf. The game UI may not display properly." << std::endl;
         }
         
         titleFont = mainFont; // Use same font for now
@@ -474,7 +470,7 @@ namespace coup {
         instructionText.setString("Add 2-6 players to start the game");
         instructionText.setCharacterSize(24);
         instructionText.setFillColor(theme.text);
-        instructionText.setPosition(getCenterPosition(sf::Vector2f(400, 30)));
+        instructionText.setPosition(getCenterPosition(sf::Vector2f(400, 150)));
         instructionText.move(0, 20);
         
         createPlayerCards();
@@ -488,10 +484,10 @@ namespace coup {
         std::vector<Player*> allPlayers = game->getAllPlayers();
         
         int playersPerRow = 3;
-        sf::Vector2f cardSize(CARD_WIDTH, CARD_HEIGHT);
-        sf::Vector2f spacing(20, 20);
+        sf::Vector2f cardSize(CARD_WIDTH, CARD_HEIGHT - 10);  // Slightly reduce card height
+        sf::Vector2f spacing(20, 15);                         // Reduce vertical spacing
         // Position cards within the player panel
-        sf::Vector2f startPos(570, 80);
+        sf::Vector2f startPos(570, 70);                       // Move up slightly
         
         for (size_t i = 0; i < allPlayers.size(); ++i) {
             int row = i / playersPerRow;
@@ -525,9 +521,9 @@ namespace coup {
         };
         
         // Position buttons in action panel
-        sf::Vector2f startPos(70, 280);
-        sf::Vector2f buttonSize(200, 45);
-        int spacing = 55;
+        sf::Vector2f startPos(70, 250);    // Moved up to fit in the smaller action panel
+        sf::Vector2f buttonSize(200, 40);  // Slightly reduced height
+        int spacing = 48;                  // Reduced spacing to fit all buttons
         
         // Add basic action buttons
         for (size_t i = 0; i < basicActions.size(); ++i) {
@@ -544,13 +540,13 @@ namespace coup {
         if (!game) return;
         
         std::vector<Player*> allPlayers = game->getAllPlayers();
-        sf::Vector2f buttonSize(220, 45);
+        sf::Vector2f buttonSize(220, 40);    // Slightly reduced height
         sf::Color reactiveColor = sf::Color(255, 140, 0); // Orange color for reactive abilities
         
         // Position reactive buttons in a separate column
-        sf::Vector2f reactiveStartPos(290, 280);
+        sf::Vector2f reactiveStartPos(290, 250);  // Moved up to match action buttons
         int buttonIndex = 0;
-        int spacing = 55;
+        int spacing = 48;                         // Reduced spacing to match action buttons
         
         // Track which reactive abilities are available (only add one button per ability type)
         bool hasActiveGovernor = false;
@@ -1236,26 +1232,26 @@ namespace coup {
         gameInfoText.setFont(mainFont);
         gameInfoText.setCharacterSize(18);
         gameInfoText.setFillColor(theme.text);
-        gameInfoText.setPosition(70, 130);
+        gameInfoText.setPosition(70, 110);         // Moved up
         
         // Setup current player display
         currentPlayerText.setFont(mainFont);
         currentPlayerText.setCharacterSize(24);
         currentPlayerText.setFillColor(theme.accent);
         currentPlayerText.setStyle(sf::Text::Bold);
-        currentPlayerText.setPosition(70, 80);
+        currentPlayerText.setPosition(70, 70);     // Moved up
         
         // Setup game status text
         gameStatusText.setFont(mainFont);
         gameStatusText.setCharacterSize(16);
         gameStatusText.setFillColor(theme.textSecondary);
-        gameStatusText.setPosition(70, 120);
+        gameStatusText.setPosition(70, 100);       // Moved up
         
         // Setup action feedback
         actionFeedbackText.setFont(mainFont);
         actionFeedbackText.setCharacterSize(18);
         actionFeedbackText.setFillColor(theme.success);
-        actionFeedbackText.setPosition(480, 680);
+        actionFeedbackText.setPosition(480, 590);  // Positioned to match feedback panel position
         
         // Setup section headers
         actionSectionHeader.setFont(mainFont);
@@ -1263,21 +1259,21 @@ namespace coup {
         actionSectionHeader.setCharacterSize(20);
         actionSectionHeader.setFillColor(theme.accent);
         actionSectionHeader.setStyle(sf::Text::Bold);
-        actionSectionHeader.setPosition(70, 255);
+        actionSectionHeader.setPosition(70, 225);  // Moved up to match action panel
         
         playerSectionHeader.setFont(mainFont);
         playerSectionHeader.setString("PLAYERS");
         playerSectionHeader.setCharacterSize(20);
         playerSectionHeader.setFillColor(theme.accent);
         playerSectionHeader.setStyle(sf::Text::Bold);
-        playerSectionHeader.setPosition(490, 55);
+        playerSectionHeader.setPosition(570, 45);  // Adjusted to match player panel position
         
-            gameInfoHeader.setFont(mainFont);
+        gameInfoHeader.setFont(mainFont);
         gameInfoHeader.setString("GAME STATUS");
         gameInfoHeader.setCharacterSize(20);
         gameInfoHeader.setFillColor(theme.accent);
         gameInfoHeader.setStyle(sf::Text::Bold);
-        gameInfoHeader.setPosition(70, 55);
+        gameInfoHeader.setPosition(70, 45);        // Moved up
     }
 
     void GameGUI::setupGameOver() {
@@ -1288,13 +1284,13 @@ namespace coup {
         gameOverTitle.setFillColor(theme.accent);
         gameOverTitle.setStyle(sf::Text::Bold);
         gameOverTitle.setPosition(getCenterPosition(sf::Vector2f(400, 80)));
-        gameOverTitle.move(0, -150);
+        gameOverTitle.move(0, -120);      // Moved up less to fit in smaller window
         
         winnerText.setFont(mainFont);
         winnerText.setCharacterSize(36);
         winnerText.setFillColor(theme.success);
         winnerText.setPosition(getCenterPosition(sf::Vector2f(600, 40)));
-        winnerText.move(0, -50);
+        winnerText.move(0, -40);          // Adjusted vertical position
 
         // Create return to main menu button
         sf::Vector2f buttonPos = getCenterPosition(sf::Vector2f(BUTTON_WIDTH, BUTTON_HEIGHT));
@@ -1318,29 +1314,29 @@ namespace coup {
 
     void GameGUI::setupGamePanels() {
         // Game information panel (left side)
-        gameInfoPanel.setSize(sf::Vector2f(480, 180));
-        gameInfoPanel.setPosition(50, 50);
+        gameInfoPanel.setSize(sf::Vector2f(480, 160));   // Reduced height
+        gameInfoPanel.setPosition(50, 40);               // Moved up
         gameInfoPanel.setFillColor(sf::Color(30, 30, 45, 200));
         gameInfoPanel.setOutlineThickness(2);
         gameInfoPanel.setOutlineColor(theme.primary);
         
         // Action panel (left side, below game info) - increased width
-        actionPanel.setSize(sf::Vector2f(480, 400));
-        actionPanel.setPosition(50, 250);
+        actionPanel.setSize(sf::Vector2f(480, 340));     // Reduced height
+        actionPanel.setPosition(50, 220);                // Moved up
         actionPanel.setFillColor(sf::Color(30, 30, 45, 200));
         actionPanel.setOutlineThickness(2);
         actionPanel.setOutlineColor(theme.secondary);
         
         // Player panel (right side) - adjusted position
-        playerPanel.setSize(sf::Vector2f(820, 580));
-        playerPanel.setPosition(550, 50);
+        playerPanel.setSize(sf::Vector2f(820, 520));     // Reduced height
+        playerPanel.setPosition(550, 40);                // Moved up
         playerPanel.setFillColor(sf::Color(25, 25, 40, 180));
         playerPanel.setOutlineThickness(2);
         playerPanel.setOutlineColor(theme.accent);
         
         // Feedback panel (bottom)
         feedbackPanel.setSize(sf::Vector2f(1300, 60));
-        feedbackPanel.setPosition(50, 670);
+        feedbackPanel.setPosition(50, 580);              // Moved up
         feedbackPanel.setFillColor(sf::Color(40, 40, 55, 220));
         feedbackPanel.setOutlineThickness(2);
         feedbackPanel.setOutlineColor(theme.text);
