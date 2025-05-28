@@ -218,7 +218,7 @@ namespace coup {
 
         // Check if target was the last player arrested - prevent consecutive arrests
         if (game.getLastArrestedPlayer() == &target) {
-            throw std::runtime_error("This player was arrested last turn and cannot be arrested again consecutively");
+            throw std::runtime_error("This player was the last player to be arrested (consecutive arrest is not allowed)");
         }
 
         // Bribe action is meaningless if target has no coins
