@@ -22,7 +22,7 @@ namespace coup {
         shape.setSize(size);
         shape.setFillColor(normalColor);
         
-    // Create hover and disabled colors
+        // Create hover and disabled colors
         hoverColor = sf::Color(
             std::min(255, (int)normal.r + 30),
             std::min(255, (int)normal.g + 30),
@@ -33,7 +33,7 @@ namespace coup {
         shape.setOutlineThickness(2);
         shape.setOutlineColor(sf::Color::White);
         
-    // Add rounded corners effect with outline
+        // Add rounded corners effect with outline
         shape.setOutlineThickness(3);
         
         text.setString(label);
@@ -41,7 +41,7 @@ namespace coup {
         text.setFillColor(sf::Color::White);
         text.setStyle(sf::Text::Bold);
         
-    // Create small icon circle
+        // Create small icon circle
         icon.setRadius(8);
         icon.setFillColor(sf::Color(255, 215, 0)); // Gold
         icon.setPosition(position.x + 10, position.y + size.y/2 - 8);
@@ -80,15 +80,11 @@ namespace coup {
 
     void EnhancedButton::setFont(const sf::Font& font) {
         text.setFont(font);
-        // text.setCharacterSize(16);
 
         // Center text
         sf::FloatRect textBounds = text.getLocalBounds();
         sf::Vector2f buttonCenter = shape.getPosition() + shape.getSize() / 2.0f;
-        // text.setPosition(
-        // buttonCenter.x - textBounds.width / 2.0f - textBounds.left,
-        // buttonCenter.y - textBounds.height / 2.0f - textBounds.top
-        // );
+
         text.setPosition(
             shape.getPosition().x + (shape.getSize().x - textBounds.width) / 2 - textBounds.left + 15,
             shape.getPosition().y + (shape.getSize().y - textBounds.height) / 2 - textBounds.top
@@ -116,19 +112,19 @@ namespace coup {
         background.setOutlineThickness(3);
         background.setOutlineColor(sf::Color::White);
         
-    // Player avatar (circular)
+        // Player avatar (circular)
         playerAvatar.setRadius(25);
         playerAvatar.setFillColor(sf::Color(100, 150, 200));
         playerAvatar.setPosition(position.x + 10, position.y + 10);
         
-    // Role icon
+        // Role icon
         roleIcon.setSize(sf::Vector2f(30, 30));
         roleIcon.setPosition(position.x + size.x - 40, position.y + 10);
         roleIcon.setFillColor(sf::Color(200, 100, 100));
         roleIcon.setOutlineThickness(2);
         roleIcon.setOutlineColor(sf::Color::Black);
         
-    // Text elements
+        // Text elements
         nameText.setPosition(position.x + 70, position.y + 15);
         nameText.setCharacterSize(20);
         nameText.setFillColor(sf::Color::White);
@@ -147,7 +143,7 @@ namespace coup {
         statusText.setCharacterSize(12);
         statusText.setFillColor(sf::Color::Green);
         
-    // Coin icon
+        // Coin icon
         coinIcon.setSize(sf::Vector2f(15, 15));
         coinIcon.setFillColor(sf::Color(255, 215, 0)); // Gold color
         coinIcon.setPosition(position.x + 90, position.y + 75);
@@ -170,7 +166,7 @@ namespace coup {
                         role == RoleType::JUDGE ? "Judge" :
                         role == RoleType::MERCHANT ? "Merchant" : "Unassigned"));
         
-    // Update status
+        // Update status
         std::string status = "";
         if (!isActive) {
             status = "ELIMINATED";
@@ -184,7 +180,7 @@ namespace coup {
         }
         statusText.setString(status);
         
-    // Update visual appearance
+        // Update visual appearance
         if (isCurrentPlayer) {
             background.setFillColor(sf::Color(80, 40, 120)); // Purple
             background.setOutlineColor(sf::Color(255, 215, 0)); // Gold
@@ -366,7 +362,7 @@ namespace coup {
         window.create(sf::VideoMode(WINDOW_WIDTH, WINDOW_HEIGHT), "COUP", sf::Style::Titlebar | sf::Style::Close);
         window.setFramerateLimit(60);
         
-    // Setup color theme
+        // Setup color theme
         theme.background = sf::Color(15, 15, 25);
         theme.primary = sf::Color(70, 130, 180);
         theme.secondary = sf::Color(100, 149, 237);
@@ -394,7 +390,7 @@ namespace coup {
     }
 
     bool GameGUI::initialize() {
-    // Load fonts
+        // Load fonts
         if (!mainFont.loadFromFile("tahoma.ttf")) {
             std::cout << "Error: Could not load tahoma.ttf. The game UI may not display properly." << std::endl;
         }
@@ -407,7 +403,7 @@ namespace coup {
         messageText.setFillColor(theme.success);
         messageText.setPosition(50, WINDOW_HEIGHT - 40);
         
-    // Setup all UI elements
+        // Setup all UI elements
         setupMainMenu();
         createDecorativeElements();
         
@@ -415,7 +411,7 @@ namespace coup {
     }
 
     void GameGUI::setupMainMenu() {
-    // Main title
+        // Main title
         titleText.setFont(titleFont);
         titleText.setString("COUP");
         titleText.setCharacterSize(72);
@@ -424,7 +420,7 @@ namespace coup {
         titleText.setPosition(getCenterPosition(sf::Vector2f(200, 80)));
         titleText.move(0, -200);
         
-    // Subtitle
+        // Subtitle
         subtitleText.setFont(mainFont);
         subtitleText.setString("Created by Raz Cohen");
         subtitleText.setCharacterSize(24);
@@ -456,7 +452,7 @@ namespace coup {
     }
 
     void GameGUI::setupPlayerSetup() {
-    // Setup input field and buttons fonts
+        // Setup input field and buttons fonts
         playerNameInput.setFont(mainFont);
         addPlayerButton.setFont(mainFont);
         startGameButton.setFont(mainFont);
@@ -465,7 +461,7 @@ namespace coup {
         // Initially disable start game button until we have enough players
         startGameButton.setEnabled(false);
         
-    // Instruction text
+        // Instruction text
         instructionText.setFont(mainFont);
         instructionText.setString("Add 2-6 players to start the game");
         instructionText.setCharacterSize(24);
@@ -1284,13 +1280,13 @@ namespace coup {
         gameOverTitle.setFillColor(theme.accent);
         gameOverTitle.setStyle(sf::Text::Bold);
         gameOverTitle.setPosition(getCenterPosition(sf::Vector2f(400, 80)));
-        gameOverTitle.move(0, -120);      // Moved up less to fit in smaller window
+        gameOverTitle.move(0, -120);
         
         winnerText.setFont(mainFont);
         winnerText.setCharacterSize(36);
         winnerText.setFillColor(theme.success);
         winnerText.setPosition(getCenterPosition(sf::Vector2f(600, 40)));
-        winnerText.move(0, -40);          // Adjusted vertical position
+        winnerText.move(0, -40);
 
         // Create return to main menu button
         sf::Vector2f buttonPos = getCenterPosition(sf::Vector2f(BUTTON_WIDTH, BUTTON_HEIGHT));
@@ -1314,29 +1310,29 @@ namespace coup {
 
     void GameGUI::setupGamePanels() {
         // Game information panel (left side)
-        gameInfoPanel.setSize(sf::Vector2f(480, 160));   // Reduced height
-        gameInfoPanel.setPosition(50, 40);               // Moved up
+        gameInfoPanel.setSize(sf::Vector2f(480, 160));
+        gameInfoPanel.setPosition(50, 40);
         gameInfoPanel.setFillColor(sf::Color(30, 30, 45, 200));
         gameInfoPanel.setOutlineThickness(2);
         gameInfoPanel.setOutlineColor(theme.primary);
         
-        // Action panel (left side, below game info) - increased width
-        actionPanel.setSize(sf::Vector2f(480, 340));     // Reduced height
-        actionPanel.setPosition(50, 220);                // Moved up
+        // Action panel (left side, below game info)
+        actionPanel.setSize(sf::Vector2f(480, 340));
+        actionPanel.setPosition(50, 220);
         actionPanel.setFillColor(sf::Color(30, 30, 45, 200));
         actionPanel.setOutlineThickness(2);
         actionPanel.setOutlineColor(theme.secondary);
         
-        // Player panel (right side) - adjusted position
-        playerPanel.setSize(sf::Vector2f(820, 520));     // Reduced height
-        playerPanel.setPosition(550, 40);                // Moved up
+        // Player panel (right side)
+        playerPanel.setSize(sf::Vector2f(820, 520));
+        playerPanel.setPosition(550, 40);
         playerPanel.setFillColor(sf::Color(25, 25, 40, 180));
         playerPanel.setOutlineThickness(2);
         playerPanel.setOutlineColor(theme.accent);
         
         // Feedback panel (bottom)
         feedbackPanel.setSize(sf::Vector2f(1300, 60));
-        feedbackPanel.setPosition(50, 580);              // Moved up
+        feedbackPanel.setPosition(50, 580);
         feedbackPanel.setFillColor(sf::Color(40, 40, 55, 220));
         feedbackPanel.setOutlineThickness(2);
         feedbackPanel.setOutlineColor(theme.text);
