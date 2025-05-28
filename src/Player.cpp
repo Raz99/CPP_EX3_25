@@ -6,7 +6,7 @@
 namespace coup {
     // Constructor - initialize player and add to game
     Player::Player(Game& game, const std::string& name)
-    : game(game), name(name), coin_count(0), active(true), sanctioned(false), arrest_available(true), bribe_used(false), used_tax_last_action(false) {
+    : game(game), name(name), coin_count(0), active(true), sanctioned(false), arrest_available(true), bribe_used(false), used_tax_last_action(false), couped_by(nullptr) {
         // Ensure game reference is valid
         if (&game == nullptr) {
             throw std::invalid_argument("Game reference cannot be null");
@@ -63,6 +63,11 @@ namespace coup {
     // Check if tax was used in the last action
     bool Player::usedTaxLastAction() const {
         return used_tax_last_action;
+    }
+
+    // Get player who performed coup on this player
+    Player* Player::getCoupedBy() const {
+        return couped_by;
     }
 
     // Basic actions that all players can perform
@@ -344,6 +349,7 @@ namespace coup {
         }
 
         removeCoins(7); // Decrease coin count
+        target.couped_by = this; // Mark this player as the one who performed the coup
         target.setActivityStatus(false); // Eliminate target
         
         // If player used bribe, then let him play another turn
@@ -394,11 +400,6 @@ namespace coup {
         sanctioned = value; // Mark player as sanctioned
     }
 
-    // // Set tax action availability
-    // void Player::setTaxAvailability(bool value) {
-    //     tax_available = value; // Mark tax action as unavailable
-    // }
-
     // Set arrest action availability
     void Player::setArrestAvailability(bool value) {
         arrest_available = value;
@@ -409,7 +410,13 @@ namespace coup {
         bribe_used = false; // Reset bribe used flag back to false
     }
 
+    // Reset used tax last action flag
     void Player::resetUsedTaxLastAction() {
         used_tax_last_action = false; // Reset used tax last action flag
+    }
+
+    // Clears the pointer to the player who performed coup on this player
+    void Player::resetCoupedBy() {
+        couped_by = nullptr; // Clear the pointer to the player who performed coup
     }
 }

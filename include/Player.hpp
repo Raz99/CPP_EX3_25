@@ -17,6 +17,7 @@ namespace coup {
         bool arrest_available; // Whether another player prevents another player's arrest action
         bool bribe_used; // Whether player used bribe action in the current turn
         bool used_tax_last_action; // Track if tax was used in the last action
+        Player* couped_by; // Pointer to the target player for actions like arrest, sanction, coup
 
     public:
         // Constructor - creates player and adds to game
@@ -33,6 +34,7 @@ namespace coup {
         bool isArrestAvailable() const; // Check if arrest action is available
         bool isBribeUsed() const; // Check if bribe action was used in the current turn
         bool usedTaxLastAction() const; // Check if tax was used in the last action
+        Player* getCoupedBy() const; // Get player who performed coup on this player
 
         // Check if player is a specific type
         virtual bool isGeneral() const { return false; } // Check if player is a General (default: false)
@@ -58,6 +60,7 @@ namespace coup {
         void setArrestAvailability(bool value); // Set arrest action availability
         void resetBribeUsed(); // Reset bribe used flag back to false
         void resetUsedTaxLastAction(); // Reset used tax last action flag
+        void resetCoupedBy(); // Clears the pointer to the player who performed coup on this player
     };
 }
 

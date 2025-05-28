@@ -23,8 +23,13 @@ namespace coup {
         if (target.isActive()) {
             throw std::runtime_error("Target player is not couped");
         }
+
+        if (target.getCoupedBy() == nullptr) {
+            throw std::runtime_error("Too late, you cannot block this coup anymore");
+        }
         
         removeCoins(5); // Pay 5 coins to block the coup
+        target.resetCoupedBy(); // Clear the pointer to the player who performed coup
         target.setActivityStatus(true); // Restore target's activity status
     }
 }

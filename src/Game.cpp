@@ -182,6 +182,15 @@ namespace coup {
         if(next_player->usedTaxLastAction()) {
             next_player->resetUsedTaxLastAction();
         }
+
+        // Checks if the next player did coup on his last turn
+        // If so, clear the pointer of couped_by to avoid block_coup that should not be possible anymore
+        for(Player* player : players_list) {
+            if (player->getCoupedBy() == next_player) {
+                // Clear the pointer to the player who performed coup on this player
+                player->resetCoupedBy();
+            }
+        }
     }
     
     // Check if it's player's turn
