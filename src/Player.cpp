@@ -6,10 +6,20 @@
 namespace coup {
     // Constructor - initialize player and add to game
     Player::Player(Game& game, const std::string& name)
-    : game(game), name(name), coin_count(0), active(true), sanctioned(false), tax_available(true), arrest_available(true), bribe_used(false) {
+    : game(game), name(name), coin_count(0), active(true), sanctioned(false), arrest_available(true), bribe_used(false), used_tax_last_action(false) {
+        // Ensure game reference is valid
+        if (&game == nullptr) {
+            throw std::invalid_argument("Game reference cannot be null");
+        }
+        
         // Check if name is empty
         if (name.empty()) {
             throw std::invalid_argument("Player name cannot be empty");
+        }
+
+        // Check if name is too long
+        if (name.length() >= 10) {
+            throw std::invalid_argument("Player name cannot exceed 9 characters");
         }
 
         game.addPlayer(this); // Add player to game
@@ -36,12 +46,23 @@ namespace coup {
         return sanctioned;
     }
 
-    bool Player::isTaxAvailable() const {
-        return tax_available && !sanctioned; // If sanctioned, tax is not available
+    // bool Player::isTaxAvailable() const {
+    //     return tax_available && !sanctioned; // If sanctioned, tax is not available
+    // }
+
+    // Check if arrest action is available
+    bool Player::isArrestAvailable() const {
+        return arrest_available;
     }
 
-    bool Player::isArrestAvailable() const {
-        return arrest_available; // Check if arrest action is available
+    // Check if bribe action was used in the current turn
+    bool Player::isBribeUsed() const {
+        return bribe_used;
+    }
+
+    // Check if tax was used in the last action
+    bool Player::usedTaxLastAction() const {
+        return used_tax_last_action;
     }
 
     // Basic actions that all players can perform
@@ -121,6 +142,7 @@ namespace coup {
         
         // If player did not use bribe, then move to next player's turn
         else {
+            used_tax_last_action = true; // Mark that tax was used in the last action
             game.nextTurn(); // Move to next player's turn
         }
     }
@@ -153,8 +175,8 @@ namespace coup {
         }
 
         removeCoins(4); // Decrease coin count
-        // No need to call nextTurn() because player gets another action
         bribe_used = true;
+        // No need to call nextTurn() because player gets another action
     }
 
     // Arrest action - take 1 coin from target
@@ -372,10 +394,10 @@ namespace coup {
         sanctioned = value; // Mark player as sanctioned
     }
 
-    // Set tax action availability
-    void Player::setTaxAvailability(bool value) {
-        tax_available = value; // Mark tax action as unavailable
-    }
+    // // Set tax action availability
+    // void Player::setTaxAvailability(bool value) {
+    //     tax_available = value; // Mark tax action as unavailable
+    // }
 
     // Set arrest action availability
     void Player::setArrestAvailability(bool value) {
@@ -385,5 +407,9 @@ namespace coup {
     // Reset bribe used flag
     void Player::resetBribeUsed() {
         bribe_used = false; // Reset bribe used flag back to false
+    }
+
+    void Player::resetUsedTaxLastAction() {
+        used_tax_last_action = false; // Reset used tax last action flag
     }
 }

@@ -19,20 +19,10 @@ namespace coup {
         if (!game.isGameStarted()) {
             throw std::runtime_error("Game has not started yet");
         }
-        
-        // // Ensure it's the player's turn
-        // if (!game.isPlayerTurn(this)) {
-        //     throw std::runtime_error("Not your turn");
-        // }
 
         // Ensure player is active
         if (!isActive()) {
             throw std::runtime_error("Player is eliminated");
-        }
-
-        // Check if player has 10 coins and just started his turn - must coup
-        if (coin_count >= 10 && !bribe_used) {
-            throw std::runtime_error("You have 10 or more coins, must perform coup");
         }
 
         // Ensure target is not the current player
@@ -44,18 +34,13 @@ namespace coup {
         if (!target.isActive()) {
             throw std::runtime_error("Target player is eliminated");
         }
-        
-        target.setTaxAvailability(false); // Disable target's tax action
 
-        // // If player used bribe, then let him play another turn
-        // if(bribe_used) {
-        //     bribe_used = false; // Reset bribe used flag
-        // }
-        // // If player did not use bribe, then move to next player's turn
-        // else {
-        //     game.nextTurn(); // Move to next player's turn
-        // }
+        // Ensure target has used tax action in his last turn
+        if (!target.usedTaxLastAction()) {
+            throw std::runtime_error("Target player did not use tax as his last action");
+        }
         
-        // No need to call nextTurn() because this action doesn't count as a turn
+        target.removeCoins(2); // Remove 2 coins from target
+        target.resetUsedTaxLastAction(); // Reset target's used tax last action flag since current player undid it
     }
 }

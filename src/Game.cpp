@@ -120,11 +120,6 @@ namespace coup {
         }
 
         // Clear the current player's arrest block since their turn is over
-        if(!players_list[current_player_index]->isTaxAvailable()) {
-            players_list[current_player_index]->setTaxAvailability(true);
-        }
-
-        // Clear the current player's arrest block since their turn is over
         if(!players_list[current_player_index]->isArrestAvailable()) {
             players_list[current_player_index]->setArrestAvailability(true);
         }
@@ -181,6 +176,11 @@ namespace coup {
             if (next_player->coins() >= 3) {
                 next_player->addCoins(1);
             }
+        }
+
+        // Clear the next player's used tax last action flag since it's a new turn
+        if(next_player->usedTaxLastAction()) {
+            next_player->resetUsedTaxLastAction();
         }
     }
     

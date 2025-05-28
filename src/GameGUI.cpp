@@ -546,6 +546,7 @@ namespace coup {
         
         // Track which reactive abilities are available (only add one button per ability type)
         bool hasActiveGovernor = false;
+        bool hasPlayerUsedTaxLastAction = false;
         bool hasActiveSpy = false;
         bool hasActiveGeneral = false;
         bool hasActiveJudge = false;
@@ -558,7 +559,8 @@ namespace coup {
                 case RoleType::GOVERNOR:
                     if (player->isActive()) {
                         hasActiveGovernor = true;
-                }
+                    }
+                    break;
                 case RoleType::SPY:
                     if (player->isActive()) {
                         hasActiveSpy = true;
@@ -578,36 +580,37 @@ namespace coup {
                 default:
                     break;
             }
+
+            // Check if any player used tax as their last action
+            if (player->usedTaxLastAction()) {
+                hasPlayerUsedTaxLastAction = true;
+            }
         }
         
         // Add one button per available reactive ability type
-        if (hasActiveGovernor) {
+        if (hasActiveGovernor && hasPlayerUsedTaxLastAction) {
             sf::Vector2f pos(reactiveStartPos.x, reactiveStartPos.y + buttonIndex * spacing);
-            actionButtons.emplace_back(pos, buttonSize, 
-                                    "Undo Tax", "undo", reactiveColor);
+            actionButtons.emplace_back(pos, buttonSize, "Undo Tax", "undo", reactiveColor);
             actionButtons.back().setFont(mainFont);
             buttonIndex++;
         }
         if (hasActiveSpy) {
             sf::Vector2f pos(reactiveStartPos.x, reactiveStartPos.y + buttonIndex * spacing);
-            actionButtons.emplace_back(pos, buttonSize, 
-                                    "Spy On", "spy_on", reactiveColor);
+            actionButtons.emplace_back(pos, buttonSize, "Spy On", "spy_on", reactiveColor);
             actionButtons.back().setFont(mainFont);
             buttonIndex++;
         }
         
         if (hasActiveGeneral) {
             sf::Vector2f pos(reactiveStartPos.x, reactiveStartPos.y + buttonIndex * spacing);
-            actionButtons.emplace_back(pos, buttonSize, 
-                                    "Block Coup", "block_coup", reactiveColor);
+            actionButtons.emplace_back(pos, buttonSize, "Block Coup", "block_coup", reactiveColor);
             actionButtons.back().setFont(mainFont);
             buttonIndex++;
         }
         
         if (hasActiveJudge) {
             sf::Vector2f pos(reactiveStartPos.x, reactiveStartPos.y + buttonIndex * spacing);
-            actionButtons.emplace_back(pos, buttonSize, 
-                                    "Block Bribe", "block_bribe", reactiveColor);
+            actionButtons.emplace_back(pos, buttonSize, "Block Bribe", "block_bribe", reactiveColor);
             actionButtons.back().setFont(mainFont);
             buttonIndex++;
         }
@@ -807,7 +810,7 @@ namespace coup {
                             // Check if target is valid based on action type
                             bool validTarget = false;
                             
-                            if (currentAction == "spy_on" || currentAction == "block_bribe") {
+                            if (currentAction == "spy_on" || currentAction == "block_bribe" || currentAction == "undo") {
                                 // Reactive abilities can target any active player (including current player)
                                 validTarget = allPlayers[i]->isActive();
                             } else if (currentAction == "block_coup") {
@@ -1407,10 +1410,9 @@ namespace coup {
                         !currentPlayer->isSanctioned() && 
                         !(currentPlayer->coins() >= 10 && !currentPlayer->isBribeUsed());
             } else if (button.action == "tax") {
-                // Player can tax if: active, not sanctioned, tax available, and not forced to coup
+                // Player can tax if: active, not sanctioned, and not forced to coup
                 available = currentPlayer->isActive() && 
                         !currentPlayer->isSanctioned() && 
-                        currentPlayer->isTaxAvailable() && 
                         !(currentPlayer->coins() >= 10 && !currentPlayer->isBribeUsed());
             } else if (button.action == "bribe") {
                 // Player can bribe if: active, has 4+ coins, and not forced to coup

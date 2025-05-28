@@ -31,13 +31,10 @@ namespace coup {
 
         // Ensure there is a bribe action to block
         if (!target.isBribeUsed()) {
-            throw std::runtime_error("Target player has not used bribe");
+            throw std::runtime_error("Target player has not used bribe as a last action");
         }
 
         // Block the bribe by resetting the bribe_used flag
         target.resetBribeUsed();
-
-        // std::cout << "Judge " << name << " blocks " << target.getName() 
-        //           << "'s bribe, causing them to lose their 4 coins." << std::endl;    }
     }
 }
