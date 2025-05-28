@@ -295,19 +295,14 @@ namespace coup {
             players_list.erase(it);
             
             // Reset indices if needed
-            if (current_player_index >= static_cast<int>(players_list.size())) {
+            if (current_player_index >= players_list.size()) {
                 current_player_index = 0;
-            }
-            
-            // Clear last arrested player if it was this player
-            if (last_arrested_player == player) {
-                last_arrested_player = nullptr;
             }
         }
     }
 
     // Check if a General can block coup to prevent game from ending
-    bool Game::canGeneralBlockCoupToPreventGameEnd() const {
+    bool Game::canGeneralPreventGameEnd() const {
         if (!game_started) return false;
         
         int active_count = 0;

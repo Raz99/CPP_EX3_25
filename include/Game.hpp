@@ -82,7 +82,7 @@ namespace coup {
         void removePlayer(Player* player);
 
         // Check if a General can block coup to prevent game from ending
-        bool canGeneralBlockCoupToPreventGameEnd() const;
+        bool canGeneralPreventGameEnd() const;
 
         // Methods for Role Assignment
         // Get random generator for role assignment
