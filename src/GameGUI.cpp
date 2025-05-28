@@ -990,6 +990,11 @@ namespace coup {
             updateMessage("Please enter a player name!", true);
             return;
         }
+
+        if (name.length() >= 10) {
+            updateMessage("Player name too long! (Max: 9 characters)", true);
+            return;
+        }
         
         if (!game) {
             game = new Game();

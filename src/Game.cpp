@@ -204,12 +204,12 @@ namespace coup {
     void Game::startGame() {
         // Check minimum players
         if (players_list.size() < 2) {
-            throw std::runtime_error("Minimum 2 players required to start the game");
+            throw std::runtime_error("Need at least 2 players to start!");
         }
         
         // Check maximum players
         if (players_list.size() > 6) {
-            throw std::runtime_error("Maximum 6 players allowed to start the game");
+            throw std::runtime_error("Maximum 6 players allowed!");
         }
         
         game_started = true;
