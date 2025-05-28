@@ -55,7 +55,7 @@ namespace coup {
         void removeCoins(int amount); // Remove coins from player (throws if not enough)
         void setActivityStatus(bool value); // Set player's activity status
         virtual void setSanctionStatus(bool value); // Set sanction's status
-        void disableTax(); // Mark tax action as unavailable
+        void setTaxAvailability(bool value); // Set tax action availability
         void setArrestAvailability(bool value); // Set arrest action availability
         void resetBribeUsed(); // Reset bribe used flag back to false
     };

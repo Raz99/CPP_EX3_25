@@ -553,15 +553,20 @@ namespace coup {
         int spacing = 55;
         
         // Track which reactive abilities are available (only add one button per ability type)
+        bool hasActiveGovernor = false;
         bool hasActiveSpy = false;
         bool hasActiveGeneral = false;
         bool hasActiveJudge = false;
-        
+
         // Check what reactive abilities are available
         for (Player* player : allPlayers) {
             RoleType playerRole = convertRoleType(player->getRoleType());
             
             switch (playerRole) {
+                case RoleType::GOVERNOR:
+                    if (player->isActive()) {
+                        hasActiveGovernor = true;
+                }
                 case RoleType::SPY:
                     if (player->isActive()) {
                         hasActiveSpy = true;
@@ -577,12 +582,20 @@ namespace coup {
                         hasActiveJudge = true;
                     }
                     break;
+                break;
                 default:
                     break;
             }
         }
         
         // Add one button per available reactive ability type
+        if (hasActiveGovernor) {
+            sf::Vector2f pos(reactiveStartPos.x, reactiveStartPos.y + buttonIndex * spacing);
+            actionButtons.emplace_back(pos, buttonSize, 
+                                    "Undo Tax", "undo", reactiveColor);
+            actionButtons.back().setFont(mainFont);
+            buttonIndex++;
+        }
         if (hasActiveSpy) {
             sf::Vector2f pos(reactiveStartPos.x, reactiveStartPos.y + buttonIndex * spacing);
             actionButtons.emplace_back(pos, buttonSize, 
@@ -613,14 +626,7 @@ namespace coup {
             RoleType role = convertRoleType(currentPlayer->getRoleType());
             sf::Color roleColor = sf::Color(255, 215, 0); // Gold color for special abilities
             
-            if (role == RoleType::GOVERNOR) {
-                sf::Vector2f pos(reactiveStartPos.x, reactiveStartPos.y + buttonIndex * spacing);
-                actionButtons.emplace_back(pos, buttonSize, 
-                                        "Undo Tax", "undo", roleColor);
-                actionButtons.back().setFont(mainFont);
-                buttonIndex++;
-            }
-            else if (role == RoleType::BARON) {
+            if (role == RoleType::BARON) {
                 sf::Vector2f pos(reactiveStartPos.x, reactiveStartPos.y + buttonIndex * spacing);
                 actionButtons.emplace_back(pos, buttonSize, 
                                         "Invest", "invest", roleColor);
@@ -1084,15 +1090,6 @@ namespace coup {
             }
             
             // Role-specific actions
-            else if (action == "undo" && target) {
-                Governor* governor = dynamic_cast<Governor*>(currentPlayer);
-                if (governor) {
-                    governor->undo(*target);
-                    updateMessage(governor->getName() + " blocked " + target->getName() + "'s tax ability");
-                } else {
-                    updateMessage("Only Governors can use undo!", true);
-                }
-            }
             else if (action == "invest") {
                 Baron* baron = dynamic_cast<Baron*>(currentPlayer);
                 if (baron) {
@@ -1100,6 +1097,20 @@ namespace coup {
                     updateMessage(baron->getName() + " invested 3 coins to get 6 coins!");
                 } else {
                     updateMessage("Only Barons can invest!", true);
+                }
+            }
+            else if (action == "undo" && target) {
+                // Find eligible Governor players for this action
+                std::vector<Player*> eligiblePlayers = getEligibleReactivePlayers(action);
+                
+                if (eligiblePlayers.empty()) {
+                    updateMessage("No active Governor available to undo tax!", true);
+                } else if (eligiblePlayers.size() == 1) {
+                    // Automatic selection for single player
+                    executeReactiveAction(action, eligiblePlayers[0], target);
+                } else {
+                    // Multiple players available - show selection overlay
+                    showReactivePlayerSelection(action, target, eligiblePlayers);
                 }
             }
             else if (action == "spy_on" && target) {
@@ -1436,18 +1447,25 @@ namespace coup {
                         !getTargetablePlayers().empty();
             }
             // Role-specific actions
-            else if (button.action == "undo") {
-                Governor* governor = dynamic_cast<Governor*>(currentPlayer);
-                available = governor && currentPlayer->isActive() && 
-                        !(currentPlayer->coins() >= 10 && !currentPlayer->isBribeUsed()) &&
-                        !getTargetablePlayers().empty();
-            } else if (button.action == "invest") {
+            else if (button.action == "invest") {
                 Baron* baron = dynamic_cast<Baron*>(currentPlayer);
                 available = baron && currentPlayer->isActive() && 
                         currentPlayer->coins() >= 3 &&
                         !(currentPlayer->coins() >= 10 && !currentPlayer->isBribeUsed());
             } 
             // Reactive abilities - available to any player with the appropriate role
+            else if (button.action == "undo") {
+                // Find any active Governor player
+                std::vector<Player*> allPlayers = game->getAllPlayers();
+                available = false;
+                for (Player* player : allPlayers) {
+                    Governor* governor = dynamic_cast<Governor*>(player);
+                    if (governor && player->isActive() && !getTargetablePlayers().empty()) {
+                        available = true;
+                        break;
+                    }
+                }
+            }
             else if (button.action == "spy_on") {
                 // Find any active Spy player
                 std::vector<Player*> allPlayers = game->getAllPlayers();
@@ -1739,7 +1757,13 @@ namespace coup {
         std::vector<Player*> allPlayers = game->getAllPlayers();
         
         for (Player* player : allPlayers) {
-            if (action == "spy_on") {
+            if (action == "undo") {
+                Governor* governor = dynamic_cast<Governor*>(player);
+                if (governor && player->isActive()) {
+                    eligiblePlayers.push_back(player);
+                }
+            }
+            else if (action == "spy_on") {
                 // Check if player is a Spy and is active
                 Spy* spy = dynamic_cast<Spy*>(player);
                 if (spy && player->isActive()) {
@@ -1771,7 +1795,8 @@ namespace coup {
         eligibleReactivePlayers = eligiblePlayers;
         
         // Setup selection title
-        std::string roleType = (action == "spy_on") ? "Spy" : 
+        std::string roleType = (action == "undo") ? "Governor" :
+                               (action == "spy_on") ? "Spy" : 
                                (action == "block_coup") ? "General" : 
                                (action == "block_bribe") ? "Judge" : "Player";
         selectionTitle.setString("Choose " + roleType);
@@ -1811,7 +1836,16 @@ namespace coup {
 
     void GameGUI::executeReactiveAction(const std::string& action, Player* reactivePlayer, Player* target) {
         try {
-            if (action == "spy_on" && target) {
+            if (action == "undo" && target) {
+                Governor* governor = dynamic_cast<Governor*>(reactivePlayer);
+                if (governor) {
+                    governor->undo(*target);
+                    updateMessage(governor->getName() + " blocked " + target->getName() + "'s tax ability");
+                } else {
+                    updateMessage("Selected player is not a Governor!", true);
+                }
+            }
+            else if (action == "spy_on" && target) {
                 Spy* spy = dynamic_cast<Spy*>(reactivePlayer);
                 if (spy) {
                     spy->spy_on(*target);

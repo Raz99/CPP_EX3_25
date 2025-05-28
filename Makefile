@@ -44,6 +44,12 @@ valgrind: Main
 	@echo "🔍 Running memory check..."
 	valgrind --leak-check=full --show-leak-kinds=all ./$(TARGET)
 
+# Demo executable for testing
+demo: $(OBJECTS) Demo.cpp | $(OBJDIR)
+	$(CXX) $(CXXFLAGS) $(INCLUDES) Demo.cpp $(OBJECTS) -o demo $(LIBS)
+	@echo "🧪 Demo compiled successfully!"
+	@echo "📁 Run with: ./demo"
+
 # Clean build
 clean:
 	rm -rf $(OBJDIR) $(TARGET)
@@ -53,4 +59,4 @@ clean:
 debug: CXXFLAGS += -DDEBUG -g3
 debug: Main
 
-.PHONY: Main test valgrind clean debug
+.PHONY: Main test valgrind clean debug demo

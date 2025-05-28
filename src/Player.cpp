@@ -372,14 +372,9 @@ namespace coup {
         sanctioned = value; // Mark player as sanctioned
     }
 
-    // Disable tax action
-    void Player::disableTax() {
-        // Ensure player is active
-        if (!active) {
-            throw std::runtime_error("Player is eliminated");
-        }
-
-        tax_available = false; // Mark tax action as unavailable
+    // Set tax action availability
+    void Player::setTaxAvailability(bool value) {
+        tax_available = value; // Mark tax action as unavailable
     }
 
     // Set arrest action availability

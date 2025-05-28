@@ -120,6 +120,11 @@ namespace coup {
         }
 
         // Clear the current player's arrest block since their turn is over
+        if(!players_list[current_player_index]->isTaxAvailable()) {
+            players_list[current_player_index]->setTaxAvailability(true);
+        }
+
+        // Clear the current player's arrest block since their turn is over
         if(!players_list[current_player_index]->isArrestAvailable()) {
             players_list[current_player_index]->setArrestAvailability(true);
         }

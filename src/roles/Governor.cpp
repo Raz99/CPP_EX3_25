@@ -20,10 +20,10 @@ namespace coup {
             throw std::runtime_error("Game has not started yet");
         }
         
-        // Ensure it's the player's turn
-        if (!game.isPlayerTurn(this)) {
-            throw std::runtime_error("Not your turn");
-        }
+        // // Ensure it's the player's turn
+        // if (!game.isPlayerTurn(this)) {
+        //     throw std::runtime_error("Not your turn");
+        // }
 
         // Ensure player is active
         if (!isActive()) {
@@ -45,16 +45,17 @@ namespace coup {
             throw std::runtime_error("Target player is eliminated");
         }
         
-        target.disableTax(); // Disable target's tax action
+        target.setTaxAvailability(false); // Disable target's tax action
 
-        // If player used bribe, then let him play another turn
-        if(bribe_used) {
-            bribe_used = false; // Reset bribe used flag
-        }
+        // // If player used bribe, then let him play another turn
+        // if(bribe_used) {
+        //     bribe_used = false; // Reset bribe used flag
+        // }
+        // // If player did not use bribe, then move to next player's turn
+        // else {
+        //     game.nextTurn(); // Move to next player's turn
+        // }
         
-        // If player did not use bribe, then move to next player's turn
-        else {
-            game.nextTurn(); // Move to next player's turn
-        }
+        // No need to call nextTurn() because this action doesn't count as a turn
     }
 }
