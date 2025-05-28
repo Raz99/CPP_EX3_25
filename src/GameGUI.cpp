@@ -1231,26 +1231,26 @@ namespace coup {
         gameInfoText.setFont(mainFont);
         gameInfoText.setCharacterSize(18);
         gameInfoText.setFillColor(theme.text);
-        gameInfoText.setPosition(70, 110);         // Moved up
+        gameInfoText.setPosition(70, 110);
         
         // Setup current player display
         currentPlayerText.setFont(mainFont);
         currentPlayerText.setCharacterSize(24);
         currentPlayerText.setFillColor(theme.accent);
         currentPlayerText.setStyle(sf::Text::Bold);
-        currentPlayerText.setPosition(70, 70);     // Moved up
+        currentPlayerText.setPosition(70, 70);
         
         // Setup game status text
         gameStatusText.setFont(mainFont);
         gameStatusText.setCharacterSize(16);
         gameStatusText.setFillColor(theme.textSecondary);
-        gameStatusText.setPosition(70, 100);       // Moved up
+        gameStatusText.setPosition(70, 100);
         
         // Setup action feedback
         actionFeedbackText.setFont(mainFont);
         actionFeedbackText.setCharacterSize(18);
         actionFeedbackText.setFillColor(theme.success);
-        actionFeedbackText.setPosition(480, 590);  // Positioned to match feedback panel position
+        actionFeedbackText.setPosition(480, 600);
         
         // Setup section headers
         actionSectionHeader.setFont(mainFont);
@@ -1258,21 +1258,21 @@ namespace coup {
         actionSectionHeader.setCharacterSize(20);
         actionSectionHeader.setFillColor(theme.accent);
         actionSectionHeader.setStyle(sf::Text::Bold);
-        actionSectionHeader.setPosition(70, 225);  // Moved up to match action panel
+        actionSectionHeader.setPosition(70, 225);
         
         playerSectionHeader.setFont(mainFont);
         playerSectionHeader.setString("PLAYERS");
         playerSectionHeader.setCharacterSize(20);
         playerSectionHeader.setFillColor(theme.accent);
         playerSectionHeader.setStyle(sf::Text::Bold);
-        playerSectionHeader.setPosition(570, 45);  // Adjusted to match player panel position
+        playerSectionHeader.setPosition(570, 45);
         
         gameInfoHeader.setFont(mainFont);
         gameInfoHeader.setString("GAME STATUS");
         gameInfoHeader.setCharacterSize(20);
         gameInfoHeader.setFillColor(theme.accent);
         gameInfoHeader.setStyle(sf::Text::Bold);
-        gameInfoHeader.setPosition(70, 45);        // Moved up
+        gameInfoHeader.setPosition(70, 45);
     }
 
     void GameGUI::setupGameOver() {
@@ -1289,7 +1289,7 @@ namespace coup {
         winnerText.setCharacterSize(36);
         winnerText.setFillColor(theme.success);
         winnerText.setPosition(getCenterPosition(sf::Vector2f(600, 40)));
-        winnerText.move(0, -40);
+        winnerText.move(180, -40);
 
         // Create return to main menu button
         sf::Vector2f buttonPos = getCenterPosition(sf::Vector2f(BUTTON_WIDTH, BUTTON_HEIGHT));
@@ -1327,7 +1327,7 @@ namespace coup {
         actionPanel.setOutlineColor(theme.secondary);
         
         // Player panel (right side)
-        playerPanel.setSize(sf::Vector2f(820, 520));
+        playerPanel.setSize(sf::Vector2f(800, 520));
         playerPanel.setPosition(550, 40);
         playerPanel.setFillColor(sf::Color(25, 25, 40, 180));
         playerPanel.setOutlineThickness(2);
