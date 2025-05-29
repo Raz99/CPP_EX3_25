@@ -1,7 +1,8 @@
-// Judge role implementation for Coup card game
+// Email: razcohenp@gmail.com
+
+// Judge.cpp - Judge role implementation
 // This file implements the Judge's special ability to block bribe actions
-// filepath: /home/razco/Uni/CPP/CPP_EX3_25/src/roles/Judge.cpp
-// email: razcohenp@gmail.com
+
 #include "../include/roles/Judge.hpp"
 #include "../include/Game.hpp"
 #include <stdexcept>

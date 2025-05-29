@@ -1,8 +1,8 @@
-// GameGUI.cpp - Graphical User Interface Implementation for Coup Card Game
+// Email: razcohenp@gmail.com
+
+// GameGUI.cpp - Graphical User Interface Implementation
 // Implements the complete visual interface using SFML for the Coup card game
 // Handles all game states, player interactions, and visual feedback
-// filepath: /home/razco/Uni/CPP/CPP_EX3_25/src/GameGUI.cpp
-// email: razcohenp@gmail.com
 
 #include "../include/GameGUI.hpp"
 #include "../include/roles/Governor.hpp"

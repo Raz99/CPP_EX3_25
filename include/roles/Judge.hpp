@@ -1,8 +1,8 @@
-// email: razcohenp@gmail.com
+// Email: razcohenp@gmail.com
 
 /**
  * Judge.hpp
- * Judge role class for the Coup card game.
+ * Judge role class.
  * Special abilities: Can block bribe actions and penalizes sanctioners with additional costs.
  * Represents judicial authority with corruption prevention and legal protection.
  */

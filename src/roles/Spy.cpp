@@ -1,7 +1,8 @@
-// Spy role implementation for Coup card game
+// Email: razcohenp@gmail.com
+
+// Spy.cpp - Spy role implementation
 // This file implements the Spy's surveillance and sabotage abilities
-// filepath: /home/razco/Uni/CPP/CPP_EX3_25/src/roles/Spy.cpp
-// email: razcohenp@gmail.com
+
 #include "../include/roles/Spy.hpp"
 #include "../include/Game.hpp"
 #include <stdexcept>

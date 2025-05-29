@@ -1,8 +1,8 @@
-// email: razcohenp@gmail.com
+// Email: razcohenp@gmail.com
 
 /**
  * Governor.hpp
- * Governor role class for the Coup card game.
+ * Governor role class.
  * Special abilities: Enhanced tax (3 coins instead of 2) and can undo other players' tax actions.
  * Represents a political figure with economic influence and regulatory power.
  */

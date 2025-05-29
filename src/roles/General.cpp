@@ -1,7 +1,8 @@
-// General role implementation for Coup card game
+// Email: razcohenp@gmail.com
+
+// General.cpp - General role implmementation
 // This file implements the General's special ability to block coup attempts
-// filepath: /home/razco/Uni/CPP/CPP_EX3_25/src/roles/General.cpp
-// email: razcohenp@gmail.com
+
 #include "../include/roles/General.hpp"
 #include "../include/Game.hpp"
 #include <stdexcept>

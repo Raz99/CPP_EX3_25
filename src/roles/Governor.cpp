@@ -1,10 +1,7 @@
-// email: razcohenp@gmail.com
+// Email: razcohenp@gmail.com
 
-/**
- * Governor.cpp
- * Implementation of the Governor role for the Coup card game.
- * Provides enhanced taxation and regulatory undo abilities.
- */
+// Governor.cpp - Governor role implementation
+// This file implements the Governor's special ability to higher tax and undo other players' tax actions
 
 #include "../include/roles/Governor.hpp"
 #include "../include/Game.hpp"

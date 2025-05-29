@@ -1,8 +1,7 @@
-// email: razcohenp@gmail.com
+// Email: razcohenp@gmail.com
 
 /**
  * GameGUI.hpp
- * 
  * This file contains the GUI code for the Coup card game.
  * Uses SFML library for graphics and input handling.
  * Has code for all the game screens and player actions.

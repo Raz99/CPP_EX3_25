@@ -1,8 +1,8 @@
-// email: razcohenp@gmail.com
+// Email: razcohenp@gmail.com
 
 /**
  * General.hpp
- * General role class for the Coup card game.
+ * General role class.
  * Special abilities: Can block coup actions (costs 5 coins) and recovers from arrest attempts.
  * Represents military leadership with defensive capabilities and resilience.
  */

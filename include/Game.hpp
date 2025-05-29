@@ -1,8 +1,8 @@
-// email: razcohenp@gmail.com
+// Email: razcohenp@gmail.com
 
 /**
  * Game.hpp
- * Main game controller class for the Coup card game.
+ * Main game controller class.
  * Manages players, turns, game state and victory conditions.
  * Supports 2-6 players with role assignment and turn-based gameplay.
  */

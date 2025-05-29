@@ -1,10 +1,7 @@
-// email: razcohenp@gmail.com
+// Email: razcohenp@gmail.com
 
-/**
- * Player.cpp
- * Implementation of the base Player class for the Coup card game.
- * Provides core functionality for all player actions and game mechanics.
- */
+ // Player.cpp - Implementation of the base Player class
+ // Provides core functionality for all player actions and game mechanics
 
 #include "../include/Player.hpp"
 #include "../include/Game.hpp"

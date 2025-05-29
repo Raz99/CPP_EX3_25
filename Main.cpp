@@ -1,7 +1,8 @@
-// Main entry point for the Coup card game application
+// Email: razcohenp@gmail.com
+
+// Main.cpp - Main entry point for the Coup game application
 // This file launches the graphical user interface and handles application lifecycle
-// filepath: /home/razco/Uni/CPP/CPP_EX3_25/Main.cpp
-// email: razcohenp@gmail.com
+
 #include "include/GameGUI.hpp"
 #include <iostream>
 

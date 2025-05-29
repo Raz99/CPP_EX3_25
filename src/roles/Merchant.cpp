@@ -1,7 +1,8 @@
-// Merchant role implementation for Coup card game
+// Email: razcohenp@gmail.com
+
+// Merchant.cpp - Merchant role implementation
 // This file implements the Merchant role with enhanced income abilities
-// filepath: /home/razco/Uni/CPP/CPP_EX3_25/src/roles/Merchant.cpp
-// email: razcohenp@gmail.com
+
 #include "../include/roles/Merchant.hpp"
 #include "../include/Game.hpp"
 #include <stdexcept>

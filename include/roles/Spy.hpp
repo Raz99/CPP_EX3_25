@@ -1,8 +1,8 @@
-// email: razcohenp@gmail.com
+// Email: razcohenp@gmail.com
 
 /**
  * Spy.hpp
- * Spy role class for the Coup card game.
+ * Spy role class.
  * Special abilities: Can observe other players' coins and prevent their arrest actions.
  * Represents intelligence gathering with information warfare and action disruption.
  */

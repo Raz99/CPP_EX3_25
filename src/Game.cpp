@@ -1,10 +1,7 @@
-// email: razcohenp@gmail.com
+// Email: razcohenp@gmail.com
 
-/**
- * Game.cpp
- * Implementation of the Game class for the Coup card game.
- * Handles game flow, player management, turn progression and victory conditions.
- */
+ // Game.cpp - Implementation of the Game class
+ // Handles game flow, player management, turn progression and victory conditions
 
 #include "../include/Game.hpp"
 #include "../include/Player.hpp"

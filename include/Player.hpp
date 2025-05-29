@@ -1,8 +1,8 @@
-// email: razcohenp@gmail.com
+// Email: razcohenp@gmail.com
 
 /**
  * Player.hpp
- * Base player class for the Coup card game.
+ * Base player class.
  * Defines common attributes and actions available to all players.
  * Serves as foundation for role-specific derived classes.
  */

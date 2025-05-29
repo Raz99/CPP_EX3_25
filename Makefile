@@ -1,6 +1,7 @@
+# Email: razcohenp@gmail.com
+
 # Makefile for Coup Card Game - C++ Implementation
 # This file automates the build process for the Coup card game project
-# Author: razcohenp@gmail.com
 
 # Compiler settings - using g++ with C++17 standard
 CXX = g++

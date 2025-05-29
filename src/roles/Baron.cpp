@@ -1,7 +1,8 @@
-// Baron role implementation for Coup card game
+// Email: razcohenp@gmail.com
+
+// Baron.cpp - Baron role implementation
 // This file implements the Baron's special investment ability and sanction benefits
-// filepath: /home/razco/Uni/CPP/CPP_EX3_25/src/roles/Baron.cpp
-// email: razcohenp@gmail.com
+
 #include "../include/roles/Baron.hpp"
 #include "../include/Game.hpp"
 #include <stdexcept>

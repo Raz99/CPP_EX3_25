@@ -1,8 +1,8 @@
-// email: razcohenp@gmail.com
+// Email: razcohenp@gmail.com
 
 /**
  * Merchant.hpp
- * Merchant role class for the Coup card game.
+ * Merchant role class.
  * Special abilities: Gains bonus coins at turn start and pays treasury instead of losing coins when arrested.
  * Represents commercial expertise with steady income and financial protection mechanisms.
  */

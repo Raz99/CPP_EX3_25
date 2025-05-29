@@ -1,8 +1,8 @@
-// email: razcohenp@gmail.com
+// Email: razcohenp@gmail.com
 
 /**
  * Baron.hpp
- * Baron role class for the Coup card game.
+ * Baron role class.
  * Special abilities: Can invest coins for profit and receives compensation when sanctioned.
  * Represents wealthy nobility with investment acumen and financial resilience.
  */
