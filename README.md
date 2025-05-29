@@ -1,150 +1,229 @@
-<div dir="rtl", "lang"="he">
+# Coup Card Game - C++ GUI Implementation
 
-# מטלה מספר 3 - קו (coup)
+A feature-rich, GUI-based implementation of the popular card game **Coup** built in C++ using the SFML graphics library. This project recreates the strategic bluffing and deduction game with original character roles, each having unique abilities that affect gameplay dynamics.
 
-### יושרה אקדמית
+## Introduction
 
-במהלך העבודה על המטלות, מותר להתייעץ עם סטודנטים אחרים ולחפש מידע באינטרנט. עם זאת, חל איסור להעתיק קטעי קוד שלמים ממקורות חיצוניים, כולל סטודנטים אחרים, אתרי אינטרנט ומודלי בינה מלאכותית (כגון ChatGPT).
+Coup is a strategic card game for 2-6 players where participants take on different roles in a dystopian future, using influence and deception to eliminate opponents and be the last player standing. This implementation features:
 
-יש לדווח על כל עזרה שקיבלתם, בין אם מדובר בהתייעצות עם סטודנטים אחרים או במידע שנמצא באינטרנט, בהתאם ל[תקנון היושר של המחלקה](https://www.ariel.ac.il/wp/cs/wp-content/uploads/sites/88/2020/08/Guidelines-for-Academic-Integrity.pdf).
-**במקרה של שימוש בכלי בינה מלאכותית (AI), יש לצרף את הפרומפטים שהוזנו ואת התשובות שהתקבלו**.
+- **GUI-based gameplay** using SFML for an intuitive gaming experience
+- **Six unique character roles** with distinct abilities and gameplay mechanics
+- **Turn-based strategy** with both basic and special actions
+- **Real-time interaction** through a modern graphical interface
+- **Comprehensive testing suite** ensuring robust game logic
 
------
-* **מטרת המטלה:** הבנת החומר הנלמד בהרצאה החמישית והשישית כגון: כלל השלושה, ירושה וירטואלית וירושה רגילה.
-* **ההגשה ביחידים**.
+### Character Roles
 
-----
+The game includes six specialized roles, each with unique abilities:
 
-## הוראות הגשה ב-Moodle:
+- **Governor** - Enhanced taxation (3 coins instead of 2) and can undo other players' tax actions
+- **General** - Can block coup attempts for 5 coins and has defensive capabilities  
+- **Judge** - Can block bribe actions and imposes penalties on attackers
+- **Baron** - Investment specialist who can triple coins (pay 3, get 6) and receives compensation when sanctioned
+- **Spy** - Intelligence gatherer who can reveal opponent coins and block arrest actions
+- **Merchant** - Generates passive income and has alternative payment methods for penalties
 
-במערכת Moodle יש להגיש **קובץ טקסט למשל (`submission.txt`)** המכיל 3 שורות בפורמט הבא:
+## Installation Instructions
 
-1. **תעודת זהות** – מספר תעודת הזהות של הסטודנט.
-2. **קישור להגשה** – קישור למאגר ה-GitHub שבו נמצא הפרויקט.
-3. **פרטי ה-commit האחרון** – המחרוזת המזהה של ה-commit האחרון (`commit hash`) 
+### System Requirements
 
- - דוגמה לקובץ הגשה תקין:
-    </div>
+- **C++17** compatible compiler (g++ recommended)
+- **SFML 2.5+** graphics library
+- **GNU Make** or **CMake** for building
+- **Linux/Windows/macOS** (tested on Linux)
+
+### Dependencies Installation
+
+#### Ubuntu/Debian:
+```bash
+sudo apt update
+sudo apt install build-essential libsfml-dev g++ make
 ```
-123456789
-https://github.com/example-user/my-assignment
-e3f1c1a 
+
+#### macOS (with Homebrew):
+```bash
+brew install sfml gcc make
 ```
 
----
-<div dir="rtl", "lang"="he">
+#### Windows (with vcpkg):
+```bash
+vcpkg install sfml
+```
 
-קו (coup - הפיכה) הוא משחק קופסה עבור 2-6 שחקנים המשחקים אחד נגד השני כדי להישאר אחרונים על המגרש.
-במטלה זו נממש חלק מחוקי המשחק
+### Building the Project
 
----
-## חוקי המשחק
-בתחילת המשחק כל שחקן שולף קלף מהערימה. כל קלף מתאר  תפקיד אותו יכול לממש השחקן.  במרכז השולחן ישנה קופה של מטבעות. כל שחקן בתורו משחק לפי התפקיד אליו משתייך (פירוט התפקידים בהמשך) ויכול לקחת מטבעות בהתאם. מטרת המשחק היא להוציא לפועל "הפיכות" ולהדיח שחקנים אחרים מתפקידם. השחקן האחרון שנשאר בעל תפקיד מנצח.
+1. **Clone the repository:**
+   ```bash
+   git clone <repository-url>
+   cd CPP_EX3_25
+   ```
 
- 
-- לכל שחקן יש שם, תפקיד ומטבעות. 
-בכל תור יכול שחקן, בלי קשר לתפקידו, לבצע את אחת מהפעולות הבאות:
+2. **Build using Make:**
+   ```bash
+   make all
+   ```
 
-</div>
-<div dir = "rtl">
+3. **Alternative build commands:**
+   ```bash
+   make GUI        # Build and run GUI application
+   make Main       # Build example demo
+   make test       # Build and run tests
+   make valgrind   # Valgrind - Memory check
+   make clean      # Clean - Remove all generated files
+   ```
 
+## How to Run
 
-- איסוף משאבים (gather) - השחקן מקבל מטבע אחד מהקופה. לפעולה זו אין עלות והיא ניתנת לחסימה באמצעות חרם.
-- מס (tax) - השחקן מקבל שני מטבעות מהקופה. פעולה זו אינה עולה דבר, אך תפקידים מסוימים או פעולות מסוימות יכולים לחסום אותה.
-- שוחד (bribe) - השחקן משלם 4 מטבעות כדי לבצע פעולה נוספת בתורו.
-- מעצר (arrest) - השחקן בוחר שחקן אחר ולוקח ממנו מטבע אחד. לא ניתן להשתמש בה על אותו שחקן פעמיים ברציפות.
-- חרם (sanction) - השחקן בוחר שחקן אחר ומונע ממנו להשתמש בפעולות כלכליות (gather, tax) עד לתורו הבא. עלות פעולה זו היא 3 מטבעות.
-- הפיכה (coup) - השחקן בוחר שחקן אחר ומדיח אותו לחלוטין מהמשחק. עלות פעולה זו היא 7 מטבעות, והיא ניתנת לחסימה בתנאים מסוימים בלבד.
-  
-כל פעולה צריכה לעדכן את מספר המטבעות אותם מחזיק השחקן בהתאם.  
-אם הפעולה לא חוקית, יש לזרוק חריגה מתאימה.
- 
-</div>
-<div dir = "rtl">
- 
- ---
+### Launch the GUI Game
+```bash
+make GUI
+# or directly:
+./coup_game
+```
 
- <div dir = "rtl">
-  
-#### תפקידים
-למשחק יש מספר תפקידים, ולכל אחד מהם יכולות ייחודיות:
+### Run Example Demo
+```bash
+make Main
+./example
+```
 
-</div>
-<div dir = "rtl">
+### Font Requirements
+The game uses the included `tahoma.ttf` font located in the `resources/` directory. Ensure this file is present for proper text rendering.
 
+## Game Overview
 
-- נציב (Governor) - לוקח 3 מטבעות מהקופה במקום 2 כשהוא משתמש בפעולת מס (tax). בנוסף, הוא יכול לבטל פעולת מס (tax) של שחקנים אחרים.
+### Basic Rules
 
-- מרגל (Spy) - יכול לראות את כמות המטבעות של שחקן אחר ולמנוע ממנו להשתמש בפעולת מעצר (arrest) בתורו הבא. פעולה זו אינה עולה מטבעות ואינה נחשבת לתור.
+- **Players:** 2-6 participants
+- **Objective:** Be the last active player remaining
+- **Starting conditions:** Each player begins with 0 coins and is assigned a random role
+- **Victory condition:** Eliminate all other players through strategic actions
 
-- ברון (Baron) - יכול "להשקיע" 3 מטבעות ולקבל בתמורה 6 מטבעות. בנוסף, אם הוא מותקף באמצעות חרם (sanction), הוא מקבל מטבע אחד כפיצוי (כלומר, מכל התהליך הוא יכול להפסיד לכל היותר מטבע אחד אם השתמש במס).
+### Core Actions
 
-- גנרל (General) - יכול לשלם 5 מטבעות כדי למנוע הפיכה (coup) נגד שחקן אחר (או נגד עצמו) שימו לב שבמקרה הזה השחקן שביצע את ההפיכה מפסיד את המטבעות ששילם. בנוסף, אם הוא נפגע באמצעות מעצר (arrest), הוא מקבל בחזרה את המטבע שנלקח ממנו.
+Every player can perform these basic actions regardless of their role:
 
-- שופט (Judge) - יכול לבטל פעולת שוחד (bribe) של שחקן אחר, מה שגורם לו להפסיד את 4 המטבעות ששילם. בנוסף, אם הוא מותקף באמצעות חרם (sanction), השחקן שהטיל עליו את החרם צריך לשלם מטבע נוסף לקופה.
+| Action | Cost | Effect | Notes |
+|--------|------|--------|-------|
+| **Gather** | Free | +1 coin | Can be blocked by sanctions |
+| **Tax** | Free | +2 coins | Can be blocked by sanctions |
+| **Bribe** | 4 coins | Extra turn | Allows additional action |
+| **Arrest** | Free | Steal 1 coin from target | Cannot target same player twice consecutively |
+| **Sanction** | 3 coins | Block target's economic actions | Prevents gather/tax until their next turn |
+| **Coup** | 7 coins | Eliminate target player | Removes player from game |
 
-- סוחר (Merchant) - אם הוא מתחיל תור עם 3 מטבעות לפחות, הוא מקבל מטבע נוסף בחינם. בנוסף, אם הוא מותקף באמצעות מעצר (arrest), הוא משלם שני מטבעות לקופה במקום לאבד אחד לשחקן אחר.
+### Special Rules
 
-  </div>
-<div dir = "rtl">
+- **Mandatory Coup:** Players with 10+ coins must perform a coup
+- **Reactive Abilities:** Some role abilities can be used outside of turn order
+- **Economic Blocking:** Sanctioned players cannot use gather or tax actions
 
-#### הערות:
+## Controls & Gameplay (GUI)
 
-- יכולים להיות שני שחקנים או יותר בעלי אותו תפקיד - לא קורה שום דבר מיוחד במצב זה.
+### Game Setup
+1. **Launch** the application
+2. **Enter player names** when prompted (2-6 players)
+3. **Roles are automatically assigned** randomly to players
+4. **Game begins** with the first player's turn
 
-- אם שחקן מחזיק 10 מטבעות בתחילת תורו, הוא חייב לבצע הפיכה באותו תור
+### During Gameplay
+- **Player cards** display current coins, role, and status
+- **Action buttons** show available moves for the current player
+- **Target selection** appears when actions require choosing an opponent
+- **Message area** provides feedback on actions and results
+- **Turn indicator** highlights the active player
 
-- פעולות שמבטלות פעולות אחרות לא צריכות להמתין לתור של השחקן המבצע אותן ולא מבזבזות לו תור אלא מתבצעות "בזמן אמת". במשחק שלנו לא נממש תגובות "בזמן אמת" לכן ממשו את הפתרון הבא:  
-שחקן שביצע פעולה שניתנת לחסימה, ניתן לחסום את הפעולה שלו עד שהגיע תורו לשחק שוב. למשל, אם שחקן השתמש בפעולה "שוחד", אז שופט יכול לחסום את הפעולה למרות שזה לא התור שלו.
+### Interface Elements
+- **Player Information Cards:** Show name, role, coin count, and status
+- **Action Panel:** Buttons for available actions (context-sensitive)
+- **Game Messages:** Real-time feedback and action results
+- **Role-specific Buttons:** Special abilities appear when applicable
 
-#### לוח המשחק 
-לכל משחק יש את השחקנים שמשחקים בו, מה מצבו של כל שחקן ובסיום המשחק, מי המנצח. בנוסף, המשחק יודע תור מי עכשיו. התורות נקבעים לפי סדר ההצטרפות למשחק.
+### Special Ability Usage
+- **Governor:** "Undo" button appears when someone uses tax
+- **General:** "Block Coup" option when coup attempts occur
+- **Judge:** "Block Bribe" when bribe actions are used
+- **Baron:** "Invest" button for wealth multiplication
+- **Spy:** "Spy On" for intelligence gathering
+- **Merchant:** Automatic bonuses at turn start
 
-יש לממש את השיטות
+## Testing
 
-- תור - `turn` - הדפסת שם השחקן אשר תורו לשחק כעת.
-- שחקנים פעילים - `players` - השיטה מחזירה את שמות השחקנים שפעילים כעת במשחק.
-- מנצח - `winner` - השיטה מחזירה את שם המנצח. אם המשחק עדיין פעיל, השיטה תזרוק שגיאה.
+### Running the Test Suite
+```bash
+make test
+./test_coup
+```
 
-</div>
-<div dir = "rtl">
- 
----
+### Test Coverage
+The comprehensive test suite covers:
 
-</div>
-<div dir = "rtl">
+- **Game Logic:** Turn management, victory conditions, player states
+- **Player Actions:** All basic actions with valid/invalid scenarios
+- **Role Abilities:** Each special ability with edge cases
+- **Error Handling:** Invalid moves, insufficient resources, eliminated players
+- **Integration:** Multi-role interactions and complex scenarios
 
-#### ממשק גרפי (GUI) -
-הוסיפו לפרויקט שלכם ממשק גרפי המאפשר הצגה קומפקטית של המשחק בעת הרצת הדמו. ניתן להניח שכלל השחקנים משחקים דרך אותו המסך, לכן מספק שה-GUI יכול להציג את התפריט בהתאם לתור של השחקן הנוכחי.
+### Memory Leak Testing
+```bash
+make valgrind
+```
 
-לצורך החלק הזה אתם יכולים להשתמש בספריות [QT](https://www.qt.io/product/qt6/qml-book/ch17-qtcpp-qtcpp) ו-[SFML](https://www.sfml-dev.org/). אתם כמובן רשאים להשתמש בספריות אחרות שאתם מוצאים לנכון.
+### Cleaning Build Files
+```bash
+make clean
+```
 
-</div>
-<div dir = "rtl">
+## Project Structure
 
---- 
-#### דרישות נוספות:
-- יש לכתוב בדיקות מקיפות ולהתייחס לכל מקרי הקצה האפשריים!
-- לצורך הדגמת המשחק, מצורף לכם קובץ בשם ``Demo.cpp`` המדגים את המשחק. **שימו לב** שהקובץ הזה הוא לצורך דוגמה בלבד!
-- חשוב לוודא שה-repository ציבורי.
-- כתבו בתחילת **כל** קובץ את כתובת המייל שלכם.
-- כתבו קוד נקי, מסודר, מחולק לקבצים, מודולרי, מתועד בצורה מספקת וכמובן בדיקות יחידה עבור כל הפונקציות.
-- בדקו את תקינות הקלט ולזרוק חריגות מתאימות במידת הצורך.
-- הוסיפו קובץ עם הפומקציה הראשית `main` בו צרו הדגמה של עבודה עם המחלקות ופונקציות שיצרתם.
-- לשימושכם הקישור הבא [doctest](https://github.com/doctest/doctest) בו תוכלו לראות דוגמאות נוספות לשימוש בסיפריה זו.
-- יש לבדוק שאין זליגת זיכרון באמצעות `valgrind`.
-- יש לצרף גם קובץ `README` עם הסבר על פרויקט, על חלוקה למחלקות וקבצים וכל מידע אחר רלוונטי.
+```
+.
+├── include/
+│   ├── Game.hpp              # Main game controller
+│   ├── GameGUI.hpp           # GUI implementation
+│   ├── Player.hpp            # Base player class
+│   └── roles/
+│       ├── Governor.hpp      # Governor role
+│       ├── Spy.hpp           # Spy role
+│       ├── Baron.hpp         # Baron role
+│       ├── General.hpp       # General role
+│       ├── Judge.hpp         # Judge role
+│       └── Merchant.hpp      # Merchant role
+├── src/
+│   ├── Game.cpp              # Game logic implementation
+│   ├── GameGUI.cpp           # GUI implementation
+│   ├── Player.cpp            # Base player implementation
+│   └── roles/
+│       ├── Governor.cpp      # Governor abilities
+│       ├── Spy.cpp           # Spy abilities
+│       ├── General.cpp       # General abilities
+│       ├── Baron.cpp         # Baron abilities
+│       ├── Judge.cpp         # Judge abilities
+│       └── Merchant.cpp      # Merchant abilities
+├── tests/
+│   ├── doctest.h             # Testing framework
+│   ├── test_game.cpp         # Game logic tests
+│   ├── test_player.cpp       # Player action tests
+│   └── test_roles.cpp        # Role-specific tests
+├── resources/
+│   └── tahoma.ttf            # Font file for GUI
+├── Makefile                  # Build configuration
+├── MainGUI.cpp               # GUI entry point
+├── example.cpp               # Demo implementation
+└── README.md                 # This file
+```
 
+## Development Notes
 
-#### קובץ `Makefile`:
-הוסיפו לפרויקט קובץ `Makefile` הכולל את הפקודות הבאות:
-- הפקודה `make Main` – להרצת קובץ ההדגמה.
-- הפקודה `make test` – להרצת בדיקות היחידה.
-- הפקודה `make valgrind` – בדיקת זליגת זיכרון באמצעות valgrind.
-- הפקודה `make clean` - מוחקת את כל הקבצים הלא רלוונטיים לאחר ההרצה.
+- **C++17 Features:** Modern C++ standards with smart pointers and RAII
+- **Object-Oriented Design:** Inheritance-based role system with polymorphism
+- **Exception Safety:** Comprehensive error handling throughout
+- **Memory Management:** Automatic cleanup with RAII principles
+- **GUI Architecture:** Event-driven interface with SFML
 
+## Acknowledgments
 
-בהצלחה!
-
-</div>
-
+- **SFML Library:** For graphics and windowing capabilities
+- **Doctest Framework:** For unit testing infrastructure
+- **Original Coup Game:** Created by Rikki Tahta
+- **Font:** Tahoma typeface for UI text rendering
