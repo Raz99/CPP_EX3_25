@@ -1233,7 +1233,7 @@ namespace coup {
                 
                 // Search for active General with sufficient coins to block coup
                 for (Player* player : allPlayers) {
-                    if (player->isGeneral() && player->coins() >= 5) { // General needs 5+ coins to block
+                    if (player->getRoleType() == "General" && player->coins() >= 5) { // General needs 5+ coins to block
                         hasGeneralWithCoins = true; // Found eligible General
                         break; // Only need to find one eligible General
                     }
@@ -1493,7 +1493,7 @@ namespace coup {
                     !(currentPlayer->coins() >= 10 && !currentPlayer->isBribeUsed())) {
                     for (Player* target : getTargetablePlayers()) {
                         // Check if player has enough coins (3 for normal, 4 for Judge targets)
-                        int requiredCoins = target->isJudge() ? 4 : 3; // Judges cost extra to sanction
+                        int requiredCoins = target->getRoleType() == "General" ? 4 : 3; // Judges cost extra to sanction
                         if (currentPlayer->coins() >= requiredCoins) {
                             available = true; // Found affordable target
                             break;
@@ -1967,7 +1967,7 @@ namespace coup {
         
         // Search for eligible General to make coup blocking decision
         for (Player* player : allPlayers) {
-            if (player->isGeneral() && player->coins() >= 5) { // General with coin requirement
+            if (player->getRoleType() == "General" && player->coins() >= 5) { // General with coin requirement
                 generalPlayer = player; // Found eligible General
                 break; // Only need one General for decision
             }

@@ -32,9 +32,6 @@ TEST_CASE("Player Construction and Basic Properties") {
         CHECK_FALSE(p.usedTaxLastAction()); // Players haven't used tax initially
         CHECK(p.getCoupedBy() == nullptr); // Players haven't been couped initially
         CHECK(p.getRoleType() == "Player"); // Base player type
-        CHECK_FALSE(p.isGeneral()); // Not a General role
-        CHECK_FALSE(p.isJudge()); // Not a Judge role
-        CHECK_FALSE(p.isMerchant()); // Not a Merchant role
     }
     
     SUBCASE("Invalid player names") {

@@ -26,6 +26,58 @@ namespace coup {
         auto seed = std::chrono::high_resolution_clock::now().time_since_epoch().count(); // Get current time for randomization
         random_generator.seed(seed); // Initialize random generator with unique seed
     }
+
+    /**
+     * Copy constructor creates a deep copy of the game state.
+     * Recreates all players with the same roles and states.
+     */
+    Game::Game(const Game& other)
+    : current_player_index(other.current_player_index), game_started(other.game_started),
+    last_arrested_player(nullptr), // Will be set after copying players
+    random_generator(other.random_generator) {
+        // Deep copy all players
+        for (Player* player : other.players_list) {
+            Player* new_player = nullptr;
+            
+            // Create appropriate derived class based on role type
+            std::string role_type = player->getRoleType();
+            
+            if (role_type == "General") {
+                new_player = new General(*this, player->getName());
+            }
+            else if (role_type == "Judge") {
+                new_player = new Judge(*this, player->getName());
+            }
+            else if (role_type == "Merchant") {
+                new_player = new Merchant(*this, player->getName());
+            }
+            else if (role_type == "Governor") {
+                new_player = new Governor(*this, player->getName());
+            }
+            else if (role_type == "Baron") {
+                new_player = new Baron(*this, player->getName());
+            }
+            else if (role_type == "Spy") {
+                new_player = new Spy(*this, player->getName());
+            }
+            else {
+                new_player = new Player(*this, player->getName());
+            }
+            
+            // Copy state (but not game reference or name)
+            *new_player = *player;
+            players_list.push_back(new_player);
+        }
+        
+        // Update last_arrested_player reference if it exists
+        if (other.last_arrested_player) {
+            size_t index = std::find(other.players_list.begin(), other.players_list.end(), 
+                                    other.last_arrested_player) - other.players_list.begin();
+            if (index < players_list.size()) {
+                last_arrested_player = players_list[index];
+            }
+        }
+    }
     
     /**
      * Destructor performs cleanup of game resources.
@@ -33,6 +85,71 @@ namespace coup {
      */
     Game::~Game() {
         players_list.clear(); // Remove all player references from the game and automatically deletes them if they were dynamically allocated
+    }
+
+    /**
+     * Copy assignment operator replaces current game with copy of other.
+     * Properly cleans up existing resources before copying.
+     */
+    Game& Game::operator=(const Game& other) {
+        if (this == &other) { // Handle self-assignment
+            return *this;
+        }
+        
+        // Clean up existing players
+        for (Player* player : players_list) {
+            delete player;
+        }
+        players_list.clear();
+        
+        // Copy basic state
+        current_player_index = other.current_player_index;
+        game_started = other.game_started;
+        last_arrested_player = nullptr;
+        random_generator = other.random_generator;
+        
+        // Deep copy all players
+        for (Player* player : other.players_list) {
+            Player* new_player = nullptr;
+            
+            std::string role_type = player->getRoleType();
+            
+            if (role_type == "General") {
+                new_player = new General(*this, player->getName());
+            }
+            else if (role_type == "Judge") {
+                new_player = new Judge(*this, player->getName());
+            }
+            else if (role_type == "Merchant") {
+                new_player = new Merchant(*this, player->getName());
+            }
+            else if (role_type == "Governor") {
+                new_player = new Governor(*this, player->getName());
+            }
+            else if (role_type == "Baron") {
+                new_player = new Baron(*this, player->getName());
+            }
+            else if (role_type == "Spy") {
+                new_player = new Spy(*this, player->getName());
+            }
+            else {
+                new_player = new Player(*this, player->getName());
+            }
+            
+            *new_player = *player;
+            players_list.push_back(new_player);
+        }
+        
+        // Update last_arrested_player reference
+        if (other.last_arrested_player) {
+            size_t index = std::find(other.players_list.begin(), other.players_list.end(), 
+                                    other.last_arrested_player) - other.players_list.begin();
+            if (index < players_list.size()) {
+                last_arrested_player = players_list[index];
+            }
+        }
+        
+        return *this;
     }
 
     /**
@@ -151,7 +268,7 @@ namespace coup {
                 for (Player* player : players_list) {
                     if (player->isActive()) {
                         active_count++;
-                        if (player->isGeneral() && player->coins() >= 5) { // General with blocking capability
+                        if (player->getRoleType() == "General" && player->coins() >= 5) { // General with blocking capability
                             has_active_general_with_coins = true;
                         }
                     }
@@ -173,7 +290,7 @@ namespace coup {
             next_player = players_list[current_player_index]; // Update next player reference
         }
 
-        if(next_player->isMerchant()) { // Handle Merchant's turn-start bonus
+        if(next_player->getRoleType() == "Merchant") { // Handle Merchant's turn-start bonus
             if (next_player->coins() >= 3) { // Merchant gains coin if wealthy enough
                 next_player->addCoins(1);
             }
@@ -305,7 +422,7 @@ namespace coup {
         for (Player* player : players_list) {
             if (player->isActive()) {
                 active_count++;
-                if (player->isGeneral() && player->coins() >= 5) {
+                if (player->getRoleType() == "General" && player->coins() >= 5) {
                     has_active_general_with_coins = true;
                 }
             }

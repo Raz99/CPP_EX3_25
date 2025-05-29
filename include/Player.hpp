@@ -40,10 +40,22 @@ namespace coup {
         Player(Game& game, const std::string& name);
 
         /**
+         * Copy constructor - creates a new player with copied state.
+         * Used for cloning players.
+         */
+        Player(const Player& other);
+
+        /**
          * Virtual destructor to ensure proper cleanup of derived objects.
          * Essential for polymorphic inheritance hierarchy.
          */
         virtual ~Player() = default; // Use default destructor
+
+        /**
+         * Copy assignment operator - copies state from another player.
+         * Handles self-assignment and maintains game registration.
+         */
+        Player& operator=(const Player& other);
 
         /**
          * Gets the player's display name.
@@ -92,24 +104,6 @@ namespace coup {
          * Used for General's coup blocking ability.
          */
         Player* getCoupedBy() const;
-
-        /**
-         * Checks if this player is a General role.
-         * Virtual method overridden by General class.
-         */
-        virtual bool isGeneral() const { return false; }
-        
-        /**
-         * Checks if this player is a Judge role.
-         * Virtual method overridden by Judge class.
-         */
-        virtual bool isJudge() const { return false; }
-        
-        /**
-         * Checks if this player is a Merchant role.
-         * Virtual method overridden by Merchant class.
-         */
-        virtual bool isMerchant() const { return false; }
         
         /**
          * Gets the role type as a string for display purposes.

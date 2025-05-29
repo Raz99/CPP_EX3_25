@@ -13,7 +13,8 @@ namespace coup {
      * Validates input parameters and sets up initial game state.
      */
     Player::Player(Game& game, const std::string& name)
-    : game(game), name(name), coin_count(0), active(true), sanctioned(false), arrest_available(true), bribe_used(false), used_tax_last_action(false), couped_by(nullptr) {
+    : game(game), name(name), coin_count(0), active(true), sanctioned(false), arrest_available(true),
+    bribe_used(false), used_tax_last_action(false), couped_by(nullptr) {
         if (&game == nullptr) { // Validate game reference is not null
             throw std::invalid_argument("Game reference cannot be null");
         }
@@ -27,6 +28,39 @@ namespace coup {
         }
 
         game.addPlayer(this); // Register this player with the game instance
+    }
+
+    /**
+     * Copy constructor creates a new player with copied state.
+     * Used for cloning players.
+     */
+    Player::Player(const Player& other)
+        : game(other.game), name(other.name + "_copy"), coin_count(other.coin_count), active(other.active),
+        sanctioned(other.sanctioned), arrest_available(other.arrest_available), bribe_used(other.bribe_used),
+        used_tax_last_action(other.used_tax_last_action), couped_by(other.couped_by) {
+        // I don't call game.addPlayer(this) here to avoid automatic registration
+    }
+
+    /**
+     * Copy assignment operator copies state from another player.
+     * Maintains current game registration and handles self-assignment.
+     */
+    Player& Player::operator=(const Player& other) {
+        // Handle self-assignment
+        if (this == &other) {
+            return *this;
+        }
+        
+        // I don't copy the game reference or name to maintain identity
+        coin_count = other.coin_count;
+        active = other.active;
+        sanctioned = other.sanctioned;
+        arrest_available = other.arrest_available;
+        bribe_used = other.bribe_used;
+        used_tax_last_action = other.used_tax_last_action;
+        couped_by = other.couped_by;
+        
+        return *this;
     }
 
     /**
@@ -234,12 +268,12 @@ namespace coup {
         }
 
         if (target.coins() >= 1) { // Only proceed if target has coins to lose
-            if(!target.isGeneral()) { // Standard arrest - transfer coin
+            if(target.getRoleType() != "General") { // Standard arrest - transfer coin
                 target.removeCoins(1); // Take 1 coin from target
                 addCoins(1); // Give coin to arresting player
             }
 
-            else if(target.isMerchant()) { // Merchant special ability - pays treasury
+            else if(target.getRoleType() == "Merchant") { // Merchant special ability - pays treasury
                 target.removeCoins(2); // Merchant loses 2 coins to treasury instead
             }
         }
@@ -290,7 +324,7 @@ namespace coup {
         }
         
         // If target is a judge, the player must pay 4 coins
-        if(target.isJudge()) {
+        if(target.getRoleType() == "Judge") {
             if (coin_count < 4) {
                 throw std::runtime_error("Not enough coins for sanction (higher fee)");
             }

@@ -36,13 +36,6 @@ namespace coup {
          * Used to show role-specific information in the interface.
          */
         std::string getRoleType() const override { return "Merchant"; }
-        
-        /**
-         * Override to identify this player as a Merchant.
-         * Used by game logic for turn-start bonus and arrest payment alternatives.
-         * Merchants gain 1 coin at turn start if they have 3+ coins.
-         */
-        bool isMerchant() const override { return true; }
     };
 }
 

@@ -43,12 +43,6 @@ namespace coup {
          * Represents judicial power to prevent corruption and waste resources.
          */
         void block_bribe(Player& target);
-        
-        /**
-         * Override to identify this player as a Judge.
-         * Used by game logic for special Judge-specific interactions and penalties.
-         */
-        bool isJudge() const override { return true; }
     };
 }
 

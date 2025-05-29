@@ -33,9 +33,6 @@ TEST_CASE("Governor Role Tests") {
     
     SUBCASE("Governor role identification") {
         CHECK(gov1.getRoleType() == "Governor"); // Should identify as Governor
-        CHECK_FALSE(gov1.isGeneral()); // Not a General
-        CHECK_FALSE(gov1.isJudge()); // Not a Judge
-        CHECK_FALSE(gov1.isMerchant()); // Not a Merchant
     }
     
     SUBCASE("Enhanced tax ability - 3 coins instead of 2") {
@@ -89,9 +86,6 @@ TEST_CASE("General Role Tests") {
     
     SUBCASE("General role identification") {
         CHECK(gen.getRoleType() == "General"); // Should identify as General
-        CHECK(gen.isGeneral()); // Should return true for isGeneral
-        CHECK_FALSE(gen.isJudge()); // Not a Judge
-        CHECK_FALSE(gen.isMerchant()); // Not a Merchant
     }
     
     SUBCASE("Block coup - valid scenario") {
@@ -154,9 +148,6 @@ TEST_CASE("Judge Role Tests") {
     
     SUBCASE("Judge role identification") {
         CHECK(judge.getRoleType() == "Judge"); // Should identify as Judge
-        CHECK_FALSE(judge.isGeneral()); // Not a General
-        CHECK(judge.isJudge()); // Should return true for isJudge
-        CHECK_FALSE(judge.isMerchant()); // Not a Merchant
     }
     
     SUBCASE("Block bribe - valid scenario") {
@@ -194,9 +185,6 @@ TEST_CASE("Baron Role Tests") {
     
     SUBCASE("Baron role identification") {
         CHECK(baron.getRoleType() == "Baron"); // Should identify as Baron
-        CHECK_FALSE(baron.isGeneral()); // Not a General
-        CHECK_FALSE(baron.isJudge()); // Not a Judge
-        CHECK_FALSE(baron.isMerchant()); // Not a Merchant
     }
     
     SUBCASE("Investment ability - valid scenario") {
@@ -246,9 +234,6 @@ TEST_CASE("Spy Role Tests") {
     
     SUBCASE("Spy role identification") {
         CHECK(spy.getRoleType() == "Spy"); // Should identify as Spy
-        CHECK_FALSE(spy.isGeneral()); // Not a General
-        CHECK_FALSE(spy.isJudge()); // Not a Judge
-        CHECK_FALSE(spy.isMerchant()); // Not a Merchant
     }
     
     SUBCASE("Spy operation - valid target") {
@@ -294,9 +279,6 @@ TEST_CASE("Merchant Role Tests") {
     
     SUBCASE("Merchant role identification") {
         CHECK(merchant.getRoleType() == "Merchant"); // Should identify as Merchant
-        CHECK_FALSE(merchant.isGeneral()); // Not a General
-        CHECK_FALSE(merchant.isJudge()); // Not a Judge
-        CHECK(merchant.isMerchant()); // Should return true for isMerchant
     }
     
     SUBCASE("Turn start bonus with sufficient coins") {
@@ -440,10 +422,6 @@ TEST_CASE("Role Edge Cases and Error Handling") {
         CHECK(gov->getRoleType() == "Governor"); // Should identify correctly through polymorphism
         CHECK(gen->getRoleType() == "General"); // Should identify correctly through polymorphism
         CHECK(judge->getRoleType() == "Judge"); // Should identify correctly through polymorphism
-        
-        CHECK_FALSE(gov->isGeneral()); // Governor should not be General
-        CHECK(gen->isGeneral()); // General should be General
-        CHECK(judge->isJudge()); // Judge should be Judge
         
         // Cleanup handled by Game destructor
     }

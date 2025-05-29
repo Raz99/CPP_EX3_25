@@ -43,12 +43,6 @@ namespace coup {
          * The player attempting coup loses their 7 coins without effect.
          */
         void block_coup(Player& target);
-
-        /**
-         * Override to identify this player as a General.
-         * Used by game logic for special General-specific interactions.
-         */
-        bool isGeneral() const override { return true; }
     };
 }
 

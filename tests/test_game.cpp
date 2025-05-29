@@ -340,9 +340,5 @@ TEST_CASE("Role Assignment and Factory Methods") {
         CHECK(governor->getRoleType() == "Governor");
         CHECK(general->getRoleType() == "General");
         CHECK(judge->getRoleType() == "Judge");
-        
-        CHECK(general->isGeneral());
-        CHECK(judge->isJudge());
-        CHECK_FALSE(governor->isGeneral());
     }
 }

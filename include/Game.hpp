@@ -49,12 +49,24 @@ namespace coup {
          * Sets up random number generator and prepares for player addition.
          */
         Game();
+
+        /**
+         * Copy constructor - creates a deep copy of the game state.
+         * Copies all players and maintains game relationships.
+         */
+        Game(const Game& other);
         
         /**
          * Destructor cleans up game resources.
          * Ensures proper memory management for player objects.
          */
         ~Game();
+
+        /**
+         * Copy assignment operator - replaces current game with copy of other.
+         * Handles self-assignment and proper cleanup of existing resources.
+         */
+        Game& operator=(const Game& other);
         
         /**
          * Displays the name of the current player whose turn it is.
