@@ -32,6 +32,10 @@ namespace coup {
      * Clears player list to ensure proper memory management.
      */
     Game::~Game() {
+        // Delete all player objects
+        for (Player* player : players_list) {
+            delete player;
+        }
         players_list.clear(); // Remove all player references from the game
     }
 
@@ -375,7 +379,7 @@ namespace coup {
         }
     }
     
-    // Create player with specific role (for internal use)
+    // Create player with specific role
     Player* Game::createPlayerWithRole(const std::string& name, RoleType role) {
         switch (role) {
             case RoleType::GOVERNOR:

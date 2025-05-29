@@ -22,13 +22,13 @@ namespace coup {
      * Each role has unique abilities and gameplay mechanics.
      */
     enum class RoleType {
-        GOVERNOR,   // Takes 3 coins on tax, can block other players' tax
-        SPY,        // Can see coins and block arrests
-        BARON,      // Can invest coins and gets compensation when sanctioned
-        GENERAL,    // Can block coups and recovers from arrests
-        JUDGE,      // Can block bribes and penalizes sanctioners
-        MERCHANT,   // Gets bonus coins and pays treasury when arrested
-        PLAYER      // Default base player with no special abilities
+        GOVERNOR, // Takes 3 coins on tax, can block other players' tax
+        SPY, // Can see coins and block arrests
+        BARON, // Can invest coins and gets compensation when sanctioned
+        GENERAL, // Can block coups and recovers from arrests
+        JUDGE, // Can block bribes and penalizes sanctioners
+        MERCHANT, // Gets bonus coins and pays treasury when arrested
+        PLAYER // Default base player with no special abilities
     };
     /**
      * Main game controller class for the Coup card game.
