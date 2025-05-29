@@ -27,6 +27,11 @@ namespace coup {
         General(Game& game, const std::string& name);
         
         /**
+         * Virtual destructor for proper cleanup of General objects.
+         */
+        virtual ~General() = default; // Use default destructor
+        
+        /**
          * Returns the role type identifier for GUI display.
          * Used to show role-specific information in the interface.
          */

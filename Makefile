@@ -8,16 +8,17 @@ CXX = g++ # C++ compiler
 CXXFLAGS =  -g -std=c++17 # Compiler flags: debug info, C++17 standard
 INCLUDES = -Iinclude # Include directory for header files
 LIBS = -lsfml-graphics -lsfml-window -lsfml-system # SFML libraries for graphics and windowing
+DOCTEST_INCLUDE = -Itests # Include directory for Doctest framework
 
 # Executable names
 GUI_EXEC = coup_game # Main executable name for GUI version
 EXAMPLE_EXEC = example # Main executable name for example file
-# TEST_EXEC = test_squaremat # Test executable
+TEST_EXEC = test_coup # Test executable
 
 # Object files
 MAIN_OBJS = Game.o Player.o # Main object files
 ROLE_OBJS = Governor.o Spy.o Baron.o General.o Judge.o Merchant.o # Role object files
-# TEST_OBJS = test_squaremat.o # Test object files
+TEST_OBJS = test_game.o test_player.o test_roles.o # Test object files
 
 # Declare targets that don't create files
 .PHONY: all GUI Main test valgrind clean
@@ -64,18 +65,18 @@ Main: $(EXAMPLE_EXEC)
 
 # Test
 # Build and run tests
-test: $(TEST_OBJS)
-	$(CXX) $(CXXFLAGS) $(INCLUDES) -o $(TEST_EXEC) $^ $(LIBS)
+test: $(TEST_OBJS) $(MAIN_OBJS) $(ROLE_OBJS)
+	$(CXX) $(CXXFLAGS) $(INCLUDES) $(DOCTEST_INCLUDE) -o $(TEST_EXEC) $^ $(LIBS)
 	./$(TEST_EXEC)
 
 # Pattern rule to build test object files
 $(TEST_OBJS): %.o: tests/%.cpp
-	$(CXX) $(CXXFLAGS) $(INCLUDES) -c $< -o $@
+	$(CXX) $(CXXFLAGS) $(INCLUDES) $(DOCTEST_INCLUDE) -c $< -o $@
 
-# Valgrind - Memory check
+# Valgrind - Memory check on example and test executables
 valgrind: $(EXAMPLE_EXEC) $(TEST_EXEC)
 	valgrind --leak-check=full ./$(EXAMPLE_EXEC) ./$(TEST_EXEC)
 
  # Clean - Remove all generated files
 clean:
-	rm -f $(GUI_EXEC) $(EXAMPLE_EXEC) $(TEST_EXEC) $(TEST_EXEC) *.o
+	rm -f $(GUI_EXEC) $(EXAMPLE_EXEC) $(TEST_EXEC) *.o

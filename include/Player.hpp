@@ -40,6 +40,12 @@ namespace coup {
         Player(Game& game, const std::string& name);
 
         /**
+         * Virtual destructor to ensure proper cleanup of derived objects.
+         * Essential for polymorphic inheritance hierarchy.
+         */
+        virtual ~Player() = default; // Use default destructor
+
+        /**
          * Gets the player's display name.
          * Used for identification in game interface and logs.
          */
@@ -179,6 +185,11 @@ namespace coup {
          * Used by Spy role to block arrests.
          */
         void setArrestAvailability(bool value);
+
+        /**
+         * Sets the player who performed coup on this player.
+         */
+        void setCoupedBy(Player* player);
         
         /**
          * Resets the bribe used flag to false.

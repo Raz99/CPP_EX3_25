@@ -406,6 +406,13 @@ namespace coup {
     }
 
     /**
+     * Sets the player who performed coup on this player.
+     */
+    void Player::setCoupedBy(Player* player) {
+        couped_by = player; // Track who performed coup on this player
+    }
+
+    /**
      * Resets the bribe used flag to false.
      * Called at end of turn cleanup or after bribe action.
      */

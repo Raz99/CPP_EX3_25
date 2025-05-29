@@ -32,10 +32,6 @@ namespace coup {
      * Clears player list to ensure proper memory management.
      */
     Game::~Game() {
-        // Delete all player objects
-        for (Player* player : players_list) {
-            delete player;
-        }
         players_list.clear(); // Remove all player references from the game
     }
 
@@ -130,7 +126,7 @@ namespace coup {
             throw std::runtime_error("No players in the game");
         }
 
-        if(players_list[current_player_index]->isSanctioned()) { // Clear sanctions at turn end
+        if(players_list[current_player_index]->isSanctioned()) { //  sanctions at turn end
             players_list[current_player_index]->setSanctionStatus(false);
         }
 
@@ -271,11 +267,6 @@ namespace coup {
         // Only allow clearing players if game hasn't started
         if (game_started) {
             throw std::runtime_error("Cannot clear players after game has started");
-        }
-        
-        // Delete all player objects
-        for (Player* player : players_list) {
-            delete player;
         }
         
         // Clear the list

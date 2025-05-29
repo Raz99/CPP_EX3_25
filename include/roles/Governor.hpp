@@ -27,6 +27,11 @@ namespace coup {
         Governor(Game& game, const std::string& name);
         
         /**
+         * Virtual destructor for proper cleanup of Governor objects.
+         */
+        virtual ~Governor() = default; // Use default destructor
+        
+        /**
          * Returns the role type identifier for GUI display.
          * Used to show role-specific information in the interface.
          */
