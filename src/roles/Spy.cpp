@@ -42,6 +42,6 @@ namespace coup {
         std::cout << getName() << " (Spy) spies on " << target.getName() << ": " << target.coins() << " coins revealed" << std::endl;
 
         target.setArrestAvailability(false); // Sabotage: disable target's arrest ability temporarily
-        // Spy action is instantaneous and doesn't consume a turn slot
+        // No need to nextTurn() since spy_on doesn't consume a turn slot
     }
 }
