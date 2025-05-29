@@ -1,65 +1,81 @@
 # Email: razcohenp@gmail.com
 
 # Makefile for Coup Game
-# This file automates the build process for the Coup card game project
+# This file automates the build process for the game and its components
 
-CXX = g++
-CXXFLAGS = -std=c++17 -Wall -Wextra -g -O2
-INCLUDES = -Iinclude
-LIBS = -lsfml-graphics -lsfml-window -lsfml-system
+# Compiler and flags
+CXX = g++ # C++ compiler to use
+CXXFLAGS =  -g -std=c++17 # Compiler flags: debug info, warnings, C++17 standard
+INCLUDES = -Iinclude # Include directory for header files
+LIBS = -lsfml-graphics -lsfml-window -lsfml-system # SFML libraries for graphics and windowing
 
-SRCDIR = src
-INCDIR = include
-OBJDIR = obj
+# Executable names
+GUI_EXEC = coup_game # Main executable name for GUI version
+EXAMPLE_EXEC = example # Main executable name for example file
+# TEST_EXEC = test_squaremat # Test executable
 
-# Source files
-SOURCES = $(wildcard $(SRCDIR)/*.cpp) $(wildcard $(SRCDIR)/roles/*.cpp)
-OBJECTS = $(SOURCES:$(SRCDIR)/%.cpp=$(OBJDIR)/%.o)
+# Object files
+MAIN_OBJS = Game.o Player.o # Main object files
+ROLE_OBJS = Governor.o Spy.o Baron.o General.o Judge.o Merchant.o # Role object files
+# TEST_OBJS = test_squaremat.o # Test object files
 
-# Main target
-TARGET = coup_game
+# Declare targets that don't create files
+.PHONY: all GUI Main test valgrind clean
 
-# Create object directory
-$(OBJDIR):
-	mkdir -p $(OBJDIR)
-	mkdir -p $(OBJDIR)/roles
+# Default target builds the GUI executable
+all: $(GUI_EXEC)
 
-# Compile object files
-$(OBJDIR)/%.o: $(SRCDIR)/%.cpp | $(OBJDIR)
+# GUI
+# Build main GUI executable
+$(GUI_EXEC): MainGUI.o GameGUI.o $(MAIN_OBJS) $(ROLE_OBJS)
+	$(CXX) $(CXXFLAGS) $(INCLUDES) -o $@ $^ $(LIBS)
+
+# Build main GUI object files
+MainGUI.o: MainGUI.cpp
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -c $< -o $@
 
-# Special rule for roles subdirectory
-$(OBJDIR)/roles/%.o: $(SRCDIR)/roles/%.cpp | $(OBJDIR)
+GameGUI.o: src/GameGUI.cpp
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -c $< -o $@
 
-# Main executable with GUI
-Main: $(OBJECTS) Main.cpp | $(OBJDIR)
-	$(CXX) $(CXXFLAGS) $(INCLUDES) Main.cpp $(OBJECTS) -o $(TARGET) $(LIBS)
-	@echo "🎮 COUP Game compiled successfully!"
-	@echo "📁 Run with: ./$(TARGET)"
+# Pattern rule to build main object files from source
+$(MAIN_OBJS): %.o: src/%.cpp
+	$(CXX) $(CXXFLAGS) $(INCLUDES) -c $< -o $@
 
-# Test compilation
-test: $(OBJECTS)
-	@echo "🧪 Test compilation ready"
+# Pattern rule to build role object files from role sources
+$(ROLE_OBJS): %.o: src/roles/%.cpp
+	$(CXX) $(CXXFLAGS) $(INCLUDES) -c $< -o $@
 
-# Memory check
-valgrind: Main
-	@echo "🔍 Running memory check..."
-	valgrind --leak-check=full --show-leak-kinds=all ./$(TARGET)
+# Run the main GUI application
+GUI: $(GUI_EXEC)
+	./$(GUI_EXEC)
 
-# Demo executable for testing
-demo: $(OBJECTS) Demo.cpp | $(OBJDIR)
-	$(CXX) $(CXXFLAGS) $(INCLUDES) Demo.cpp $(OBJECTS) -o demo $(LIBS)
-	@echo "🧪 Demo compiled successfully!"
-	@echo "📁 Run with: ./demo"
+# Main - Example file
+# Build example executable
+$(EXAMPLE_EXEC): example.o $(MAIN_OBJS) $(ROLE_OBJS)
+	$(CXX) $(CXXFLAGS) $(INCLUDES) -o $@ $^ $(LIBS)
 
-# Clean build
+# Build example object file
+example.o: example.cpp
+	$(CXX) $(CXXFLAGS) $(INCLUDES) -c $< -o $@
+
+# Run the example executable
+Main: $(EXAMPLE_EXEC)
+	./$(EXAMPLE_EXEC)
+
+# Test
+# Build and run tests
+test: $(TEST_OBJS)
+	$(CXX) $(CXXFLAGS) $(INCLUDES) -o $(TEST_EXEC) $^ $(LIBS)
+	./$(TEST_EXEC)
+
+# Pattern rule to build test object files
+$(TEST_OBJS): %.o: tests/%.cpp
+	$(CXX) $(CXXFLAGS) $(INCLUDES) -c $< -o $@
+
+# Valgrind - Memory check
+valgrind: $(EXAMPLE_EXEC) $(TEST_EXEC) $(GUI_EXEC)
+	valgrind --leak-check=full ./$(EXAMPLE_EXEC) ./$(TEST_EXEC) ./$(GUI_EXEC)
+
+ # Clean - Remove all generated files
 clean:
-	rm -rf $(OBJDIR) $(TARGET)
-	@echo "🧹 Build cleaned!"
-
-# Development build with debug symbols
-debug: CXXFLAGS += -DDEBUG -g3
-debug: Main
-
-.PHONY: Main test valgrind clean debug demo
+	rm -f $(GUI_EXEC) $(EXAMPLE_EXEC) $(TEST_EXEC) $(TEST_EXEC) *.o

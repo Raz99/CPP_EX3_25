@@ -389,6 +389,9 @@ namespace coup {
         
         // Create main game window with specific dimensions and styling
         window.create(sf::VideoMode(WINDOW_WIDTH, WINDOW_HEIGHT), "COUP", sf::Style::Titlebar | sf::Style::Close);
+        
+        // Ignore VSync entirely
+        window.setVerticalSyncEnabled(false);
         window.setFramerateLimit(60); // Limit to 60 FPS for smooth performance
         
         // Setup comprehensive color theme for consistent visual design
@@ -421,8 +424,8 @@ namespace coup {
 
     bool GameGUI::initialize() {
         // Load fonts for consistent typography throughout the application
-        if (!mainFont.loadFromFile("tahoma.ttf")) {
-            std::cout << "Error: Could not load tahoma.ttf. The game UI may not display properly." << std::endl;
+        if (!mainFont.loadFromFile("resources/tahoma.ttf")) {
+            std::cout << "Error: Could not load Tahoma font. The game UI may not display properly." << std::endl;
         }
         
         titleFont = mainFont; // Use same font for title (can be customized later)
