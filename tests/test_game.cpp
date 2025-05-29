@@ -271,11 +271,6 @@ TEST_CASE("Edge Cases and Boundary Conditions") {
         CHECK_THROWS_AS(Player p(game, "VeryLongPlayerNameThatExceedsLimit"), std::invalid_argument);
     }
     
-    SUBCASE("Null game reference handling") {
-        // This test verifies the constructor validates the game reference
-        // Implementation should check for valid game instance
-    }
-    
     SUBCASE("Turn progression with no active players") {
         Game game;
         Player p1(game, "Alice");
@@ -299,10 +294,6 @@ TEST_CASE("Memory Management and Cleanup") {
         
         // Game destructor should clean up player objects
         delete game; // This should delete associated players
-        
-        // Manual cleanup not needed if Game handles it properly
-        // delete p1; // Should not be needed
-        // delete p2; // Should not be needed
     }
     
     SUBCASE("Clear all players functionality") {

@@ -32,7 +32,7 @@ namespace coup {
      * Clears player list to ensure proper memory management.
      */
     Game::~Game() {
-        players_list.clear(); // Remove all player references from the game
+        players_list.clear(); // Remove all player references from the game and automatically deletes them if they were dynamically allocated
     }
 
     /**

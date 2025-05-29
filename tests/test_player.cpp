@@ -242,8 +242,8 @@ TEST_CASE("Arrest Action") {
         p1.arrest(p2);
         
         // Move to next turn and try to arrest same player
-        game.nextTurn(); // p2's turn
-        game.nextTurn(); // p3's turn
+        p2.tax(); // p2's turn
+        p3.gather(); // p3's turn
         
         p3.addCoins(1); // Give p3 some coins for arrest
         CHECK_THROWS_AS(p3.arrest(p2), std::runtime_error);
@@ -383,15 +383,6 @@ TEST_CASE("Mandatory Coup Rule") {
         CHECK_THROWS_AS(p1.tax(), std::runtime_error);
         CHECK_THROWS_AS(p1.arrest(p2), std::runtime_error);
         CHECK_THROWS_AS(p1.sanction(p2), std::runtime_error);
-        
-        // But bribe should be allowed to potentially enable other actions
-        // (Implementation detail may vary)
-    }
-    
-    SUBCASE("Can perform actions after bribe with 10+ coins") {
-        p1.addCoins(14);
-        // After using bribe, should be able to perform other actions
-        // This tests the bribe exception to the 10+ coin rule
     }
 }
 
