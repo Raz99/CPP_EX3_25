@@ -54,7 +54,7 @@ vcpkg install sfml
 
 1. **Clone the repository:**
    ```bash
-   git clone <repository-url>
+   git clone https://github.com/Raz99/CPP_EX3_25.git
    cd CPP_EX3_25
    ```
 
@@ -66,7 +66,7 @@ vcpkg install sfml
 3. **Alternative build commands:**
    ```bash
    make GUI        # Build and run GUI application
-   make Main       # Build example demo
+   make Main       # Build and run example demo
    make test       # Build and run tests
    make valgrind   # Valgrind - Memory check
    make clean      # Clean - Remove all generated files
@@ -79,12 +79,6 @@ vcpkg install sfml
 make GUI
 # or directly:
 ./coup_game
-```
-
-### Run Example Demo
-```bash
-make Main
-./example
 ```
 
 ### Font Requirements
@@ -103,7 +97,7 @@ The game uses the included `tahoma.ttf` font located in the `resources/` directo
 
 Every player can perform these basic actions regardless of their role:
 
-| Action | Cost | Effect | Notes |
+| Action | Cost | Regular Effect | Notes |
 |--------|------|--------|-------|
 | **Gather** | Free | +1 coin | Can be blocked by sanctions |
 | **Tax** | Free | +2 coins | Can be blocked by sanctions |
@@ -140,39 +134,12 @@ Every player can perform these basic actions regardless of their role:
 - **Role-specific Buttons:** Special abilities appear when applicable
 
 ### Special Ability Usage
-- **Governor:** "Undo" button appears when someone uses tax
-- **General:** "Block Coup" option when coup attempts occur
-- **Judge:** "Block Bribe" when bribe actions are used
-- **Baron:** "Invest" button for wealth multiplication
-- **Spy:** "Spy On" for intelligence gathering
-- **Merchant:** Automatic bonuses at turn start
-
-## Testing
-
-### Running the Test Suite
-```bash
-make test
-./test_coup
-```
-
-### Test Coverage
-The comprehensive test suite covers:
-
-- **Game Logic:** Turn management, victory conditions, player states
-- **Player Actions:** All basic actions with valid/invalid scenarios
-- **Role Abilities:** Each special ability with edge cases
-- **Error Handling:** Invalid moves, insufficient resources, eliminated players
-- **Integration:** Multi-role interactions and complex scenarios
-
-### Memory Leak Testing
-```bash
-make valgrind
-```
-
-### Cleaning Build Files
-```bash
-make clean
-```
+- **Governor:** "Undo" button appears when someone uses tax, also gains 3 coins instead of 2 when using the tax action.
+- **Spy:** "Spy On" for peeking at another players's coins and prevents their arrest ability for their next turn
+- **Baron:** "Invest" button for wealth multiplication (3 -> 6 coins). In addition, if targeted by a sanction, receives 1 coin as compensation.
+- **General:** "Block Coup" (for 5 coins) option when coup attempts occur, also regains the coin lost when arrested
+- **Judge:** "Block Bribe" when bribe actions are used, also if sanctioned, the attacker must pay 1 extra coin to the bank
+- **Merchant:** Starts their turn with an extra coin if they have at least 3. If arrested, pays 2 coins to the bank instead of giving 1 to **Note:** Actions that cancel or block other players' actions are performed in real-time and do not consume the player's turn.
 
 ## Project Structure
 
@@ -212,14 +179,6 @@ make clean
 ├── example.cpp               # Demo implementation
 └── README.md                 # This file
 ```
-
-## Development Notes
-
-- **C++17 Features:** Modern C++ standards with smart pointers and RAII
-- **Object-Oriented Design:** Inheritance-based role system with polymorphism
-- **Exception Safety:** Comprehensive error handling throughout
-- **Memory Management:** Automatic cleanup with RAII principles
-- **GUI Architecture:** Event-driven interface with SFML
 
 ## Acknowledgments
 
