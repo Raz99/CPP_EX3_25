@@ -1,3 +1,9 @@
+// Email: razcohenp@gmail.com
+
+// Main.cpp - Example usage of the Coup game with various roles
+// This file demonstrates how to create a game, add players with different roles,
+// and perform actions in a simulated game environment.
+
 #include "include/Player.hpp"
 #include "include/roles/Governor.hpp"
 #include "include/roles/Spy.hpp"
