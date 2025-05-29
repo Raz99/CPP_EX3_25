@@ -79,7 +79,7 @@ int main() {
     cout << "   " << "Coins after: " << judge.coins() << " (+1 coin)" << endl;
     cout << endl;
 
-    // Merchant gathers (gets bonus if has 3+ coins at turn start)
+    // Merchant gathers
     cout << "6. " << merchant.getName() << " gathers" << endl;
     cout << "   " << "Coins before: " << merchant.coins() << endl;
     merchant.gather();
@@ -115,17 +115,17 @@ int main() {
 
     // Spy can spy on someone to see their coins and block their arrest ability
     cout << "9. " << spy.getName() << " spies on " << baron.getName() << " (Spy ability)" << endl;
-    cout << "   ";
     spy.spy_on(baron);
+    cout << "    " << spy.getName() << "spies on " << baron.getName() << ": " << baron.coins() << "coins revealed" << endl;
     cout << "   " << baron.getName() << "'s arrest ability blocked for next turn" << endl;
     cout << endl;
     spy.tax(); // Spy can still tax normally
 
-    // Baron can invest 3 coins to get 6 coins (net +3)
+    // Baron can invest 3 coins to get 6 coins (+3 in total)
     cout << "10. " << baron.getName() << " invests (Baron ability)" << endl;
     cout << "    " << "Coins before investment: " << baron.coins() << endl;
     baron.invest();
-    cout << "    " << "Coins after investment: " << baron.coins() << " (paid 3, received 6, net +3)" << endl;
+    cout << "    " << "Coins after investment: " << baron.coins() << " (paid 3, received 6, +3 in total)" << endl;
     cout << endl;
 
     // General gathers
@@ -161,14 +161,14 @@ int main() {
     cout << endl;
 
     // Governor uses the first action to tax (1/2 actions used)
-    cout << "15. " << governor.getName() << " uses enhanced tax (1st action)" << endl;
+    cout << "15. " << governor.getName() << " uses enhanced tax (1/2 actions used)" << endl;
     cout << "    " << "Coins before: " << governor.coins() << endl;
     governor.tax();
     cout << "    " << "Coins after: " << governor.coins() << " (+3 coins from Governor tax)" << endl;
     cout << endl;
 
     // Governor can still gather (2/2 actions used)
-    cout << "16. " << governor.getName() << " gathers (2nd action)" << endl;
+    cout << "16. " << governor.getName() << " gathers (2/2 actions used)" << endl;
     cout << "    " << "Coins before: " << governor.coins() << endl;
     governor.gather();
     cout << "    " << "Coins after: " << governor.coins() << " (+1 coin)" << endl;
@@ -177,8 +177,6 @@ int main() {
     // Judge can block bribe attempts
     cout << "17. " << spy.getName() << " attempts bribe, but " << judge.getName() << " blocks it (Judge ability)" << endl;
     cout << "    " << spy.getName() << " coins before blocked bribe: " << spy.coins() << endl;
-    cout << "    " << "Current turn: ";
-    game_1.turn();
     spy.bribe();
     cout << "    " << spy.getName() << " coins after bribe: " << spy.coins() << " (-4 coins for bribe)" << endl;
     judge.block_bribe(spy);
@@ -191,8 +189,8 @@ int main() {
     
     // Spy can still spy on someone since it doesn't consume a turn
     cout << "    " << spy.getName() << " can still spy on someone since it doesn't consume a turn" << endl;
-    cout << "    "; // Just for formatting
     spy.spy_on(baron); // Spy can still spy on baron to know the amount of coins he has and to block arrest
+    cout << "    " << spy.getName() << "spies on " << baron.getName() << ": " << baron.coins() << "coins revealed" << endl;
     cout << endl;
 
     // Baron arrests someone (but spy blocked baron's arrest earlier)
@@ -203,7 +201,7 @@ int main() {
     // Try arrest - should fail because spy blocked baron's arrest ability
     try {
         baron.arrest(merchant);
-        cout << "    Arrest successful!" << endl;
+        cout << "    Arrest successful" << endl;
     }
     catch (const std::exception &e){
         cout << "    Arrest failed: " << e.what() << endl;
@@ -237,7 +235,7 @@ int main() {
     cout << "    " << merchant.getName() << " coins before: " << merchant.coins() << endl;
     merchant.sanction(general);
     cout << "    " << merchant.getName() << " coins after: " << merchant.coins() << " (-3 coins)" << endl;
-    cout << "    " << general.getName() << " is now sanctioned" << endl;
+    cout << "    " << general.getName() << " is now sanctioned (cannot gather/tax until next turn)" << endl;
     cout << endl;
 
     // --- ROUND 5 ---
@@ -279,8 +277,8 @@ int main() {
     }
     catch (const std::exception &e){
         cout << "    " << "Action failed: " << e.what() << endl;
-        // General arrests someone instead
-        cout << "    " << general.getName() << " arrests " << judge.getName() << " instead" << endl;
+        // General arrests someone for instead
+        cout << "    " << general.getName() << " arrests " << judge.getName() << " for instead" << endl;
         cout << "    " << general.getName() << " coins before: " << general.coins() << endl;
         cout << "    " << judge.getName() << " coins before: " << judge.coins() << endl;
         general.arrest(judge);
@@ -322,7 +320,7 @@ int main() {
     general.block_coup(spy);
     cout << "    " << general.getName() << " coins after: " << general.coins() << " (-5 coins)" << endl;
     cout << "    " << spy.getName() << " status after block: " << (spy.isActive() ? "Active" : "Eliminated") << endl;
-    cout << "    " << spy.getName() << " has been revived by General!" << endl;
+    cout << "    " << spy.getName() << " has been revived by General" << endl;
     cout << endl;
 
     // Show current players
@@ -338,7 +336,7 @@ int main() {
 
     // Show mandatory coup rule (if someone has 10+ coins)
     if (baron.coins() >= 10) {
-        cout << "30. " << baron.getName() << " has 10+ coins and must perform coup!" << endl;
+        cout << "30. " << baron.getName() << " has 10+ coins and must perform coup" << endl;
         cout << "    " << baron.getName() << " coins: " << baron.coins() << endl;
         cout << "    " << "Performing mandatory coup on " << judge.getName() << endl;
         baron.coup(judge);

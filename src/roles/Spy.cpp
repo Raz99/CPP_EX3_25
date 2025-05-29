@@ -38,8 +38,7 @@ namespace coup {
         }
         
         // Target's coin count revealed to Spy
-        // This information advantage is handled by the GUI interface and by the console output
-        std::cout << getName() << " (Spy) spies on " << target.getName() << ": " << target.coins() << " coins revealed" << std::endl;
+        // This information advantage is handled by the GUI interface
 
         target.setArrestAvailability(false); // Sabotage: disable target's arrest ability temporarily
         // No need to nextTurn() since spy_on doesn't consume a turn slot
