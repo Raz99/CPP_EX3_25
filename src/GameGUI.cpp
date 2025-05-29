@@ -506,160 +506,176 @@ namespace coup {
     }
 
     void GameGUI::createPlayerCards() {
+        // Clear existing player cards to rebuild from current game state
         playerCards.clear();
         
+        // Safety check to ensure game object exists before accessing players
         if (!game) return;
         
+        // Retrieve all players from the current game session
         std::vector<Player*> allPlayers = game->getAllPlayers();
         
-        int playersPerRow = 3;
-        sf::Vector2f cardSize(CARD_WIDTH, CARD_HEIGHT - 10);
-        sf::Vector2f spacing(20, 15);
-        // Position cards within the player panel
-        sf::Vector2f startPos(570, 70);
+        // Configure card layout parameters for organized display
+        int playersPerRow = 3; // Maximum players per horizontal row
+        sf::Vector2f cardSize(CARD_WIDTH, CARD_HEIGHT - 10); // Slightly reduced height for better spacing
+        sf::Vector2f spacing(20, 15); // Horizontal and vertical spacing between cards
+        // Position cards within the player panel area
+        sf::Vector2f startPos(570, 70); // Top-left starting position for card grid
         
+        // Create individual player cards in grid layout
         for (size_t i = 0; i < allPlayers.size(); ++i) {
-            int row = i / playersPerRow;
-            int col = i % playersPerRow;
+            int row = i / playersPerRow; // Calculate which row this card belongs to
+            int col = i % playersPerRow; // Calculate column position within the row
             
+            // Calculate exact position for this specific card
             sf::Vector2f pos(
-                startPos.x + col * (cardSize.x + spacing.x),
-                startPos.y + row * (cardSize.y + spacing.y)
+                startPos.x + col * (cardSize.x + spacing.x), // Horizontal position with spacing
+                startPos.y + row * (cardSize.y + spacing.y)  // Vertical position with row offset
             );
             
+            // Create new player card at calculated position
             playerCards.emplace_back(pos, cardSize);
-            playerCards.back().setFont(mainFont);
+            playerCards.back().setFont(mainFont); // Apply consistent font styling
             
             // Use the Player's getRoleType method for proper role detection
-            RoleType displayRole = convertRoleType(allPlayers[i]->getRoleType());
-            playerCards.back().updateInfo(allPlayers[i], false, displayRole);
+            RoleType displayRole = convertRoleType(allPlayers[i]->getRoleType()); // Convert role for display
+            playerCards.back().updateInfo(allPlayers[i], false, displayRole); // Update card with player information
         }
     }
 
     void GameGUI::createActionButtons() {
+        // Clear existing action buttons to rebuild from current game state
         actionButtons.clear();
         
-        // Basic actions available to all players
+        // Define all basic actions available to every player in the game
         std::vector<std::pair<std::string, std::string>> basicActions = {
-            {"Gather", "gather"},
-            {"Tax", "tax"},
-            {"Bribe", "bribe"},
-            {"Arrest", "arrest"},
-            {"Sanction", "sanction"},
-            {"Coup", "coup"}
+            {"Gather", "gather"}, // Collect 1 coin safely
+            {"Tax", "tax"}, // Collect 3 coins (can be undone by Governor)
+            {"Bribe", "bribe"}, // Pay 2 coins to bribe player (can be blocked by Judge)
+            {"Arrest", "arrest"}, // Pay 7 coins to arrest player (can be blocked by Spy)
+            {"Sanction", "sanction"}, // Pay 3 coins to steal 2 coins from player
+            {"Coup", "coup"} // Pay 5 coins to eliminate player (can be blocked by General)
         };
         
-        // Position buttons in action panel
-        sf::Vector2f startPos(70, 250);    // Moved up to fit in the smaller action panel
-        sf::Vector2f buttonSize(200, 40);  // Slightly reduced height
-        int spacing = 48;                  // Reduced spacing to fit all buttons
+        // Configure button layout parameters for the action panel
+        sf::Vector2f startPos(70, 250); // Top-left starting position for action buttons
+        sf::Vector2f buttonSize(200, 40); // Standard button dimensions
+        int spacing = 48; // Vertical spacing between buttons
         
-        // Add basic action buttons
+        // Create and position each basic action button
         for (size_t i = 0; i < basicActions.size(); ++i) {
-            sf::Vector2f pos(startPos.x, startPos.y + i * spacing);
+            sf::Vector2f pos(startPos.x, startPos.y + i * spacing); // Calculate vertical position
             actionButtons.emplace_back(pos, buttonSize, 
-                                    basicActions[i].first, basicActions[i].second, theme.primary);
-            actionButtons.back().setFont(mainFont);
+                                    basicActions[i].first, basicActions[i].second, theme.primary); // Create button with display text, action, and theme
+            actionButtons.back().setFont(mainFont); // Apply consistent font styling
         }
         
         // Role-specific buttons will be added dynamically based on current player's role
     }
 
         void GameGUI::addReactiveAbilityButtons() {
+        // Safety check to ensure game object exists before accessing players
         if (!game) return;
         
+        // Retrieve all players to analyze available reactive abilities
         std::vector<Player*> allPlayers = game->getAllPlayers();
-        sf::Vector2f buttonSize(220, 40);    // Slightly reduced height
-        sf::Color reactiveColor = sf::Color(255, 140, 0); // Orange color for reactive abilities
+        sf::Vector2f buttonSize(220, 40); // Slightly wider buttons for reactive ability text
+        sf::Color reactiveColor = sf::Color(255, 140, 0); // Orange color to distinguish reactive abilities
         
-        // Position reactive buttons in a separate column
-        sf::Vector2f reactiveStartPos(290, 250);  // Moved up to match action buttons
-        int buttonIndex = 0;
-        int spacing = 48;                         // Reduced spacing to match action buttons
+        // Position reactive buttons in separate column from basic actions
+        sf::Vector2f reactiveStartPos(290, 250); // Right column positioning to match action buttons
+        int buttonIndex = 0; // Track vertical position for button placement
+        int spacing = 48; // Consistent spacing to align with action buttons
         
-        // Track which reactive abilities are available (only add one button per ability type)
-        bool hasActiveGovernor = false;
-        bool hasPlayerUsedTaxLastAction = false;
-        bool hasActiveSpy = false;
-        bool hasActiveGeneral = false;
-        bool hasActiveJudge = false;
+        // Track availability of each reactive ability type to avoid duplicates
+        bool hasActiveGovernor = false; // Governor can undo tax actions
+        bool hasPlayerUsedTaxLastAction = false; // Tax was used in previous turn
+        bool hasActiveSpy = false; // Spy can perform surveillance
+        bool hasActiveGeneral = false; // General can block coup attempts
+        bool hasActiveJudge = false; // Judge can block bribe attempts
 
-        // Check what reactive abilities are available
+        // Scan all players to determine which reactive abilities are currently available
         for (Player* player : allPlayers) {
-            RoleType playerRole = convertRoleType(player->getRoleType());
+            RoleType playerRole = convertRoleType(player->getRoleType()); // Get standardized role type
             
+            // Check each role type for specific reactive ability conditions
             switch (playerRole) {
                 case RoleType::GOVERNOR:
-                    if (player->isActive()) {
+                    if (player->isActive()) { // Governor must be alive to use abilities
                         hasActiveGovernor = true;
                     }
                     break;
                 case RoleType::SPY:
-                    if (player->isActive()) {
+                    if (player->isActive()) { // Spy must be alive to use surveillance
                         hasActiveSpy = true;
                     }
                     break;
                 case RoleType::GENERAL:
-                    if (player->coins() >= 5) {
+                    if (player->coins() >= 5) { // General needs 5+ coins to block coup attempts
                         hasActiveGeneral = true;
                     }
                     break;
                 case RoleType::JUDGE:
-                    if (player->isActive()) {
+                    if (player->isActive()) { // Judge must be alive to block bribes
                         hasActiveJudge = true;
                     }
                     break;
                 break;
                 default:
-                    break;
+                    break; // Other roles don't have reactive abilities
             }
 
-            // Check if any player used tax as their last action
+            // Check if any player used tax as their most recent action (for Governor undo)
             if (player->usedTaxLastAction()) {
                 hasPlayerUsedTaxLastAction = true;
             }
         }
         
-        // Add one button per available reactive ability type
+        // Add reactive ability buttons based on current game state conditions
         if (hasActiveGovernor && hasPlayerUsedTaxLastAction) {
+            // Governor can undo tax action if someone used tax recently
             sf::Vector2f pos(reactiveStartPos.x, reactiveStartPos.y + buttonIndex * spacing);
             actionButtons.emplace_back(pos, buttonSize, "Undo Tax", "undo", reactiveColor);
-            actionButtons.back().setFont(mainFont);
-            buttonIndex++;
+            actionButtons.back().setFont(mainFont); // Apply consistent font styling
+            buttonIndex++; // Move to next button position
         }
         if (hasActiveSpy) {
+            // Spy can perform surveillance on other players
             sf::Vector2f pos(reactiveStartPos.x, reactiveStartPos.y + buttonIndex * spacing);
             actionButtons.emplace_back(pos, buttonSize, "Spy On", "spy_on", reactiveColor);
-            actionButtons.back().setFont(mainFont);
-            buttonIndex++;
+            actionButtons.back().setFont(mainFont); // Apply consistent font styling
+            buttonIndex++; // Move to next button position
         }
         
         if (hasActiveGeneral) {
+            // General can block coup attempts if they have sufficient coins
             sf::Vector2f pos(reactiveStartPos.x, reactiveStartPos.y + buttonIndex * spacing);
             actionButtons.emplace_back(pos, buttonSize, "Block Coup", "block_coup", reactiveColor);
-            actionButtons.back().setFont(mainFont);
-            buttonIndex++;
+            actionButtons.back().setFont(mainFont); // Apply consistent font styling
+            buttonIndex++; // Move to next button position
         }
         
         if (hasActiveJudge) {
+            // Judge can block bribe attempts to protect players
             sf::Vector2f pos(reactiveStartPos.x, reactiveStartPos.y + buttonIndex * spacing);
             actionButtons.emplace_back(pos, buttonSize, "Block Bribe", "block_bribe", reactiveColor);
-            actionButtons.back().setFont(mainFont);
-            buttonIndex++;
+            actionButtons.back().setFont(mainFont); // Apply consistent font styling
+            buttonIndex++; // Move to next button position
         }
 
-        // Add role-specific buttons for current player right here
+        // Add role-specific special abilities for the current player
         if (game->getCurrentPlayer()) {
-            Player* currentPlayer = game->getCurrentPlayer();
-            RoleType role = convertRoleType(currentPlayer->getRoleType());
-            sf::Color roleColor = sf::Color(255, 215, 0); // Gold color for special abilities
+            Player* currentPlayer = game->getCurrentPlayer(); // Get the player whose turn it is
+            RoleType role = convertRoleType(currentPlayer->getRoleType()); // Get their role type
+            sf::Color roleColor = sf::Color(255, 215, 0); // Gold color for special role abilities
             
+            // Add Baron's investment ability if current player is Baron
             if (role == RoleType::BARON) {
                 sf::Vector2f pos(reactiveStartPos.x, reactiveStartPos.y + buttonIndex * spacing);
                 actionButtons.emplace_back(pos, buttonSize, 
-                                        "Invest", "invest", roleColor);
-                actionButtons.back().setFont(mainFont);
-                buttonIndex++;
+                                        "Invest", "invest", roleColor); // Baron can invest coins for future benefit
+                actionButtons.back().setFont(mainFont); // Apply consistent font styling
+                buttonIndex++; // Move to next button position
             }
         }
     }
