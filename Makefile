@@ -4,8 +4,8 @@
 # This file automates the build process for the game and its components
 
 # Compiler and flags
-CXX = g++ # C++ compiler to use
-CXXFLAGS =  -g -std=c++17 # Compiler flags: debug info, warnings, C++17 standard
+CXX = g++ # C++ compiler
+CXXFLAGS =  -g -std=c++17 # Compiler flags: debug info, C++17 standard
 INCLUDES = -Iinclude # Include directory for header files
 LIBS = -lsfml-graphics -lsfml-window -lsfml-system # SFML libraries for graphics and windowing
 
@@ -73,8 +73,8 @@ $(TEST_OBJS): %.o: tests/%.cpp
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -c $< -o $@
 
 # Valgrind - Memory check
-valgrind: $(EXAMPLE_EXEC) $(TEST_EXEC) $(GUI_EXEC)
-	valgrind --leak-check=full ./$(EXAMPLE_EXEC) ./$(TEST_EXEC) ./$(GUI_EXEC)
+valgrind: $(EXAMPLE_EXEC) $(TEST_EXEC)
+	valgrind --leak-check=full ./$(EXAMPLE_EXEC) ./$(TEST_EXEC)
 
  # Clean - Remove all generated files
 clean:

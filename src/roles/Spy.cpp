@@ -5,6 +5,7 @@
 
 #include "../include/roles/Spy.hpp"
 #include "../include/Game.hpp"
+#include <iostream>
 #include <stdexcept>
 
 namespace coup {
@@ -36,8 +37,9 @@ namespace coup {
             throw std::runtime_error("Target player is eliminated");
         }
         
-        // Intelligence gathering: target's coin count revealed to Spy
-        // This information advantage is handled by the GUI interface
+        // Target's coin count revealed to Spy
+        // This information advantage is handled by the GUI interface and by the console output
+        std::cout << getName() << " (Spy) spies on " << target.getName() << ": " << target.coins() << " coins revealed" << std::endl;
 
         target.setArrestAvailability(false); // Sabotage: disable target's arrest ability temporarily
         // Spy action is instantaneous and doesn't consume a turn slot
