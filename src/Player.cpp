@@ -1,289 +1,289 @@
 // email: razcohenp@gmail.com
+
+/**
+ * Player.cpp
+ * Implementation of the base Player class for the Coup card game.
+ * Provides core functionality for all player actions and game mechanics.
+ */
+
 #include "../include/Player.hpp"
 #include "../include/Game.hpp"
-#include <stdexcept>
+#include <stdexcept> // For exception handling
 
 namespace coup {
-    // Constructor - initialize player and add to game
+    /**
+     * Constructor initializes a player and adds them to the game.
+     * Validates input parameters and sets up initial game state.
+     */
     Player::Player(Game& game, const std::string& name)
     : game(game), name(name), coin_count(0), active(true), sanctioned(false), arrest_available(true), bribe_used(false), used_tax_last_action(false), couped_by(nullptr) {
-        // Ensure game reference is valid
-        if (&game == nullptr) {
+        if (&game == nullptr) { // Validate game reference is not null
             throw std::invalid_argument("Game reference cannot be null");
         }
         
-        // Check if name is empty
-        if (name.empty()) {
+        if (name.empty()) { // Ensure player has a valid name
             throw std::invalid_argument("Player name cannot be empty");
         }
 
-        // Check if name is too long
-        if (name.length() >= 10) {
+        if (name.length() >= 10) { // Enforce name length limit for display purposes
             throw std::invalid_argument("Player name cannot exceed 9 characters");
         }
 
-        game.addPlayer(this); // Add player to game
+        game.addPlayer(this); // Register this player with the game instance
     }
 
-    // Basic getters
-    // Get player name
+    /**
+     * Returns the player's display name for identification.
+     * Used throughout the game for player recognition.
+     */
     std::string Player::getName() const {
-        return name;
+        return name; // Return the player's assigned name
     }
 
-    // Get coin count
+    /**
+     * Returns the player's current coin count.
+     * Essential for action validation and game state display.
+     */
     int Player::coins() const {
-        return coin_count;
+        return coin_count; // Return current financial resources
     }
 
-    // Check if player is active
+    /**
+     * Checks if the player is still participating in the game.
+     * Inactive players have been eliminated and cannot perform actions.
+     */
     bool Player::isActive() const {
-        return active;
+        return active; // Return current participation status
     }
 
-    // Check if player is sanctioned
+    /**
+     * Checks if the player is currently sanctioned.
+     * Sanctioned players cannot perform economic actions like gather or tax.
+     */
     bool Player::isSanctioned() const {
-        return sanctioned;
+        return sanctioned; // Return current sanction status
     }
 
-    // bool Player::isTaxAvailable() const {
-    //     return tax_available && !sanctioned; // If sanctioned, tax is not available
-    // }
-
-    // Check if arrest action is available
+    /**
+     * Checks if this player can be targeted by arrest actions.
+     * Some roles or effects can temporarily prevent arrests.
+     */
     bool Player::isArrestAvailable() const {
-        return arrest_available;
+        return arrest_available; // Return arrest vulnerability status
     }
 
-    // Check if bribe action was used in the current turn
+    /**
+     * Checks if the player has used bribe action this turn.
+     * Bribe allows additional actions within the same turn.
+     */
     bool Player::isBribeUsed() const {
-        return bribe_used;
+        return bribe_used; // Return bribe usage status for current turn
     }
 
-    // Check if tax was used in the last action
+    /**
+     * Checks if tax was the player's most recent action.
+     * Used by Governor role to determine if undo action is valid.
+     */
     bool Player::usedTaxLastAction() const {
-        return used_tax_last_action;
+        return used_tax_last_action; // Return tax action tracking status
     }
 
-    // Get player who performed coup on this player
+    /**
+     * Gets reference to the player who performed coup on this player.
+     * Used for General's coup blocking ability within time window.
+     */
     Player* Player::getCoupedBy() const {
-        return couped_by;
+        return couped_by; // Return reference to couping player
     }
 
-    // Basic actions that all players can perform
-    // Gather action - take 1 coin
+    /**
+     * Gather action - basic economic action to gain 1 coin.
+     * Available to all players unless sanctioned or under special conditions.
+     */
     void Player::gather() {
-        // Check if game has started
-        if (!game.isGameStarted()) {
+        if (!game.isGameStarted()) { // Ensure game is in progress
             throw std::runtime_error("Game has not started yet");
         }
 
-        // Ensure it's the player's turn
-        if (!game.isPlayerTurn(this)) {
+        if (!game.isPlayerTurn(this)) { // Verify it's this player's turn
             throw std::runtime_error("Not your turn");
         }
 
-        // Ensure player is active
-        if (!active) {
+        if (!active) { // Ensure player is still in the game
             throw std::runtime_error("Player is eliminated");
         }
 
-        // Check if player has 10 coins and just started his turn - must coup
-        if (coin_count >= 10 && !bribe_used) {
+        if (coin_count >= 10 && !bribe_used) { // Enforce mandatory coup rule
             throw std::runtime_error("You have 10 or more coins, must perform coup");
         }
 
-        // Ensure player is not sanctioned
-        if (sanctioned) {
+        if (sanctioned) { // Check if economic actions are blocked
             throw std::runtime_error("Player is sanctioned");
         }
 
-        addCoins(1); // Increase coin count
+        addCoins(1); // Award 1 coin for gather action
 
-        // If player used bribe, then let him play another turn
-        if(bribe_used) {
-            bribe_used = false; // Reset bribe used flag
+        if(bribe_used) { // If player used bribe, allow continued play
+            bribe_used = false; // Reset bribe flag for next action
         }
         
-        // If player did not use bribe, then move to next player's turn
-        else {
-            game.nextTurn(); // Move to next player's turn
+        else { // Normal turn progression
+            game.nextTurn(); // Advance to next player's turn
         }
     }
 
-    // Tax action - take 2 coins
+    /**
+     * Tax action - economic action to gain 2 coins from treasury.
+     * Virtual method as some roles modify the coin amount received.
+     */
     void Player::tax() {
-        // Check if game has started
-        if (!game.isGameStarted()) {
+        if (!game.isGameStarted()) { // Ensure game is in progress
             throw std::runtime_error("Game has not started yet");
         }
 
-        // Ensure it's the player's turn
-        if (!game.isPlayerTurn(this)) {
+        if (!game.isPlayerTurn(this)) { // Verify it's this player's turn
             throw std::runtime_error("Not your turn");
         }
 
-        // Ensure player is active
-        if (!active) {
+        if (!active) { // Ensure player is still in the game
             throw std::runtime_error("Player is eliminated");
         }
 
-        // Check if player has 10 coins and just started his turn - must coup
-        if (coin_count >= 10 && !bribe_used) {
+        if (coin_count >= 10 && !bribe_used) { // Enforce mandatory coup rule
             throw std::runtime_error("You have 10 or more coins, must perform coup");
         }
 
-        // Ensure player is not sanctioned
-        if (sanctioned) {
+        if (sanctioned) { // Check if economic actions are blocked
             throw std::runtime_error("Player is sanctioned");
         }
 
-        addCoins(2); // Increase coin count
+        addCoins(2); // Award 2 coins for tax action
 
-        // If player used bribe, then let him play another turn
-        if(bribe_used) {
-            bribe_used = false; // Reset bribe used flag
+        if(bribe_used) { // If player used bribe, allow continued play
+            bribe_used = false; // Reset bribe flag for next action
         }
         
-        // If player did not use bribe, then move to next player's turn
-        else {
-            used_tax_last_action = true; // Mark that tax was used in the last action
-            game.nextTurn(); // Move to next player's turn
+        else { // Normal turn progression
+            used_tax_last_action = true; // Mark tax as last action for Governor undo
+            game.nextTurn(); // Advance to next player's turn
         }
     }
 
-    // Bribe action - pay 4 coins for extra action
+    /**
+     * Bribe action - pays 4 coins to gain an additional action this turn.
+     * Allows strategic flexibility by enabling multiple actions per turn.
+     */
     void Player::bribe() {
-        // Check if game has started
-        if (!game.isGameStarted()) {
+        if (!game.isGameStarted()) { // Ensure game is in progress
             throw std::runtime_error("Game has not started yet");
         }
 
-        // Ensure it's the player's turn
-        if (!game.isPlayerTurn(this)) {
+        if (!game.isPlayerTurn(this)) { // Verify it's this player's turn
             throw std::runtime_error("Not your turn");
         }
 
-        // Ensure player is active
-        if (!active) {
+        if (!active) { // Ensure player is still in the game
             throw std::runtime_error("Player is eliminated");
         }
 
-        // Check if player has 10 coins and just started his turn - must coup
-        if (coin_count >= 10 && !bribe_used) {
+        if (coin_count >= 10 && !bribe_used) { // Enforce mandatory coup rule
             throw std::runtime_error("You have 10 or more coins, must perform coup");
         }
 
-        // Ensure player has enough coins
-        if (coin_count < 4) {
+        if (coin_count < 4) { // Verify player has sufficient funds
             throw std::runtime_error("Not enough coins for bribe");
         }
 
-        removeCoins(4); // Decrease coin count
-        bribe_used = true;
-        // No need to call nextTurn() because player gets another action
+        removeCoins(4); // Pay the bribe cost
+        bribe_used = true; // Mark bribe as used for this turn
+        // Note: No nextTurn() call as player gets another action
     }
 
-    // Arrest action - take 1 coin from target
+    /**
+     * Arrest action - takes 1 coin from target player.
+     * Cannot target the same player consecutively to prevent harassment.
+     */
     void Player::arrest(Player& target) {
-        // Check if game has started
-        if (!game.isGameStarted()) {
+        if (!game.isGameStarted()) { // Ensure game is in progress
             throw std::runtime_error("Game has not started yet");
         }
         
-        // Ensure it's the player's turn
-        if (!game.isPlayerTurn(this)) {
+        if (!game.isPlayerTurn(this)) { // Verify it's this player's turn
             throw std::runtime_error("Not your turn");
         }
 
-        // Ensure player is active
-        if (!active) {
+        if (!active) { // Ensure player is still in the game
             throw std::runtime_error("Player is eliminated");
         }
 
-        // Ensure player is able to arrest
-        if (!arrest_available) {
+        if (!arrest_available) { // Check if arrest is blocked by Spy
             throw std::runtime_error("Arrest action is not available");
         }
 
-        // Check if player has 10 coins and just started his turn - must coup
-        if (coin_count >= 10 && !bribe_used) {
+        if (coin_count >= 10 && !bribe_used) { // Enforce mandatory coup rule
             throw std::runtime_error("You have 10 or more coins, must perform coup");
         }
 
-        // Ensure target is not the current player
-        if (&target == this) {
+        if (&target == this) { // Prevent self-targeting
             throw std::runtime_error("An action against yourself is not allowed");
         }
 
-        // Ensure target is active
-        if (!target.isActive()) {
+        if (!target.isActive()) { // Ensure target is still in game
             throw std::runtime_error("Target player is eliminated");
         }
 
-        // Check if target was the last player arrested - prevent consecutive arrests
-        if (game.getLastArrestedPlayer() == &target) {
+        if (game.getLastArrestedPlayer() == &target) { // Prevent consecutive arrests
             throw std::runtime_error("This player was the last player to be arrested (consecutive arrest is not allowed)");
         }
 
-        // Bribe action is meaningless if target has no coins
-        if (target.coins() >= 1) {
-            // If target is not a General, then transfer 1 coin from target to current player
-            // (If General was arrested, he recieves his 1 coin back)
-            if(!target.isGeneral()) {
-                target.removeCoins(1); // Remove 1 coin from target
-                addCoins(1); // Add 1 coin to current player
+        if (target.coins() >= 1) { // Only proceed if target has coins to lose
+            if(!target.isGeneral()) { // Standard arrest - transfer coin
+                target.removeCoins(1); // Take 1 coin from target
+                addCoins(1); // Give coin to arresting player
             }
 
-            // If target is a Merchant, then take 2 coins from target directly to bank (not to current player)
-            else if(target.isMerchant()) {
-                target.removeCoins(2);
+            else if(target.isMerchant()) { // Merchant special ability - pays treasury
+                target.removeCoins(2); // Merchant loses 2 coins to treasury instead
             }
         }
         
-        // Mark this player as the last arrested player
-        game.setLastArrestedPlayer(&target);
+        game.setLastArrestedPlayer(&target); // Record arrest for consecutive prevention
         
-        // If player used bribe, then let him play another turn
-        if(bribe_used) {
-            bribe_used = false; // Reset bribe used flag
+        if(bribe_used) { // If player used bribe, allow continued play
+            bribe_used = false; // Reset bribe flag for next action
         }
         
-        // If player did not use bribe, then move to next player's turn
-        else {
-            game.nextTurn(); // Move to next player's turn
+        else { // Normal turn progression
+            game.nextTurn(); // Advance to next player's turn
         }
     }
 
-    // Sanction action - block target's economic actions
+    /**
+     * Sanction action - blocks target's economic actions for one turn.
+     * Costs 3 coins and prevents gather/tax until target's next turn.
+     */
     void Player::sanction(Player& target) {
-        // Check if game has started
-        if (!game.isGameStarted()) {
+        if (!game.isGameStarted()) { // Ensure game is in progress
             throw std::runtime_error("Game has not started yet");
         }
 
-        // Ensure it's the player's turn
-        if (!game.isPlayerTurn(this)) {
+        if (!game.isPlayerTurn(this)) { // Verify it's this player's turn
             throw std::runtime_error("Not your turn");
         }
 
-        // Ensure player is active
-        if (!active) {
+        if (!active) { // Ensure player is still in the game
             throw std::runtime_error("Player is eliminated");
         }
 
-        // Check if player has 10 coins and just started his turn - must coup
-        if (coin_count >= 10 && !bribe_used) {
+        if (coin_count >= 10 && !bribe_used) { // Enforce mandatory coup rule
             throw std::runtime_error("You have 10 or more coins, must perform coup");
         }
 
-        // Ensure target is not the current player
-        if (&target == this) {
+        if (&target == this) { // Prevent self-targeting
             throw std::runtime_error("An action against yourself is not allowed");
         }
 
-        // Ensure target is active
-        if (!target.isActive()) {
+        if (!target.isActive()) { // Ensure target is still in game
             throw std::runtime_error("Target player is eliminated");
         }
 
@@ -400,23 +400,35 @@ namespace coup {
         sanctioned = value; // Mark player as sanctioned
     }
 
-    // Set arrest action availability
+    /**
+     * Sets whether this player can be arrested.
+     * Used by Spy role to block arrests temporarily.
+     */
     void Player::setArrestAvailability(bool value) {
-        arrest_available = value;
+        arrest_available = value; // Update arrest action status
     }
 
-    // Reset bribe used flag
+    /**
+     * Resets the bribe used flag to false.
+     * Called at end of turn cleanup or after bribe action.
+     */
     void Player::resetBribeUsed() {
-        bribe_used = false; // Reset bribe used flag back to false
+        bribe_used = false; // Clear bribe usage flag
     }
 
-    // Reset used tax last action flag
+    /**
+     * Resets the tax last action tracking flag.
+     * Called when Governor undoes tax or at turn end.
+     */
     void Player::resetUsedTaxLastAction() {
-        used_tax_last_action = false; // Reset used tax last action flag
+        used_tax_last_action = false; // Clear tax action tracking
     }
 
-    // Clears the pointer to the player who performed coup on this player
+    /**
+     * Clears the reference to who performed coup on this player.
+     * Called when coup blocking window expires.
+     */
     void Player::resetCoupedBy() {
-        couped_by = nullptr; // Clear the pointer to the player who performed coup
+        couped_by = nullptr; // Remove coup relationship tracking
     }
 }

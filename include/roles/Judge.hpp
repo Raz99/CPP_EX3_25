@@ -1,23 +1,49 @@
 // email: razcohenp@gmail.com
+
+/**
+ * Judge.hpp
+ * Judge role class for the Coup card game.
+ * Special abilities: Can block bribe actions and penalizes sanctioners with additional costs.
+ * Represents judicial authority with corruption prevention and legal protection.
+ */
+
 #ifndef JUDGE_HPP
 #define JUDGE_HPP
 
 #include "../Player.hpp"
 
 namespace coup {
+    /**
+     * Judge class - a law enforcement role in the Coup game.
+     * Judges can prevent corruption (bribes) and impose legal penalties on attackers.
+     * This role specializes in blocking actions and imposing costs on opponents.
+     */
     class Judge : public Player {
     public:
-        // Constructor
+        /**
+         * Constructor creates a Judge with the specified name.
+         * Inherits all basic player functionality with legal enforcement powers.
+         */
         Judge(Game& game, const std::string& name);
         
-        // Override role type
+        /**
+         * Returns the role type identifier for GUI display.
+         * Used to show role-specific information in the interface.
+         */
         std::string getRoleType() const override { return "Judge"; }
         
-        // Block bribe
+        /**
+         * Block bribe action - prevents target's bribe and wastes their coins.
+         * Causes the bribing player to lose 4 coins without gaining extra action.
+         * Represents judicial power to prevent corruption and waste resources.
+         */
         void block_bribe(Player& target);
         
-        // Override to get a coin when targeted
-        bool isJudge() const override { return true; } // Override to return true for Judge
+        /**
+         * Override to identify this player as a Judge.
+         * Used by game logic for special Judge-specific interactions and penalties.
+         */
+        bool isJudge() const override { return true; }
     };
 }
 

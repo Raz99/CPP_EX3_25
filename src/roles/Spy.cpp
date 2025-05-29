@@ -1,37 +1,44 @@
+// Spy role implementation for Coup card game
+// This file implements the Spy's surveillance and sabotage abilities
+// filepath: /home/razco/Uni/CPP/CPP_EX3_25/src/roles/Spy.cpp
 // email: razcohenp@gmail.com
 #include "../include/roles/Spy.hpp"
 #include "../include/Game.hpp"
 #include <stdexcept>
 
 namespace coup {
-    // Constructor
+    // Initialize Spy player with game reference and name
+    // Spy specializes in information gathering and tactical disruption
     Spy::Spy(Game& game, const std::string& name) : Player(game, name) {}
     
-    // Watch another player's amount of coins and prevent him from using arrest action
+    // Spy's special ability: Conduct surveillance on target player
+    // Reveals target's coin count and blocks their arrest capability
     void Spy::spy_on(Player& target) {
-        // Check if game has started
+        // Verify game has begun before allowing spy operations
         if (!game.isGameStarted()) {
             throw std::runtime_error("Game has not started yet");
         }
         
-        // Ensure player is active
+        // Confirm Spy is still active and operational
         if (!isActive()) {
             throw std::runtime_error("Player is eliminated");
         }
 
-        // Ensure target is not the current player
+        // Prevent self-surveillance which would be meaningless
+        // Spy already knows their own information
         if (&target == this) {
             throw std::runtime_error("An action against yourself is not allowed");
         }
 
-        // Ensure target is active
+        // Verify target is still participating and can be spied upon
         if (!target.isActive()) {
             throw std::runtime_error("Target player is eliminated");
         }
         
-        // Display target's coins - This will be handled in GUI
+        // Intelligence gathering: target's coin count revealed to Spy
+        // This information advantage is handled by the GUI interface
 
-        target.setArrestAvailability(false); // Block the target's arrest ability for their next turn
-        // No need to call nextTurn() because this action doesn't count as a turn
+        target.setArrestAvailability(false); // Sabotage: disable target's arrest ability temporarily
+        // Spy action is instantaneous and doesn't consume a turn slot
     }
 }

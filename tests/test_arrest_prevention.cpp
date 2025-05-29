@@ -1,3 +1,6 @@
+// Test suite for arrest prevention mechanics in Coup card game
+// This file validates the spy's ability to block arrest actions and timing constraints
+// filepath: /home/razco/Uni/CPP/CPP_EX3_25/tests/test_arrest_prevention.cpp
 #include "include/Game.hpp"
 #include "include/Player.hpp"
 #include <iostream>
@@ -8,59 +11,62 @@ using namespace coup;
 void test_arrest_prevention() {
     std::cout << "Testing arrest prevention feature...\n";
     
-    // Create game and players
+    // Initialize game environment with three test players
     Game game;
-    Player player1(game, "Alice");   // Player index 0
-    Player player2(game, "Bob");     // Player index 1  
-    Player player3(game, "Charlie"); // Player index 2
+    Player player1(game, "Alice");   // Player index 0 - primary test subject
+    Player player2(game, "Bob");     // Player index 1 - target for arrest
+    Player player3(game, "Charlie"); // Player index 2 - additional participant
     
-    // Start the game
+    // Initialize game state for testing arrest mechanics
     game.startGame();
     
-    // Give players some coins to perform arrests
-    player1.addCoins(5);
-    player2.addCoins(5);
-    player3.addCoins(5);
+    // Provide sufficient funds for arrest actions (cost varies by implementation)
+    player1.addCoins(5); // Ensure Alice can afford arrest action
+    player2.addCoins(5); // Ensure Bob has coins for counter-actions
+    player3.addCoins(5); // Ensure Charlie can participate if needed
     
     std::cout << "Initial setup complete. Alice: " << player1.coins() 
               << " coins, Bob: " << player2.coins() 
               << " coins, Charlie: " << player3.coins() << " coins\n";
     
-    // Check who's turn it is initially
+    // Verify turn order system is functioning correctly
     std::cout << "Current turn check:\n";
     std::cout << "Alice's turn: " << (game.isPlayerTurn(&player1) ? "YES" : "NO") << "\n";
     std::cout << "Bob's turn: " << (game.isPlayerTurn(&player2) ? "YES" : "NO") << "\n";
     std::cout << "Charlie's turn: " << (game.isPlayerTurn(&player3) ? "YES" : "NO") << "\n";
     
-    // Test 1: Alice arrests Bob - should work (it's Alice's turn initially)
+    // Test 1: Basic arrest functionality - Alice arrests Bob
+    // This should succeed as Alice has initiative and sufficient resources
     try {
-        player1.arrest(player2);
+        player1.arrest(player2); // Execute arrest action
         std::cout << "✓ Test 1 passed: Alice successfully arrested Bob\n";
         std::cout << "After arrest - Alice: " << player1.coins() 
                   << " coins, Bob: " << player2.coins() << " coins\n";
     } catch (const std::exception& e) {
         std::cout << "✗ Test 1 failed: " << e.what() << "\n";
-        return;
+        return; // Exit test if basic functionality fails
     }
     
-    // After Alice's arrest, it should now be Bob's turn
+    // Verify turn progression after Alice's action
     std::cout << "\nAfter Alice's turn:\n";
     std::cout << "Alice's turn: " << (game.isPlayerTurn(&player1) ? "YES" : "NO") << "\n";
     std::cout << "Bob's turn: " << (game.isPlayerTurn(&player2) ? "YES" : "NO") << "\n";
     std::cout << "Charlie's turn: " << (game.isPlayerTurn(&player3) ? "YES" : "NO") << "\n";
     
-    // Test 2: Bob tries to arrest himself (Bob was last arrested) - should fail
+    // Test 2: Self-arrest prevention - Bob cannot arrest himself
+    // This validates the prevention mechanism for self-targeting
     try {
-        player2.arrest(player2);
+        player2.arrest(player2); // Attempt self-arrest (should fail)
         std::cout << "✗ Test 2 failed: Bob should not be able to arrest himself\n";
         return;
     } catch (const std::exception& e) {
         std::cout << "✓ Test 2 passed (self-arrest blocked): " << e.what() << "\n";
     }
     
-    // Test 3: Bob arrests Alice instead - should work
+    // Test 3: Counter-arrest capability - Bob arrests Alice
+    // This demonstrates reciprocal arrest actions between players
     try {
-        player2.arrest(player1);
+        player2.arrest(player1); // Bob retaliates against Alice
         std::cout << "✓ Test 3 passed: Bob successfully arrested Alice\n";
         std::cout << "After second arrest - Alice: " << player1.coins() 
                   << " coins, Bob: " << player2.coins() << " coins\n";
@@ -69,13 +75,14 @@ void test_arrest_prevention() {
         return;
     }
     
-    // Now it should be Charlie's turn
+    // Check turn rotation to Charlie after Bob's action
     std::cout << "\nAfter Bob's turn:\n";
     std::cout << "Alice's turn: " << (game.isPlayerTurn(&player1) ? "YES" : "NO") << "\n";
     std::cout << "Bob's turn: " << (game.isPlayerTurn(&player2) ? "YES" : "NO") << "\n";
     std::cout << "Charlie's turn: " << (game.isPlayerTurn(&player3) ? "YES" : "NO") << "\n";
     
-    // Test 4: Charlie tries to arrest Alice again (Alice was last arrested) - should fail
+    // Test 4: Consecutive arrest prevention - Charlie cannot re-arrest Alice
+    // This tests the prevention of repeated targeting of the same player
     try {
         player3.arrest(player1);
         std::cout << "✗ Test 4 failed: Charlie should not be able to arrest Alice consecutively\n";

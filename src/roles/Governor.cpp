@@ -1,46 +1,57 @@
 // email: razcohenp@gmail.com
+
+/**
+ * Governor.cpp
+ * Implementation of the Governor role for the Coup card game.
+ * Provides enhanced taxation and regulatory undo abilities.
+ */
+
 #include "../include/roles/Governor.hpp"
 #include "../include/Game.hpp"
-#include <stdexcept>
+#include <stdexcept> // For exception handling
 
 namespace coup {
-    // Constructor
+    /**
+     * Constructor creates a Governor player with enhanced economic abilities.
+     * Inherits base player functionality with role-specific enhancements.
+     */
     Governor::Governor(Game& game, const std::string& name) : Player(game, name) {}
     
-    // Override tax to take 3 coins instead of 2
+    /**
+     * Enhanced tax action yields 3 coins instead of the standard 2.
+     * Demonstrates the Governor's superior economic influence and power.
+     */
     void Governor::tax() {
-        Player::tax(); // Handle all validation and take 2 coins
-        addCoins(1); // Add 1 more coin for a total of 3
+        Player::tax(); // Execute standard tax validation and award 2 coins
+        addCoins(1); // Governor bonus - award additional coin for total of 3
     }
     
-    // Block another player's tax action
+    /**
+     * Undo action reverses another player's tax action.
+     * Removes 2 coins from target who used tax as their last action.
+     */
     void Governor::undo(Player& target) {
-        // Check if game has started
-        if (!game.isGameStarted()) {
+        if (!game.isGameStarted()) { // Ensure game is in progress
             throw std::runtime_error("Game has not started yet");
         }
 
-        // Ensure player is active
-        if (!isActive()) {
+        if (!isActive()) { // Ensure Governor is still in the game
             throw std::runtime_error("Player is eliminated");
         }
 
-        // Ensure target is not the current player
-        if (&target == this) {
+        if (&target == this) { // Prevent self-targeting
             throw std::runtime_error("An action against yourself is not allowed");
         }
 
-        // Ensure target is active
-        if (!target.isActive()) {
+        if (!target.isActive()) { // Ensure target is still in game
             throw std::runtime_error("Target player is eliminated");
         }
 
-        // Ensure target has used tax action in his last turn
-        if (!target.usedTaxLastAction()) {
+        if (!target.usedTaxLastAction()) { // Verify target used tax recently
             throw std::runtime_error("Target player did not use tax as his last action");
         }
         
-        target.removeCoins(2); // Remove 2 coins from target
-        target.resetUsedTaxLastAction(); // Reset target's used tax last action flag since current player undid it
+        target.removeCoins(2); // Reverse the tax benefit by removing 2 coins
+        target.resetUsedTaxLastAction(); // Clear tax tracking since action was undone
     }
 }

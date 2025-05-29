@@ -1,4 +1,9 @@
+// GameGUI.cpp - Graphical User Interface Implementation for Coup Card Game
+// Implements the complete visual interface using SFML for the Coup card game
+// Handles all game states, player interactions, and visual feedback
+// filepath: /home/razco/Uni/CPP/CPP_EX3_25/src/GameGUI.cpp
 // email: razcohenp@gmail.com
+
 #include "../include/GameGUI.hpp"
 #include "../include/roles/Governor.hpp"
 #include "../include/roles/Baron.hpp" 
@@ -13,151 +18,161 @@
 #include <cmath>
 
 namespace coup {
-    // EnhancedButton implementation
+    // EnhancedButton Implementation - Interactive button with hover effects and role-specific styling
+    
     EnhancedButton::EnhancedButton(sf::Vector2f position, sf::Vector2f size, const std::string& label, 
                                 const std::string& actionType, sf::Color normal)
         : action(actionType), enabled(true), hovered(false), normalColor(normal) {
         
-        shape.setPosition(position);
-        shape.setSize(size);
-        shape.setFillColor(normalColor);
+        shape.setPosition(position); // Set button position on screen
+        shape.setSize(size); // Define button dimensions
+        shape.setFillColor(normalColor); // Apply base color scheme
         
-        // Create hover and disabled colors
+        // Create dynamic color variations for interactive feedback
         hoverColor = sf::Color(
-            std::min(255, (int)normal.r + 30),
-            std::min(255, (int)normal.g + 30),
-            std::min(255, (int)normal.b + 30)
+            std::min(255, (int)normal.r + 30), // Brighten red component
+            std::min(255, (int)normal.g + 30), // Brighten green component
+            std::min(255, (int)normal.b + 30)  // Brighten blue component
         );
-        disabledColor = sf::Color(100, 100, 100);
+        disabledColor = sf::Color(100, 100, 100); // Standard gray for disabled state
         
-        shape.setOutlineThickness(2);
-        shape.setOutlineColor(sf::Color::White);
+        shape.setOutlineThickness(2); // Add border for definition
+        shape.setOutlineColor(sf::Color::White); // White border for contrast
         
-        // Add rounded corners effect with outline
-        shape.setOutlineThickness(3);
+        // Enhanced visual styling with rounded corners effect
+        shape.setOutlineThickness(3); // Thicker border for premium look
         
-        text.setString(label);
-        text.setCharacterSize(18);
-        text.setFillColor(sf::Color::White);
-        text.setStyle(sf::Text::Bold);
+        text.setString(label); // Set button display text
+        text.setCharacterSize(18); // Readable font size
+        text.setFillColor(sf::Color::White); // High contrast text color
+        text.setStyle(sf::Text::Bold); // Bold text for emphasis
         
-        // Create small icon circle
-        icon.setRadius(8);
-        icon.setFillColor(sf::Color(255, 215, 0)); // Gold
-        icon.setPosition(position.x + 10, position.y + size.y/2 - 8);
+        // Create decorative icon element for visual interest
+        icon.setRadius(8); // Small circular icon
+        icon.setFillColor(sf::Color(255, 215, 0)); // Gold accent color
+        icon.setPosition(position.x + 10, position.y + size.y/2 - 8); // Left-aligned positioning
     }
 
     bool EnhancedButton::contains(sf::Vector2f point) const {
-        return enabled && shape.getGlobalBounds().contains(point);
+        return enabled && shape.getGlobalBounds().contains(point); // Only clickable when enabled
     }
 
     void EnhancedButton::setEnabled(bool enable) {
-        enabled = enable;
+        enabled = enable; // Update button state
         if (enabled) {
+            // Restore interactive colors for active button
             shape.setFillColor(hovered ? hoverColor : normalColor);
-            text.setFillColor(sf::Color::White);
-            icon.setFillColor(sf::Color(255, 215, 0));
+            text.setFillColor(sf::Color::White); // Bright text for active state
+            icon.setFillColor(sf::Color(255, 215, 0)); // Gold icon for active state
         } else {
-            shape.setFillColor(disabledColor);
-            text.setFillColor(sf::Color(150, 150, 150));
-            icon.setFillColor(sf::Color(80, 80, 80));
+            // Apply muted colors for disabled button
+            shape.setFillColor(disabledColor); // Gray background
+            text.setFillColor(sf::Color(150, 150, 150)); // Dim text
+            icon.setFillColor(sf::Color(80, 80, 80)); // Dim icon
         }
     }
 
     void EnhancedButton::setHovered(bool hover) {
-        hovered = hover && enabled;
+        hovered = hover && enabled; // Only allow hover effect when enabled
         if (enabled) {
+            // Apply hover visual feedback
             shape.setFillColor(hovered ? hoverColor : normalColor);
-            shape.setOutlineColor(hovered ? sf::Color::Yellow : sf::Color::White);
+            shape.setOutlineColor(hovered ? sf::Color::Yellow : sf::Color::White); // Yellow highlight on hover
         }
     }
 
     void EnhancedButton::draw(sf::RenderWindow& window) const {
-        window.draw(shape);
-        window.draw(icon);
-        window.draw(text);
+        window.draw(shape); // Draw button background
+        window.draw(icon); // Draw decorative icon
+        window.draw(text); // Draw button label
     }
 
     void EnhancedButton::setFont(const sf::Font& font) {
-        text.setFont(font);
+        text.setFont(font); // Apply font to button text
 
-        // Center text
-        sf::FloatRect textBounds = text.getLocalBounds();
-        sf::Vector2f buttonCenter = shape.getPosition() + shape.getSize() / 2.0f;
+        // Calculate precise text centering within button bounds
+        sf::FloatRect textBounds = text.getLocalBounds(); // Get text dimensions
+        sf::Vector2f buttonCenter = shape.getPosition() + shape.getSize() / 2.0f; // Find button center
 
+        // Position text with offset to account for icon space and perfect centering
         text.setPosition(
-            shape.getPosition().x + (shape.getSize().x - textBounds.width) / 2 - textBounds.left + 15,
-            shape.getPosition().y + (shape.getSize().y - textBounds.height) / 2 - textBounds.top
+            shape.getPosition().x + (shape.getSize().x - textBounds.width) / 2 - textBounds.left + 15, // Horizontal center with icon offset
+            shape.getPosition().y + (shape.getSize().y - textBounds.height) / 2 - textBounds.top // Vertical center
         );
     }
 
-    // PlayerCard implementation
+    // PlayerCard Implementation - Visual representation of player state and information
+    
     PlayerCard::PlayerCard(sf::Vector2f position, sf::Vector2f size)
         : isCurrentPlayer(false), isActive(true),
         deleteButton(sf::Vector2f(position.x + size.x - 70, position.y + size.y - 35), 
                     sf::Vector2f(50, 25), "X", "delete_player", sf::Color(180, 60, 60)) {
         
-        // Customize delete button appearance
-        deleteButton.hoverColor = sf::Color(220, 80, 80);
-        deleteButton.normalColor = sf::Color(180, 60, 60);
-        deleteButton.shape.setFillColor(deleteButton.normalColor);
-        deleteButton.shape.setOutlineThickness(2);
-        deleteButton.shape.setOutlineColor(sf::Color(120, 40, 40));
-        deleteButton.text.setCharacterSize(16);
-        deleteButton.text.setStyle(sf::Text::Bold);
+        // Customize delete button for player removal functionality
+        deleteButton.hoverColor = sf::Color(220, 80, 80); // Bright red on hover
+        deleteButton.normalColor = sf::Color(180, 60, 60); // Dark red normal state
+        deleteButton.shape.setFillColor(deleteButton.normalColor); // Apply base color
+        deleteButton.shape.setOutlineThickness(2); // Defined border
+        deleteButton.shape.setOutlineColor(sf::Color(120, 40, 40)); // Darker red border
+        deleteButton.text.setCharacterSize(16); // Smaller text for compact button
+        deleteButton.text.setStyle(sf::Text::Bold); // Bold X for emphasis
         
-        background.setPosition(position);
-        background.setSize(size);
-        background.setFillColor(sf::Color(40, 40, 60));
-        background.setOutlineThickness(3);
-        background.setOutlineColor(sf::Color::White);
+        // Setup main card background with professional styling
+        background.setPosition(position); // Card placement
+        background.setSize(size); // Card dimensions
+        background.setFillColor(sf::Color(40, 40, 60)); // Dark blue-gray background
+        background.setOutlineThickness(3); // Prominent border
+        background.setOutlineColor(sf::Color::White); // White border for contrast
         
-        // Player avatar (circular)
-        playerAvatar.setRadius(25);
-        playerAvatar.setFillColor(sf::Color(100, 150, 200));
-        playerAvatar.setPosition(position.x + 10, position.y + 10);
+        // Create circular player avatar for visual identification
+        playerAvatar.setRadius(25); // Medium-sized circle
+        playerAvatar.setFillColor(sf::Color(100, 150, 200)); // Light blue default
+        playerAvatar.setPosition(position.x + 10, position.y + 10); // Top-left positioning
         
-        // Role icon
-        roleIcon.setSize(sf::Vector2f(30, 30));
-        roleIcon.setPosition(position.x + size.x - 40, position.y + 10);
-        roleIcon.setFillColor(sf::Color(200, 100, 100));
-        roleIcon.setOutlineThickness(2);
-        roleIcon.setOutlineColor(sf::Color::Black);
+        // Role icon for quick role identification
+        roleIcon.setSize(sf::Vector2f(30, 30)); // Square icon shape
+        roleIcon.setPosition(position.x + size.x - 40, position.y + 10); // Top-right corner
+        roleIcon.setFillColor(sf::Color(200, 100, 100)); // Default red color
+        roleIcon.setOutlineThickness(2); // Clear definition
+        roleIcon.setOutlineColor(sf::Color::Black); // Black border for contrast
         
-        // Text elements
-        nameText.setPosition(position.x + 70, position.y + 15);
-        nameText.setCharacterSize(20);
-        nameText.setFillColor(sf::Color::White);
-        nameText.setStyle(sf::Text::Bold);
+        // Setup text elements for player information display
+        nameText.setPosition(position.x + 70, position.y + 15); // Right of avatar
+        nameText.setCharacterSize(20); // Large readable text
+        nameText.setFillColor(sf::Color::White); // High contrast
+        nameText.setStyle(sf::Text::Bold); // Emphasis on player name
         
-        roleText.setPosition(position.x + 70, position.y + 40);
-        roleText.setCharacterSize(14);
-        roleText.setFillColor(sf::Color::Cyan);
+        roleText.setPosition(position.x + 70, position.y + 40); // Below name
+        roleText.setCharacterSize(14); // Medium size for role info
+        roleText.setFillColor(sf::Color::Cyan); // Cyan for role distinction
         
-        coinsText.setPosition(position.x + 15, position.y + 70);
-        coinsText.setCharacterSize(16);
-        coinsText.setFillColor(sf::Color::Yellow);
-        coinsText.setStyle(sf::Text::Bold);
+        coinsText.setPosition(position.x + 15, position.y + 70); // Below avatar
+        coinsText.setCharacterSize(16); // Clear size for important info
+        coinsText.setFillColor(sf::Color::Yellow); // Yellow for coins (gold theme)
+        coinsText.setStyle(sf::Text::Bold); // Emphasis on coin count
         
-        statusText.setPosition(position.x + 15, position.y + 95);
-        statusText.setCharacterSize(12);
-        statusText.setFillColor(sf::Color::Green);
+        statusText.setPosition(position.x + 15, position.y + 95); // Bottom of card
+        statusText.setCharacterSize(12); // Smaller for status info
+        statusText.setFillColor(sf::Color::Green); // Green for positive status
         
-        // Coin icon
-        coinIcon.setSize(sf::Vector2f(15, 15));
-        coinIcon.setFillColor(sf::Color(255, 215, 0)); // Gold color
-        coinIcon.setPosition(position.x + 90, position.y + 75);
-        coinIcon.setOutlineThickness(1);
-        coinIcon.setOutlineColor(sf::Color(139, 69, 19)); // Brown outline for gold coin
+        // Decorative coin icon for visual enhancement
+        coinIcon.setSize(sf::Vector2f(15, 15)); // Small square icon
+        coinIcon.setFillColor(sf::Color(255, 215, 0)); // Gold color matching game theme
+        coinIcon.setPosition(position.x + 90, position.y + 75); // Next to coin text
+        coinIcon.setOutlineThickness(1); // Subtle border
+        coinIcon.setOutlineColor(sf::Color(139, 69, 19)); // Brown outline for realistic gold appearance
     }
 
     void PlayerCard::updateInfo(const Player* player, bool current, RoleType playerRole) {
-        isCurrentPlayer = current;
-        isActive = player->isActive();
-        role = playerRole;
+        isCurrentPlayer = current; // Mark if this is the active player's turn
+        isActive = player->isActive(); // Update elimination status
+        role = playerRole; // Store role for visual customization
         
-        nameText.setString(player->getName());
-        coinsText.setString("Coins: " + std::to_string(player->coins()));
+        // Update player information displays
+        nameText.setString(player->getName()); // Display player name
+        coinsText.setString("Coins: " + std::to_string(player->coins())); // Show current coin count
+        
+        // Convert role enum to readable string for display
         roleText.setString("Role: " + std::string(
                         role == RoleType::GOVERNOR ? "Governor" :
                         role == RoleType::SPY ? "Spy" :
@@ -166,310 +181,328 @@ namespace coup {
                         role == RoleType::JUDGE ? "Judge" :
                         role == RoleType::MERCHANT ? "Merchant" : "Unassigned"));
         
-        // Update status
+        // Determine and display current player status with appropriate coloring
         std::string status = "";
         if (!isActive) {
-            status = "ELIMINATED";
-            statusText.setFillColor(sf::Color::Red);
+            status = "ELIMINATED"; // Player has been eliminated from game
+            statusText.setFillColor(sf::Color::Red); // Red for elimination
         } else if (player->isSanctioned()) {
-            status = "SANCTIONED";
-            statusText.setFillColor(sf::Color(255, 165, 0)); // Orange
+            status = "SANCTIONED"; // Player is currently sanctioned
+            statusText.setFillColor(sf::Color(255, 165, 0)); // Orange for sanction warning
         } else {
-            status = "ACTIVE";
-            statusText.setFillColor(sf::Color::Green);
+            status = "ACTIVE"; // Player is active and participating
+            statusText.setFillColor(sf::Color::Green); // Green for active participation
         }
-        statusText.setString(status);
+        statusText.setString(status); // Apply status text
         
-        // Update visual appearance
+        // Apply visual styling based on player state
         if (isCurrentPlayer) {
-            background.setFillColor(sf::Color(80, 40, 120)); // Purple
-            background.setOutlineColor(sf::Color(255, 215, 0)); // Gold
-            background.setOutlineThickness(4);
-            playerAvatar.setFillColor(sf::Color(255, 215, 0)); // Gold
+            // Highlight current player with premium styling
+            background.setFillColor(sf::Color(80, 40, 120)); // Rich purple background
+            background.setOutlineColor(sf::Color(255, 215, 0)); // Gold border for current player
+            background.setOutlineThickness(4); // Thicker border for emphasis
+            playerAvatar.setFillColor(sf::Color(255, 215, 0)); // Gold avatar for current player
         } else if (!isActive) {
-            background.setFillColor(sf::Color(30, 30, 30)); // Dark
-            background.setOutlineColor(sf::Color::Red);
-            playerAvatar.setFillColor(sf::Color(100, 100, 100)); // Gray
+            // Dim styling for eliminated players
+            background.setFillColor(sf::Color(30, 30, 30)); // Very dark background
+            background.setOutlineColor(sf::Color::Red); // Red border indicating elimination
+            playerAvatar.setFillColor(sf::Color(100, 100, 100)); // Gray avatar for eliminated
         } else {
-            background.setFillColor(sf::Color(40, 40, 60)); // Normal
-            background.setOutlineColor(sf::Color::White);
-            playerAvatar.setFillColor(sf::Color(100, 150, 200)); // Blue
+            // Standard styling for active non-current players
+            background.setFillColor(sf::Color(40, 40, 60)); // Normal blue-gray background
+            background.setOutlineColor(sf::Color::White); // White border for active players
+            playerAvatar.setFillColor(sf::Color(100, 150, 200)); // Blue avatar for active players
         }
         
-    // Role-specific colors and shapes
-        sf::Color roleColor = sf::Color(200, 100, 100);
+        // Apply role-specific colors and visual customization
+        sf::Color roleColor = sf::Color(200, 100, 100); // Default red color
         switch (role) {
             case RoleType::GOVERNOR: 
-                roleColor = sf::Color(200, 150, 50); // Gold-like color
+                roleColor = sf::Color(200, 150, 50); // Gold-like color representing wealth and authority
                 break;
             case RoleType::SPY: 
-                roleColor = sf::Color(100, 100, 200); // Blue color
+                roleColor = sf::Color(100, 100, 200); // Blue color representing stealth and intelligence
                 break;
             case RoleType::BARON: 
-                roleColor = sf::Color(150, 100, 200); // Purple color
+                roleColor = sf::Color(150, 100, 200); // Purple color representing nobility and commerce
                 break;
             case RoleType::GENERAL: 
-                roleColor = sf::Color(200, 100, 100); // Red color
+                roleColor = sf::Color(200, 100, 100); // Red color representing military and combat
                 break;
             case RoleType::JUDGE: 
-                roleColor = sf::Color(150, 150, 150); // Silver/gray color
+                roleColor = sf::Color(150, 150, 150); // Silver/gray color representing justice and law
                 break;
             case RoleType::MERCHANT: 
-                roleColor = sf::Color(100, 200, 100); // Green color
+                roleColor = sf::Color(100, 200, 100); // Green color representing trade and economy
                 break;
             default: 
-                roleColor = sf::Color(120, 120, 120); // Default gray
+                roleColor = sf::Color(120, 120, 120); // Default gray for unassigned roles
                 break;
         }
-        roleIcon.setFillColor(roleColor);
+        roleIcon.setFillColor(roleColor); // Apply role-specific coloring
         
-        // Customize icon appearance based on role
+        // Customize icon shape based on role for additional visual distinction
         switch (role) {
             case RoleType::GOVERNOR:
-                roleIcon.setSize(sf::Vector2f(30, 20)); // Crown-like shape
+                roleIcon.setSize(sf::Vector2f(30, 20)); // Crown-like rectangular shape
                 break;
             case RoleType::SPY:
-                roleIcon.setSize(sf::Vector2f(25, 25)); // More square shape
+                roleIcon.setSize(sf::Vector2f(25, 25)); // More square shape for espionage
                 break;
             case RoleType::BARON:
-                roleIcon.setSize(sf::Vector2f(35, 25)); // Wider rectangle
+                roleIcon.setSize(sf::Vector2f(35, 25)); // Wider rectangle for commercial influence
                 break;
             case RoleType::GENERAL:
-                roleIcon.setSize(sf::Vector2f(30, 30)); // Standard square
+                roleIcon.setSize(sf::Vector2f(30, 30)); // Standard square for military discipline
                 break;
             case RoleType::JUDGE:
-                roleIcon.setSize(sf::Vector2f(35, 20)); // Wider, flatter shape
+                roleIcon.setSize(sf::Vector2f(35, 20)); // Wider, flatter shape resembling scales of justice
                 break;
             case RoleType::MERCHANT:
-                roleIcon.setSize(sf::Vector2f(25, 30)); // Taller rectangle
+                roleIcon.setSize(sf::Vector2f(25, 30)); // Taller rectangle for trade goods
                 break;
             default:
-                roleIcon.setSize(sf::Vector2f(30, 30)); // Default square
+                roleIcon.setSize(sf::Vector2f(30, 30)); // Default square for unknown roles
                 break;
         }
     }
 
     void PlayerCard::draw(sf::RenderWindow& window, bool showDeleteButton) const {
-        window.draw(background);
-        window.draw(playerAvatar);
-        window.draw(roleIcon);
-        window.draw(nameText);
-        window.draw(roleText);
-        window.draw(coinsText);
-        window.draw(statusText);
-        // window.draw(coinIcon);
+        window.draw(background); // Draw card background first
+        window.draw(playerAvatar); // Draw player avatar circle
+        window.draw(roleIcon); // Draw role identification icon
+        window.draw(nameText); // Draw player name
+        window.draw(roleText); // Draw role information
+        window.draw(coinsText); // Draw coin count
+        window.draw(statusText); // Draw current status
+        // window.draw(coinIcon); // Optional coin icon (currently disabled)
         
-        // Only draw delete button when explicitly requested (during player setup)
+        // Only show delete button during player setup phase
         if (showDeleteButton) {
-            deleteButton.draw(window);
+            deleteButton.draw(window); // Draw delete button for player removal
         }
     }
 
     void PlayerCard::setFont(const sf::Font& font) {
-        nameText.setFont(font);
-        roleText.setFont(font);
-        coinsText.setFont(font);
-        statusText.setFont(font);
-        deleteButton.setFont(font);
+        // Apply font to all text elements for consistent typography
+        nameText.setFont(font); // Player name font
+        roleText.setFont(font); // Role description font
+        coinsText.setFont(font); // Coin count font
+        statusText.setFont(font); // Status indicator font
+        deleteButton.setFont(font); // Delete button font
     }
 
-    // InputField implementation
+    // InputField Implementation - Text input widget with cursor and placeholder support
+    
     InputField::InputField(sf::Vector2f position, sf::Vector2f size, const std::string& placeholderText)
         : active(false), showCursor(false) {
         
-        background.setPosition(position);
-        background.setSize(size);
-        background.setFillColor(sf::Color(50, 50, 50));
-        background.setOutlineThickness(2);
-        background.setOutlineColor(sf::Color::White);
+        // Setup input field background with professional styling
+        background.setPosition(position); // Field position on screen
+        background.setSize(size); // Field dimensions
+        background.setFillColor(sf::Color(50, 50, 50)); // Dark background for input
+        background.setOutlineThickness(2); // Clear border definition
+        background.setOutlineColor(sf::Color::White); // White border for visibility
         
-        displayText.setPosition(position.x + 10, position.y + 10);
-        displayText.setCharacterSize(18);
-        displayText.setFillColor(sf::Color::White);
+        // Setup user input text display
+        displayText.setPosition(position.x + 10, position.y + 10); // Padded text position
+        displayText.setCharacterSize(18); // Readable text size
+        displayText.setFillColor(sf::Color::White); // High contrast text color
         
-        placeholder.setString(placeholderText);
-        placeholder.setPosition(position.x + 10, position.y + 10);
-        placeholder.setCharacterSize(18);
-        placeholder.setFillColor(sf::Color(150, 150, 150));
+        // Setup placeholder text for user guidance
+        placeholder.setString(placeholderText); // Instructional text
+        placeholder.setPosition(position.x + 10, position.y + 10); // Same position as input text
+        placeholder.setCharacterSize(18); // Matching text size
+        placeholder.setFillColor(sf::Color(150, 150, 150)); // Dimmed color to differentiate from input
     }
 
     void InputField::handleInput(sf::Uint32 unicode) {
-        if (!active) return;
+        if (!active) return; // Only process input when field is active
         
-        if (unicode == 8) { // Backspace
+        if (unicode == 8) { // Backspace key pressed
             if (!content.empty()) {
-                content.pop_back();
-                displayText.setString(content);
+                content.pop_back(); // Remove last character
+                displayText.setString(content); // Update display
             }
-        } else if (unicode >= 32 && unicode < 127) { // Printable characters
-            if (content.length() < 20) { // Max length
-                content += static_cast<char>(unicode);
-                displayText.setString(content);
+        } else if (unicode >= 32 && unicode < 127) { // Printable ASCII characters only
+            if (content.length() < 20) { // Enforce reasonable character limit
+                content += static_cast<char>(unicode); // Add new character
+                displayText.setString(content); // Update display with new content
             }
         }
     }
 
     void InputField::setActive(bool isActive) {
-        active = isActive;
-        background.setOutlineColor(active ? sf::Color::Yellow : sf::Color::White);
-        background.setOutlineThickness(active ? 3 : 2);
+        active = isActive; // Update field state
+        // Visual feedback for active/inactive state
+        background.setOutlineColor(active ? sf::Color::Yellow : sf::Color::White); // Yellow when active
+        background.setOutlineThickness(active ? 3 : 2); // Thicker border when active
     }
 
     bool InputField::contains(sf::Vector2f point) const {
-        return background.getGlobalBounds().contains(point);
+        return background.getGlobalBounds().contains(point); // Check if point is within field bounds
     }
 
     void InputField::update() {
+        // Animate blinking cursor when field is active
         if (active && cursorClock.getElapsedTime().asSeconds() > 0.5f) {
-            showCursor = !showCursor;
-            cursorClock.restart();
+            showCursor = !showCursor; // Toggle cursor visibility
+            cursorClock.restart(); // Reset cursor timer
             
-            std::string displayStr = content;
-            if (showCursor) displayStr += "|";
-            displayText.setString(displayStr);
+            std::string displayStr = content; // Start with current content
+            if (showCursor) displayStr += "|"; // Add cursor character when visible
+            displayText.setString(displayStr); // Update display with cursor
         }
     }
 
     void InputField::draw(sf::RenderWindow& window) const {
-        window.draw(background);
+        window.draw(background); // Draw input field background
         if (content.empty() && !active) {
-            window.draw(placeholder);
+            window.draw(placeholder); // Show placeholder when empty and inactive
         } else {
-            window.draw(displayText);
+            window.draw(displayText); // Show actual content or content with cursor
         }
     }
 
     void InputField::setFont(const sf::Font& font) {
-        displayText.setFont(font);
-        placeholder.setFont(font);
+        displayText.setFont(font); // Apply font to input text
+        placeholder.setFont(font); // Apply font to placeholder text
     }
 
-    // GameGUI implementation
+    // GameGUI Implementation - Main graphical interface controller for Coup card game
+    
     GameGUI::GameGUI() 
-        : game(nullptr),
-        currentState(GameState::MAIN_MENU), 
-        waitingForTarget(false), 
-        waitingForRole(false),
-        waitingForReactivePlayer(false),
-        selectedTarget(nullptr),
-        pendingReactiveTarget(nullptr),
+        : game(nullptr), // Initialize game pointer to null until game creation
+        currentState(GameState::MAIN_MENU), // Start in main menu state
+        waitingForTarget(false), // Not waiting for target selection initially
+        waitingForRole(false), // Not waiting for role selection initially
+        waitingForReactivePlayer(false), // Not waiting for reactive player selection initially
+        selectedTarget(nullptr), // No target selected initially
+        pendingReactiveTarget(nullptr), // No reactive target pending initially
+        // Initialize input field for player name entry
         playerNameInput(sf::Vector2f(500, 400), sf::Vector2f(300, 40), "Enter player name..."),
+        // Initialize buttons with positions, sizes, labels, and actions
         addPlayerButton(sf::Vector2f(820, 400), sf::Vector2f(150, 40), "Add Player", "add_player"),
         startGameButton(sf::Vector2f(600, 500), sf::Vector2f(200, 50), "Start Game", "start_game"),
         backButton(sf::Vector2f(50, 50), sf::Vector2f(100, 40), "Back", "back"),
         returnToMenuButton(sf::Vector2f(600, 600), sf::Vector2f(200, 50), "Return to Menu", "menu", sf::Color(70, 130, 180)) {
         
+        // Create main game window with specific dimensions and styling
         window.create(sf::VideoMode(WINDOW_WIDTH, WINDOW_HEIGHT), "COUP", sf::Style::Titlebar | sf::Style::Close);
-        window.setFramerateLimit(60);
+        window.setFramerateLimit(60); // Limit to 60 FPS for smooth performance
         
-        // Setup color theme
-        theme.background = sf::Color(15, 15, 25);
-        theme.primary = sf::Color(70, 130, 180);
-        theme.secondary = sf::Color(100, 149, 237);
-        theme.accent = sf::Color(255, 215, 0);
-        theme.text = sf::Color::White;
-        theme.textSecondary = sf::Color(200, 200, 200);
-        theme.success = sf::Color(50, 205, 50);
-        theme.error = sf::Color(220, 20, 60);
-        theme.warning = sf::Color(255, 165, 0);
+        // Setup comprehensive color theme for consistent visual design
+        theme.background = sf::Color(15, 15, 25); // Dark navy background
+        theme.primary = sf::Color(70, 130, 180); // Steel blue for primary elements
+        theme.secondary = sf::Color(100, 149, 237); // Cornflower blue for secondary elements
+        theme.accent = sf::Color(255, 215, 0); // Gold for accent and highlights
+        theme.text = sf::Color::White; // White for primary text
+        theme.textSecondary = sf::Color(200, 200, 200); // Light gray for secondary text
+        theme.success = sf::Color(50, 205, 50); // Lime green for success messages
+        theme.error = sf::Color(220, 20, 60); // Crimson for error messages
+        theme.warning = sf::Color(255, 165, 0); // Orange for warning messages
         
-        // Setup selection overlay
-        selectionOverlay.setSize(sf::Vector2f(WINDOW_WIDTH, WINDOW_HEIGHT));
-        selectionOverlay.setFillColor(sf::Color(0, 0, 0, 180)); // Semi-transparent black
-        selectionOverlay.setPosition(0, 0);
+        // Setup modal selection overlay for target selection screens
+        selectionOverlay.setSize(sf::Vector2f(WINDOW_WIDTH, WINDOW_HEIGHT)); // Full screen overlay
+        selectionOverlay.setFillColor(sf::Color(0, 0, 0, 180)); // Semi-transparent black backdrop
+        selectionOverlay.setPosition(0, 0); // Cover entire window
         
-        selectionTitle.setCharacterSize(32);
-        selectionTitle.setFillColor(theme.accent);
-        selectionTitle.setStyle(sf::Text::Bold);
-        selectionTitle.setPosition(getCenterPosition(sf::Vector2f(400, 40)));
-        selectionTitle.move(0, -150);
+        // Setup title text for selection dialogs
+        selectionTitle.setCharacterSize(32); // Large readable text
+        selectionTitle.setFillColor(theme.accent); // Gold color for prominence
+        selectionTitle.setStyle(sf::Text::Bold); // Bold for emphasis
+        selectionTitle.setPosition(getCenterPosition(sf::Vector2f(400, 40))); // Center horizontally
+        selectionTitle.move(0, -150); // Move up from center
     }
 
     GameGUI::~GameGUI() {
-        if (game) delete game;
+        if (game) delete game; // Clean up game instance on destruction
     }
 
     bool GameGUI::initialize() {
-        // Load fonts
+        // Load fonts for consistent typography throughout the application
         if (!mainFont.loadFromFile("tahoma.ttf")) {
             std::cout << "Error: Could not load tahoma.ttf. The game UI may not display properly." << std::endl;
         }
         
-        titleFont = mainFont; // Use same font for now
+        titleFont = mainFont; // Use same font for title (can be customized later)
         
-        // Initialize message text
-        messageText.setFont(mainFont);
-        messageText.setCharacterSize(18);
-        messageText.setFillColor(theme.success);
-        messageText.setPosition(50, WINDOW_HEIGHT - 40);
+        // Initialize message display system for user feedback
+        messageText.setFont(mainFont); // Apply main font
+        messageText.setCharacterSize(18); // Readable size for messages
+        messageText.setFillColor(theme.success); // Default to success color
+        messageText.setPosition(50, WINDOW_HEIGHT - 40); // Bottom-left positioning
         
-        // Setup all UI elements
-        setupMainMenu();
-        createDecorativeElements();
+        // Setup all UI components for initial display
+        setupMainMenu(); // Configure main menu interface
+        createDecorativeElements(); // Add visual enhancements
         
-        return true;
+        return true; // Initialization successful
     }
 
     void GameGUI::setupMainMenu() {
-        // Main title
-        titleText.setFont(titleFont);
-        titleText.setString("COUP");
-        titleText.setCharacterSize(72);
-        titleText.setFillColor(theme.accent);
-        titleText.setStyle(sf::Text::Bold);
-        titleText.setPosition(getCenterPosition(sf::Vector2f(200, 80)));
-        titleText.move(0, -200);
+        // Configure main title display with prominent styling
+        titleText.setFont(titleFont); // Apply title font
+        titleText.setString("COUP"); // Game title
+        titleText.setCharacterSize(72); // Large, eye-catching size
+        titleText.setFillColor(theme.accent); // Gold color for premium feel
+        titleText.setStyle(sf::Text::Bold); // Bold for maximum impact
+        titleText.setPosition(getCenterPosition(sf::Vector2f(200, 80))); // Center horizontally
+        titleText.move(0, -200); // Move up from center for title placement
         
-        // Subtitle
-        subtitleText.setFont(mainFont);
-        subtitleText.setString("Created by Raz Cohen");
-        subtitleText.setCharacterSize(24);
-        subtitleText.setFillColor(theme.textSecondary);
-        // Center the subtitle text
+        // Configure subtitle with creator attribution
+        subtitleText.setFont(mainFont); // Apply main font
+        subtitleText.setString("Created by Raz Cohen"); // Attribution text
+        subtitleText.setCharacterSize(24); // Medium size for subtitle
+        subtitleText.setFillColor(theme.textSecondary); // Secondary color for less emphasis
+        // Center the subtitle text precisely
         subtitleText.setPosition(getCenterPosition(sf::Vector2f(subtitleText.getLocalBounds().width, subtitleText.getLocalBounds().height)));
-        subtitleText.move(0, -120);
+        subtitleText.move(0, -120); // Position below title
         
-        createMenuButtons();
+        createMenuButtons(); // Setup interactive menu buttons
     }
 
     void GameGUI::createMenuButtons() {
-        menuButtons.clear();
+        menuButtons.clear(); // Clear any existing buttons
         
+        // Define main menu button configuration
         std::vector<std::pair<std::string, std::string>> buttons = {
-            {"New Game", "new_game"},
-            {"Exit", "exit"}
+            {"New Game", "new_game"}, // Start new game button
+            {"Exit", "exit"} // Exit application button
         };
         
+        // Calculate centered starting position for button layout
         sf::Vector2f startPos = getCenterPosition(sf::Vector2f(BUTTON_WIDTH, BUTTON_HEIGHT));
-        startPos.y += 50;
+        startPos.y += 50; // Offset below title area
         
+        // Create and configure each menu button
         for (size_t i = 0; i < buttons.size(); ++i) {
-            sf::Vector2f pos = sf::Vector2f(startPos.x, startPos.y + i * 80);
+            sf::Vector2f pos = sf::Vector2f(startPos.x, startPos.y + i * 80); // Vertical spacing
             menuButtons.emplace_back(pos, sf::Vector2f(BUTTON_WIDTH, BUTTON_HEIGHT), 
-                                    buttons[i].first, buttons[i].second, theme.primary);
-            menuButtons.back().setFont(mainFont);
+                                    buttons[i].first, buttons[i].second, theme.primary); // Create button with theme
+            menuButtons.back().setFont(mainFont); // Apply font to new button
         }
     }
 
     void GameGUI::setupPlayerSetup() {
-        // Setup input field and buttons fonts
-        playerNameInput.setFont(mainFont);
-        addPlayerButton.setFont(mainFont);
-        startGameButton.setFont(mainFont);
-        backButton.setFont(mainFont);
+        // Configure all input elements for player setup phase
+        playerNameInput.setFont(mainFont); // Apply font to input field
+        addPlayerButton.setFont(mainFont); // Apply font to add button
+        startGameButton.setFont(mainFont); // Apply font to start button
+        backButton.setFont(mainFont); // Apply font to back button
         
-        // Initially disable start game button until we have enough players
+        // Initially disable start game button until minimum players are added
         startGameButton.setEnabled(false);
         
-        // Instruction text
-        instructionText.setFont(mainFont);
-        instructionText.setString("Add 2-6 players to start the game");
-        instructionText.setCharacterSize(24);
-        instructionText.setFillColor(theme.text);
-        instructionText.setPosition(getCenterPosition(sf::Vector2f(400, 150)));
-        instructionText.move(0, 20);
+        // Setup instructional text for user guidance
+        instructionText.setFont(mainFont); // Apply main font
+        instructionText.setString("Add 2-6 players to start the game"); // Clear instructions
+        instructionText.setCharacterSize(24); // Large readable size
+        instructionText.setFillColor(theme.text); // Primary text color
+        instructionText.setPosition(getCenterPosition(sf::Vector2f(400, 150))); // Center horizontally
+        instructionText.move(0, 20); // Slight downward offset
         
-        createPlayerCards();
+        createPlayerCards(); // Initialize player card display
     }
 
     void GameGUI::createPlayerCards() {
@@ -480,10 +513,10 @@ namespace coup {
         std::vector<Player*> allPlayers = game->getAllPlayers();
         
         int playersPerRow = 3;
-        sf::Vector2f cardSize(CARD_WIDTH, CARD_HEIGHT - 10);  // Slightly reduce card height
-        sf::Vector2f spacing(20, 15);                         // Reduce vertical spacing
+        sf::Vector2f cardSize(CARD_WIDTH, CARD_HEIGHT - 10);
+        sf::Vector2f spacing(20, 15);
         // Position cards within the player panel
-        sf::Vector2f startPos(570, 70);                       // Move up slightly
+        sf::Vector2f startPos(570, 70);
         
         for (size_t i = 0; i < allPlayers.size(); ++i) {
             int row = i / playersPerRow;
@@ -632,38 +665,45 @@ namespace coup {
     }
 
     void GameGUI::run() {
+        // Main application loop - continues until window is closed
         while (window.isOpen()) {
-            handleEvents();
-            update();
-            render();
+            handleEvents(); // Process all user input and system events
+            update(); // Update game state and animations
+            render(); // Draw current frame to window
         }
     }
 
     void GameGUI::handleEvents() {
-        sf::Event event;
+        sf::Event event; // Event object to store incoming events
+        
+        // Process all events in the event queue
         while (window.pollEvent(event)) {
             if (event.type == sf::Event::Closed) {
-                window.close();
+                window.close(); // User clicked window close button
             }
             
+            // Handle mouse button press events
             if (event.type == sf::Event::MouseButtonPressed) {
                 if (event.mouseButton.button == sf::Mouse::Left) {
-                    sf::Vector2f mousePos(event.mouseButton.x, event.mouseButton.y);
-                    handleMouseClick(mousePos);
+                    sf::Vector2f mousePos(event.mouseButton.x, event.mouseButton.y); // Get click position
+                    handleMouseClick(mousePos); // Process left mouse button clicks
                 }
             }
             
+            // Handle mouse movement for hover effects
             if (event.type == sf::Event::MouseMoved) {
-                sf::Vector2f mousePos(event.mouseMove.x, event.mouseMove.y);
-                handleMouseMove(mousePos);
+                sf::Vector2f mousePos(event.mouseMove.x, event.mouseMove.y); // Get mouse position
+                handleMouseMove(mousePos); // Update hover states
             }
             
+            // Handle keyboard key presses
             if (event.type == sf::Event::KeyPressed) {
-                handleKeyPress(event.key.code);
+                handleKeyPress(event.key.code); // Process key press events
             }
             
+            // Handle text input for input fields
             if (event.type == sf::Event::TextEntered) {
-                handleTextInput(event.text.unicode);
+                handleTextInput(event.text.unicode); // Process character input
             }
         }
     }
@@ -980,99 +1020,101 @@ namespace coup {
     }
 
     void GameGUI::addNewPlayer() {
-        std::string name = playerNameInput.getText();
+        std::string name = playerNameInput.getText(); // Get entered player name
         if (name.empty()) {
-            updateMessage("Please enter a player name!", true);
+            updateMessage("Please enter a player name!", true); // Validation: require non-empty name
             return;
         }
 
         if (name.length() >= 10) {
-            updateMessage("Player name too long! (Max: 9 characters)", true);
+            updateMessage("Player name too long! (Max: 9 characters)", true); // Validation: enforce length limit
             return;
         }
         
         if (!game) {
-            game = new Game();
+            game = new Game(); // Create new game instance if none exists
         }
         
-        // Check for duplicate names through Game class
-        std::vector<Player*> allPlayers = game->getAllPlayers();
+        // Validation: check for maximum player count and duplicate names
+        std::vector<Player*> allPlayers = game->getAllPlayers(); // Get current player list
         if (allPlayers.size() >= 6) {
-            updateMessage("Maximum 6 players allowed!", true);
+            updateMessage("Maximum 6 players allowed!", true); // Enforce game limit
             return;
         }
         
+        // Check for duplicate player names to ensure uniqueness
         for (const auto& player : allPlayers) {
             if (player->getName() == name) {
-                updateMessage("Player name already exists!", true);
+                updateMessage("Player name already exists!", true); // Prevent name conflicts
                 return;
             }
         }
         
         try {
-            // Assign a random role to the new player
+            // Randomly assign a role to the new player for game variety
             std::vector<RoleType> roles = { RoleType::GOVERNOR, RoleType::SPY, RoleType::BARON, 
                                             RoleType::GENERAL, RoleType::JUDGE, RoleType::MERCHANT };
-            RoleType assignedRole = roles[game->getRandomGenerator()() % roles.size()];
+            RoleType assignedRole = roles[game->getRandomGenerator()() % roles.size()]; // Random role selection
             
-            // Create a new player with the assigned role (this already adds the player to the game)
-            game->createPlayerWithRole(name, assignedRole);
+            // Create and add player to game with assigned role
+            game->createPlayerWithRole(name, assignedRole); // Player creation handles game integration
             
-            playerNameInput.clear();
-            createPlayerCards();
+            playerNameInput.clear(); // Clear input field for next player
+            createPlayerCards(); // Refresh player card display
             updateMessage("Player " + name + " added as " + game->getRoleName(assignedRole) + " successfully!", false);
             
-            // Enable start button if we have enough players (get updated player count)
-            std::vector<Player*> updatedPlayers = game->getAllPlayers();
-            startGameButton.setEnabled(updatedPlayers.size() >= 2);
+            // Enable start button if minimum player requirement is met
+            std::vector<Player*> updatedPlayers = game->getAllPlayers(); // Get refreshed player list
+            startGameButton.setEnabled(updatedPlayers.size() >= 2); // Enable start if 2+ players
         } catch (const std::exception& e) {
-            updateMessage("Error adding player: " + std::string(e.what()), true);
+            updateMessage("Error adding player: " + std::string(e.what()), true); // Handle creation errors
         }
     }
 
     void GameGUI::startNewGame() {
+        // Validate game setup before starting
         if (!game || game->getAllPlayers().size() < 2) {
-            updateMessage("Need at least 2 players to start!", true);
+            updateMessage("Need at least 2 players to start!", true); // Enforce minimum player requirement
             return;
         }
         
         try {
-            game->startGame(); // Start the game using existing players
-            changeState(GameState::PLAYING);
-            updateMessage("Game started! " + game->getCurrentPlayer()->getName() + "'s turn");
+            game->startGame(); // Initialize game with existing players
+            changeState(GameState::PLAYING); // Transition to gameplay state
+            updateMessage("Game started! " + game->getCurrentPlayer()->getName() + "'s turn"); // Announce first turn
         } catch (const std::exception& e) {
-            updateMessage("Error starting game: " + std::string(e.what()), true);
+            updateMessage("Error starting game: " + std::string(e.what()), true); // Handle startup errors
         }
     }
     
     void GameGUI::executeAction(const std::string& action, Player* target) {
-        Player* currentPlayer = game->getCurrentPlayer();
+        Player* currentPlayer = game->getCurrentPlayer(); // Get currently active player
         if (!currentPlayer) {
-            updateMessage("No current player!", true);
+            updateMessage("No current player!", true); // Error: no active player found
             return;
         }
         
         try {
-            // Basic actions
+            // Execute basic game actions available to all players
             if (action == "gather") {
-                currentPlayer->gather();
+                currentPlayer->gather(); // Collect 1 coin from treasury
                 updateMessage(currentPlayer->getName() + " gathered 1 coin");
             }
             else if (action == "tax") {
-                currentPlayer->tax();
-                Governor* governor = dynamic_cast<Governor*>(currentPlayer);
+                currentPlayer->tax(); // Collect coins based on role
+                Governor* governor = dynamic_cast<Governor*>(currentPlayer); // Check if Governor
                 if(governor) {
-                    updateMessage(currentPlayer->getName() + " collected tax (3 coins for Governor)");
+                    updateMessage(currentPlayer->getName() + " collected tax (3 coins for Governor)"); // Governor gets bonus
                 } else {
-                    updateMessage(currentPlayer->getName() + " collected tax (2 coins)");
+                    updateMessage(currentPlayer->getName() + " collected tax (2 coins)"); // Standard tax amount
                 }
             }
             else if (action == "bribe") {
-                currentPlayer->bribe();
+                currentPlayer->bribe(); // Pay 4 coins for extra action
                 updateMessage(currentPlayer->getName() + " paid bribe (4 coins) for extra action");
             }
             else if (action == "arrest" && target) {
-                currentPlayer->arrest(*target);
+                currentPlayer->arrest(*target); // Remove 1 coin from target
                 if (target->coins() == 0) {
                     updateMessage(currentPlayer->getName() + " arrested " + target->getName() + ", though " + target->getName() + " had no coins", false, true);
                 }
@@ -1081,62 +1123,57 @@ namespace coup {
                 }
             }
             else if (action == "sanction" && target) {
-                currentPlayer->sanction(*target);
+                currentPlayer->sanction(*target); // Pay 3 coins to sanction target
                 updateMessage(currentPlayer->getName() + " sanctioned (3 coins) " + target->getName());
             }
             else if (action == "coup" && target) {
-                currentPlayer->coup(*target);
+                currentPlayer->coup(*target); // Pay 7 coins to eliminate target
                 updateMessage(currentPlayer->getName() + " performed coup (7 coins) on " + target->getName());
             }
             
-            // Role-specific actions
+            // Execute role-specific special abilities
             else if (action == "invest") {
-                Baron* baron = dynamic_cast<Baron*>(currentPlayer);
+                Baron* baron = dynamic_cast<Baron*>(currentPlayer); // Verify Baron role
                 if (baron) {
-                    baron->invest();
+                    baron->invest(); // Baron special: pay 3 to get 6 coins
                     updateMessage(baron->getName() + " invested 3 coins to get 6 coins!");
                 } else {
-                    updateMessage("Only Barons can invest!", true);
+                    updateMessage("Only Barons can invest!", true); // Role restriction error
                 }
             }
             else if (action == "undo" && target) {
-                // Find eligible Governor players for this action
+                // Governor reactive ability: undo another player's tax action
                 std::vector<Player*> eligiblePlayers = getEligibleReactivePlayers(action);
                 
                 if (eligiblePlayers.empty()) {
-                    updateMessage("No active Governor available to undo tax!", true);
+                    updateMessage("No active Governor available to undo tax!", true); // No eligible Governors
                 } else if (eligiblePlayers.size() == 1) {
-                    // Automatic selection for single player
-                    executeReactiveAction(action, eligiblePlayers[0], target);
+                    executeReactiveAction(action, eligiblePlayers[0], target); // Auto-select single Governor
                 } else {
-                    // Multiple players available - show selection overlay
-                    showReactivePlayerSelection(action, target, eligiblePlayers);
+                    showReactivePlayerSelection(action, target, eligiblePlayers); // Multiple Governors: show selection
                 }
             }
             else if (action == "spy_on" && target) {
-                // Find eligible Spy players for this action
+                // Spy reactive ability: surveillance on target player
                 std::vector<Player*> eligiblePlayers = getEligibleReactivePlayers(action);
                 
                 if (eligiblePlayers.empty()) {
-                    updateMessage("No active Spy available to spy on players!", true);
+                    updateMessage("No active Spy available to spy on players!", true); // No eligible Spies
                 } else if (eligiblePlayers.size() == 1) {
-                    // Automatic selection for single player
-                    executeReactiveAction(action, eligiblePlayers[0], target);
+                    executeReactiveAction(action, eligiblePlayers[0], target); // Auto-select single Spy
                 } else {
-                    // Multiple players available - show selection overlay
                     updateMessage("Multiple Spies available - choose one", false);
-                    showReactivePlayerSelection(action, target, eligiblePlayers);
-                    return; // Important: return here to prevent further execution
+                    showReactivePlayerSelection(action, target, eligiblePlayers); // Multiple Spies: show selection
+                    return; // Prevent further execution until selection is made
                 }
             }
             else if (action == "block_coup" && target) {
-                // Find eligible General players for this action
+                // General reactive ability: block coup attempt by reviving eliminated player
                 std::vector<Player*> eligiblePlayers = getEligibleReactivePlayers(action);
                 
                 if (eligiblePlayers.empty()) {
-                    updateMessage("No active General with 5+ coins available to block coup!", true);
+                    updateMessage("No active General with 5+ coins available to block coup!", true); // No eligible Generals
                 } else if (eligiblePlayers.size() == 1) {
-                    // Automatic selection for single player
                     executeReactiveAction(action, eligiblePlayers[0], target);
                 } else {
                     // Multiple players available - show selection overlay
@@ -1158,283 +1195,288 @@ namespace coup {
                 }
             }
             
-            updatePlayerCards();
-            updateGameInfo();
-
+            updatePlayerCards(); // Refresh player card displays with current state
+            updateGameInfo(); // Update game information display
+            
             // Recreate action buttons to update role-specific ones
-            createActionButtons();
+            createActionButtons(); // Recreate action buttons to reflect current game state
             
             // Add reactive ability buttons for all players
-            addReactiveAbilityButtons();
+            addReactiveAbilityButtons(); // Enable role-specific reactive abilities
             
-            // Check for game over
+            // Check for game over condition after action completion
             try {
-                std::string winner = game->winner();
+                std::string winner = game->winner(); // Attempt to determine game winner
                 
                 // Before declaring game over, check if ANY General can block coup to prevent game end
-                std::vector<Player*> allPlayers = game->getAllPlayers();
-                bool hasGeneralWithCoins = false;
+                std::vector<Player*> allPlayers = game->getAllPlayers(); // Get all players for General check
+                bool hasGeneralWithCoins = false; // Track if General can afford to block coup
                 
+                // Search for active General with sufficient coins to block coup
                 for (Player* player : allPlayers) {
-                    if (player->isGeneral() && player->coins() >= 5) {
-                        hasGeneralWithCoins = true;
-                        break;
+                    if (player->isGeneral() && player->coins() >= 5) { // General needs 5+ coins to block
+                        hasGeneralWithCoins = true; // Found eligible General
+                        break; // Only need to find one eligible General
                     }
                 }
                 
                 if (hasGeneralWithCoins) {
                     // Show General block coup decision dialog instead of ending game
-                    showGeneralBlockCoupDecision();
+                    showGeneralBlockCoupDecision(); // Let General decide whether to block game end
                 } else {
-                    updateMessage("Game Over! Winner: " + winner);
-                    changeState(GameState::GAME_OVER);
+                    updateMessage("Game Over! Winner: " + winner); // Announce game completion
+                    changeState(GameState::GAME_OVER); // Transition to game over screen
                 }
             } catch (const std::exception&) {
-                // Game continues
+                // Game continues - no winner determined yet
             }
             
         } catch (const std::exception& e) {
-            updateMessage("Error: " + std::string(e.what()), true);
+            updateMessage("Error: " + std::string(e.what()), true); // Display error message
         }
     }
 
     void GameGUI::changeState(GameState newState) {
-        currentState = newState;
+        currentState = newState; // Update current interface state
         
+        // Configure interface based on new state
         switch (newState) {
             case GameState::MAIN_MENU:
-                setupMainMenu();
+                setupMainMenu(); // Initialize main menu interface
                 break;
             case GameState::SETUP_PLAYERS:
-                setupPlayerSetup();
+                setupPlayerSetup(); // Initialize player creation interface
                 break;
             case GameState::PLAYING:
-                setupGameScreen();
+                setupGameScreen(); // Initialize gameplay interface
                 break;
             case GameState::GAME_OVER:
-                setupGameOver();
+                setupGameOver(); // Initialize game completion interface
                 break;
         }
     }
 
     void GameGUI::setupGameScreen() {
-        createActionButtons();
-        updatePlayerCards();
+        createActionButtons(); // Initialize action button interface
+        updatePlayerCards(); // Refresh player information display
         
-        // Setup main game panels
-        setupGamePanels();
+        // Setup comprehensive color theme for consistent visual design
+        setupGamePanels(); // Configure layout panels for organized interface
         
-        // Add reactive ability buttons for all players
-        addReactiveAbilityButtons();
+        addReactiveAbilityButtons(); // Add role-specific reactive ability buttons
         
-        // Setup game info text
-        gameInfoText.setFont(mainFont);
-        gameInfoText.setCharacterSize(18);
-        gameInfoText.setFillColor(theme.text);
-        gameInfoText.setPosition(70, 110);
+        // Configure game information text display
+        gameInfoText.setFont(mainFont); // Apply main font
+        gameInfoText.setCharacterSize(18); // Readable text size
+        gameInfoText.setFillColor(theme.text); // Standard text color
+        gameInfoText.setPosition(70, 110); // Position in game info panel
         
-        // Setup current player display
-        currentPlayerText.setFont(mainFont);
-        currentPlayerText.setCharacterSize(24);
-        currentPlayerText.setFillColor(theme.accent);
-        currentPlayerText.setStyle(sf::Text::Bold);
-        currentPlayerText.setPosition(70, 70);
+        // Configure current player indicator
+        currentPlayerText.setFont(mainFont); // Apply main font
+        currentPlayerText.setCharacterSize(24); // Prominent size for current player
+        currentPlayerText.setFillColor(theme.accent); // Gold color for emphasis
+        currentPlayerText.setStyle(sf::Text::Bold); // Bold for maximum visibility
+        currentPlayerText.setPosition(70, 70); // Top of game info panel
         
-        // Setup game status text
-        gameStatusText.setFont(mainFont);
-        gameStatusText.setCharacterSize(16);
-        gameStatusText.setFillColor(theme.textSecondary);
-        gameStatusText.setPosition(70, 100);
+        // Configure game status information display
+        gameStatusText.setFont(mainFont); // Apply main font
+        gameStatusText.setCharacterSize(16); // Smaller size for status info
+        gameStatusText.setFillColor(theme.textSecondary); // Secondary color for less emphasis
+        gameStatusText.setPosition(70, 100); // Below current player info
         
-        // Setup action feedback
-        actionFeedbackText.setFont(mainFont);
-        actionFeedbackText.setCharacterSize(18);
-        actionFeedbackText.setFillColor(theme.success);
-        actionFeedbackText.setPosition(480, 600);
+        // Configure action feedback display for user responses
+        actionFeedbackText.setFont(mainFont); // Apply main font
+        actionFeedbackText.setCharacterSize(18); // Standard feedback size
+        actionFeedbackText.setFillColor(theme.success); // Success color by default
+        actionFeedbackText.setPosition(480, 600); // Bottom area for feedback
         
-        // Setup section headers
-        actionSectionHeader.setFont(mainFont);
-        actionSectionHeader.setString("ACTIONS");
-        actionSectionHeader.setCharacterSize(20);
-        actionSectionHeader.setFillColor(theme.accent);
-        actionSectionHeader.setStyle(sf::Text::Bold);
-        actionSectionHeader.setPosition(70, 225);
+        // Configure section headers for organized interface layout
+        actionSectionHeader.setFont(mainFont); // Apply main font
+        actionSectionHeader.setString("ACTIONS"); // Section title
+        actionSectionHeader.setCharacterSize(20); // Header size
+        actionSectionHeader.setFillColor(theme.accent); // Gold accent color
+        actionSectionHeader.setStyle(sf::Text::Bold); // Bold for section headers
+        actionSectionHeader.setPosition(70, 225); // Top of action panel
         
-        playerSectionHeader.setFont(mainFont);
-        playerSectionHeader.setString("PLAYERS");
-        playerSectionHeader.setCharacterSize(20);
-        playerSectionHeader.setFillColor(theme.accent);
-        playerSectionHeader.setStyle(sf::Text::Bold);
-        playerSectionHeader.setPosition(570, 45);
+        playerSectionHeader.setFont(mainFont); // Apply main font
+        playerSectionHeader.setString("PLAYERS"); // Section title
+        playerSectionHeader.setCharacterSize(20); // Header size
+        playerSectionHeader.setFillColor(theme.accent); // Gold accent color
+        playerSectionHeader.setStyle(sf::Text::Bold); // Bold for section headers
+        playerSectionHeader.setPosition(570, 45); // Top of player panel
         
-        gameInfoHeader.setFont(mainFont);
-        gameInfoHeader.setString("GAME STATUS");
-        gameInfoHeader.setCharacterSize(20);
-        gameInfoHeader.setFillColor(theme.accent);
-        gameInfoHeader.setStyle(sf::Text::Bold);
-        gameInfoHeader.setPosition(70, 45);
+        gameInfoHeader.setFont(mainFont); // Apply main font
+        gameInfoHeader.setString("GAME STATUS"); // Section title
+        gameInfoHeader.setCharacterSize(20); // Header size
+        gameInfoHeader.setFillColor(theme.accent); // Gold accent color
+        gameInfoHeader.setStyle(sf::Text::Bold); // Bold for section headers
+        gameInfoHeader.setPosition(70, 45); // Top of game info panel
     }
 
     void GameGUI::setupGameOver() {
-        // Setup game over screen
-        gameOverTitle.setFont(titleFont);
-        gameOverTitle.setString("GAME OVER");
-        gameOverTitle.setCharacterSize(72);
-        gameOverTitle.setFillColor(theme.accent);
-        gameOverTitle.setStyle(sf::Text::Bold);
-        gameOverTitle.setPosition(getCenterPosition(sf::Vector2f(400, 80)));
-        gameOverTitle.move(0, -120);
+        // Configure game over screen with winner announcement
+        gameOverTitle.setFont(titleFont); // Apply title font
+        gameOverTitle.setString("GAME OVER"); // Game completion title
+        gameOverTitle.setCharacterSize(72); // Large impactful size
+        gameOverTitle.setFillColor(theme.accent); // Gold color for prominence
+        gameOverTitle.setStyle(sf::Text::Bold); // Bold for maximum impact
+        gameOverTitle.setPosition(getCenterPosition(sf::Vector2f(400, 80))); // Center horizontally
+        gameOverTitle.move(0, -120); // Move up for title positioning
         
-        winnerText.setFont(mainFont);
-        winnerText.setCharacterSize(36);
-        winnerText.setFillColor(theme.success);
-        winnerText.setPosition(getCenterPosition(sf::Vector2f(600, 40)));
-        winnerText.move(180, -40);
+        // Configure winner announcement text
+        winnerText.setFont(mainFont); // Apply main font
+        winnerText.setCharacterSize(36); // Large size for winner announcement
+        winnerText.setFillColor(theme.success); // Success/celebration color
+        winnerText.setPosition(getCenterPosition(sf::Vector2f(600, 40))); // Center positioning
+        winnerText.move(180, -40); // Adjust for optimal placement
 
-        // Create return to main menu button
-        sf::Vector2f buttonPos = getCenterPosition(sf::Vector2f(BUTTON_WIDTH, BUTTON_HEIGHT));
-        buttonPos.y += 100;
+        // Create and configure return to menu button
+        sf::Vector2f buttonPos = getCenterPosition(sf::Vector2f(BUTTON_WIDTH, BUTTON_HEIGHT)); // Center button
+        buttonPos.y += 100; // Move down from center
         returnToMenuButton = EnhancedButton(
-            buttonPos,
-            sf::Vector2f(BUTTON_WIDTH, BUTTON_HEIGHT),
-            "Return to Menu",
-            "menu",
-            theme.primary
+            buttonPos, // Button position
+            sf::Vector2f(BUTTON_WIDTH, BUTTON_HEIGHT), // Button size
+            "Return to Menu", // Button label
+            "menu", // Button action
+            theme.primary // Button color theme
         );
-        returnToMenuButton.setFont(mainFont);
+        returnToMenuButton.setFont(mainFont); // Apply font to button
         
+        // Determine and display winner information
         try {
-            std::string winner = game->winner();
-            winnerText.setString("Winner: " + winner);
+            std::string winner = game->winner(); // Get game winner
+            winnerText.setString("Winner: " + winner); // Display winner name
         } catch (const std::exception&) {
-            winnerText.setString("No winner determined");
+            winnerText.setString("No winner determined"); // Handle edge cases
         }
     }
 
     void GameGUI::setupGamePanels() {
-        // Game information panel (left side)
-        gameInfoPanel.setSize(sf::Vector2f(480, 160));
-        gameInfoPanel.setPosition(50, 40);
-        gameInfoPanel.setFillColor(sf::Color(30, 30, 45, 200));
-        gameInfoPanel.setOutlineThickness(2);
-        gameInfoPanel.setOutlineColor(theme.primary);
+        // Game information panel (left side) - displays current game state and player turn info
+        gameInfoPanel.setSize(sf::Vector2f(480, 160)); // Adequate size for game info display
+        gameInfoPanel.setPosition(50, 40); // Top-left positioning with margin
+        gameInfoPanel.setFillColor(sf::Color(30, 30, 45, 200)); // Semi-transparent dark blue background
+        gameInfoPanel.setOutlineThickness(2); // Clear panel definition
+        gameInfoPanel.setOutlineColor(theme.primary); // Steel blue border matching theme
         
-        // Action panel (left side, below game info)
-        actionPanel.setSize(sf::Vector2f(480, 340));
-        actionPanel.setPosition(50, 220);
-        actionPanel.setFillColor(sf::Color(30, 30, 45, 200));
-        actionPanel.setOutlineThickness(2);
-        actionPanel.setOutlineColor(theme.secondary);
+        // Action panel (left side, below game info) - contains all action buttons and commands
+        actionPanel.setSize(sf::Vector2f(480, 340)); // Large area for action buttons
+        actionPanel.setPosition(50, 220); // Below game info panel with spacing
+        actionPanel.setFillColor(sf::Color(30, 30, 45, 200)); // Matching semi-transparent background
+        actionPanel.setOutlineThickness(2); // Clear panel definition
+        actionPanel.setOutlineColor(theme.secondary); // Cornflower blue border for distinction
         
-        // Player panel (right side)
-        playerPanel.setSize(sf::Vector2f(800, 520));
-        playerPanel.setPosition(550, 40);
-        playerPanel.setFillColor(sf::Color(25, 25, 40, 180));
-        playerPanel.setOutlineThickness(2);
-        playerPanel.setOutlineColor(theme.accent);
+        // Player panel (right side) - displays all player cards and their current states
+        playerPanel.setSize(sf::Vector2f(800, 520)); // Large area for multiple player cards
+        playerPanel.setPosition(550, 40); // Right side positioning with margin
+        playerPanel.setFillColor(sf::Color(25, 25, 40, 180)); // Slightly different background for variety
+        playerPanel.setOutlineThickness(2); // Clear panel definition
+        playerPanel.setOutlineColor(theme.accent); // Gold border for emphasis on player area
         
-        // Feedback panel (bottom)
-        feedbackPanel.setSize(sf::Vector2f(1300, 60));
-        feedbackPanel.setPosition(50, 580);
-        feedbackPanel.setFillColor(sf::Color(40, 40, 55, 220));
-        feedbackPanel.setOutlineThickness(2);
-        feedbackPanel.setOutlineColor(theme.text);
+        // Feedback panel (bottom) - displays game messages and action results
+        feedbackPanel.setSize(sf::Vector2f(1300, 60)); // Wide panel across bottom of screen
+        feedbackPanel.setPosition(50, 580); // Bottom positioning with margin
+        feedbackPanel.setFillColor(sf::Color(40, 40, 55, 220)); // Slightly brighter for message visibility
+        feedbackPanel.setOutlineThickness(2); // Clear panel definition
+        feedbackPanel.setOutlineColor(theme.text); // White border for clear message area
     }
 
     void GameGUI::updateGameInfo() {
+        // Validate game state before updating display information
         if (!game || !game->isGameStarted()) {
-            currentPlayerText.setString("Game not started");
-            gameStatusText.setString("");
+            currentPlayerText.setString("Game not started"); // Display initialization message
+            gameStatusText.setString(""); // Clear status info when game not active
             return;
         }
         
-        Player* currentPlayer = game->getCurrentPlayer();
+        Player* currentPlayer = game->getCurrentPlayer(); // Get currently active player
         if (!currentPlayer) {
-            currentPlayerText.setString("No current player");
-            gameStatusText.setString("");
+            currentPlayerText.setString("No current player"); // Error state display
+            gameStatusText.setString(""); // Clear status for error state
             return;
         }
         
-        // Update current player display
-        std::string playerInfo = "Current Turn: " + currentPlayer->getName();
+        // Update current player display with contextual information
+        std::string playerInfo = "Current Turn: " + currentPlayer->getName(); // Base player info
         if (currentPlayer->coins() >= 10) {
-            playerInfo += " (MUST COUP!)";
-            currentPlayerText.setFillColor(theme.error);
+            playerInfo += " (MUST COUP!)"; // Force coup action when player has 10+ coins
+            currentPlayerText.setFillColor(theme.error); // Red color for mandatory action
         } else {
-            currentPlayerText.setFillColor(theme.accent);
+            currentPlayerText.setFillColor(theme.accent); // Gold color for normal state
         }
-        currentPlayerText.setString(playerInfo);
+        currentPlayerText.setString(playerInfo); // Apply updated player information
         
-        // Update game status
-        std::vector<Player*> activePlayers = getActivePlayers();
-        std::string statusInfo = "Active Players: " + std::to_string(activePlayers.size());
-        statusInfo += "\nCoins: " + std::to_string(currentPlayer->coins());
+        // Update game status with comprehensive information display
+        std::vector<Player*> activePlayers = getActivePlayers(); // Get all active participants
+        std::string statusInfo = "Active Players: " + std::to_string(activePlayers.size()); // Show remaining players
+        statusInfo += "\nCoins: " + std::to_string(currentPlayer->coins()); // Display current player wealth
         
-        // Add status effects
+        // Add status effects affecting current player
         if (currentPlayer->isSanctioned()) {
-            statusInfo += "\nSTATUS: Sanctioned (no gather/tax)";
+            statusInfo += "\nSTATUS: Sanctioned (no gather/tax)"; // Sanction restricts income actions
         }
         if (!currentPlayer->isArrestAvailable()) {
-            statusInfo += "\nSTATUS: Arrest blocked";
+            statusInfo += "\nSTATUS: Arrest blocked"; // Spy protection from arrest
         }
         if (currentPlayer->isBribeUsed()) {
-            statusInfo += "\nSTATUS: Extra action available";
+            statusInfo += "\nSTATUS: Extra action available"; // Bribe enables additional turn
         }
         
-        gameStatusText.setString(statusInfo);
+        gameStatusText.setString(statusInfo); // Update status display with all information
     }
 
     void GameGUI::updateActionAvailability() {
+        // Validate game state before updating button availability
         if (!game || !game->isGameStarted()) {
             for (auto& button : actionButtons) {
-                button.setEnabled(false);
+                button.setEnabled(false); // Disable all buttons when game not started
             }
             return;
         }
         
-        Player* currentPlayer = game->getCurrentPlayer();
+        Player* currentPlayer = game->getCurrentPlayer(); // Get currently active player
         if (!currentPlayer) {
             for (auto& button : actionButtons) {
-                button.setEnabled(false);
+                button.setEnabled(false); // Disable all buttons when no current player
             }
             return;
         }
         
-        // Update each action button based on availability using state variables
+        // Update each action button based on availability using game state variables
         for (auto& button : actionButtons) {
-            bool available = false;
+            bool available = false; // Default to disabled until validated
             
             if (button.action == "gather") {
                 // Player can gather if: active, not sanctioned, and not forced to coup
                 available = currentPlayer->isActive() && 
                         !currentPlayer->isSanctioned() && 
-                        !(currentPlayer->coins() >= 10 && !currentPlayer->isBribeUsed());
+                        !(currentPlayer->coins() >= 10 && !currentPlayer->isBribeUsed()); // Can't gather if must coup
             } else if (button.action == "tax") {
                 // Player can tax if: active, not sanctioned, and not forced to coup
                 available = currentPlayer->isActive() && 
                         !currentPlayer->isSanctioned() && 
-                        !(currentPlayer->coins() >= 10 && !currentPlayer->isBribeUsed());
+                        !(currentPlayer->coins() >= 10 && !currentPlayer->isBribeUsed()); // Can't tax if must coup
             } else if (button.action == "bribe") {
                 // Player can bribe if: active, has 4+ coins, and not forced to coup
                 available = currentPlayer->isActive() && 
                         currentPlayer->coins() >= 4 && 
-                        !(currentPlayer->coins() >= 10 && !currentPlayer->isBribeUsed());
+                        !(currentPlayer->coins() >= 10 && !currentPlayer->isBribeUsed()); // Can't bribe if must coup
             } else if (button.action == "arrest") {
                 // Player can arrest if: active, arrest available, not forced to coup, and has targets
                 available = currentPlayer->isActive() && 
                         currentPlayer->isArrestAvailable() && 
                         !(currentPlayer->coins() >= 10 && !currentPlayer->isBribeUsed()) && 
-                        !getTargetablePlayers().empty();
+                        !getTargetablePlayers().empty(); // Need valid targets
             } else if (button.action == "sanction") {
-                // Check if player can sanction any target
+                // Check if player can sanction any target based on coin requirements
                 available = false;
                 if (currentPlayer->isActive() && 
                     !(currentPlayer->coins() >= 10 && !currentPlayer->isBribeUsed())) {
                     for (Player* target : getTargetablePlayers()) {
-                        // Check if player has enough coins (3 for normal, 4 for Judge)
-                        int requiredCoins = target->isJudge() ? 4 : 3;
+                        // Check if player has enough coins (3 for normal, 4 for Judge targets)
+                        int requiredCoins = target->isJudge() ? 4 : 3; // Judges cost extra to sanction
                         if (currentPlayer->coins() >= requiredCoins) {
-                            available = true;
+                            available = true; // Found affordable target
                             break;
                         }
                     }
@@ -1443,56 +1485,56 @@ namespace coup {
                 // Player can coup if: active, has 7+ coins, and has targets
                 available = currentPlayer->isActive() && 
                         currentPlayer->coins() >= 7 && 
-                        !getTargetablePlayers().empty();
+                        !getTargetablePlayers().empty(); // Need valid targets for coup
             }
-            // Role-specific actions
+            // Role-specific actions validation
             else if (button.action == "invest") {
-                Baron* baron = dynamic_cast<Baron*>(currentPlayer);
+                Baron* baron = dynamic_cast<Baron*>(currentPlayer); // Verify Baron role
                 available = baron && currentPlayer->isActive() && 
                         currentPlayer->coins() >= 3 &&
-                        !(currentPlayer->coins() >= 10 && !currentPlayer->isBribeUsed());
+                        !(currentPlayer->coins() >= 10 && !currentPlayer->isBribeUsed()); // Baron investment cost
             } 
             // Reactive abilities - available to any player with the appropriate role
             else if (button.action == "undo") {
-                // Find any active Governor player
+                // Find any active Governor player for undo tax ability
                 std::vector<Player*> allPlayers = game->getAllPlayers();
                 available = false;
                 for (Player* player : allPlayers) {
-                    Governor* governor = dynamic_cast<Governor*>(player);
+                    Governor* governor = dynamic_cast<Governor*>(player); // Check for Governor role
                     if (governor && player->isActive() && !getTargetablePlayers().empty()) {
-                        available = true;
+                        available = true; // Found eligible Governor
                         break;
                     }
                 }
             }
             else if (button.action == "spy_on") {
-                // Find any active Spy player
+                // Find any active Spy player for surveillance ability
                 std::vector<Player*> allPlayers = game->getAllPlayers();
                 available = false;
                 for (Player* player : allPlayers) {
-                    Spy* spy = dynamic_cast<Spy*>(player);
+                    Spy* spy = dynamic_cast<Spy*>(player); // Check for Spy role
                     if (spy && player->isActive() && !getTargetablePlayers().empty()) {
-                        available = true;
+                        available = true; // Found eligible Spy
                         break;
                     }
                 }
             } else if (button.action == "block_coup") {
-                // Find any General player with 5+ coins (including inactive ones)
+                // Find any General player with 5+ coins for coup blocking ability
                 std::vector<Player*> allPlayers = game->getAllPlayers();
                 available = false;
                 for (Player* player : allPlayers) {
-                    General* general = dynamic_cast<General*>(player);
-                    if (general && player->coins() >= 5) {
+                    General* general = dynamic_cast<General*>(player); // Check for General role
+                    if (general && player->coins() >= 5) { // General needs 5+ coins to block
                         // Check if there are any inactive players that could be revived
                         bool hasInactivePlayers = false;
                         for (Player* otherPlayer : allPlayers) {
                             if (!otherPlayer->isActive()) {
-                                hasInactivePlayers = true;
+                                hasInactivePlayers = true; // Found revivable player
                                 break;
                             }
                         }
                         if (hasInactivePlayers) {
-                            available = true;
+                            available = true; // Can block coup and revive someone
                             break;
                         }
                     }
@@ -1502,458 +1544,474 @@ namespace coup {
                 std::vector<Player*> allPlayers = game->getAllPlayers();
                 available = false;
                 for (Player* player : allPlayers) {
-                    Judge* judge = dynamic_cast<Judge*>(player);
+                    Judge* judge = dynamic_cast<Judge*>(player); // Check for Judge role
                     if (judge && player->isActive()) {
-                        // Check if any player has used bribe
+                        // Check if any player has used bribe that can be blocked
                         bool hasBribeUser = false;
                         for (Player* otherPlayer : allPlayers) {
                             if (otherPlayer->isBribeUsed()) {
-                                hasBribeUser = true;
+                                hasBribeUser = true; // Found player who used bribe
                                 break;
                             }
                         }
                         if (hasBribeUser) {
-                            available = true;
+                            available = true; // Can block bribe action
                             break;
                         }
                     }
                 }
             }
-            // Add role-specific actions here if needed
+            // Additional role-specific actions can be added here
             
-            button.setEnabled(available);
+            button.setEnabled(available); // Apply availability state to button
             
             // Add visual feedback for unavailable actions
             if (!available) {
-                button.setHovered(false);
+                button.setHovered(false); // Remove hover effect for disabled buttons
             }
         }
     }
 
     std::vector<Player*> GameGUI::getTargetablePlayers() const {
-        std::vector<Player*> targets;
-        Player* currentPlayer = game->getCurrentPlayer();
+        std::vector<Player*> targets; // Initialize target list
+        Player* currentPlayer = game->getCurrentPlayer(); // Get currently active player
         
-        if (!currentPlayer) return targets;
+        if (!currentPlayer) return targets; // Return empty if no current player
         
-        std::vector<Player*> allPlayers = game->getActivePlayers();
+        std::vector<Player*> allPlayers = game->getActivePlayers(); // Get all active participants
         for (Player* player : allPlayers) {
-            if (player != currentPlayer) {
-                targets.push_back(player);
+            if (player != currentPlayer) { // Exclude current player from targets
+                targets.push_back(player); // Add valid target to list
             }
         }
         
-        return targets;
+        return targets; // Return list of valid target players
     }
 
     std::vector<Player*> GameGUI::getActivePlayers() const {
         if (!game) {
-            return std::vector<Player*>();
+            return std::vector<Player*>(); // Return empty vector if no game exists
         }
-        return game->getActivePlayers();
+        return game->getActivePlayers(); // Return active players from game
     }
 
     void GameGUI::update() {
-        playerNameInput.update();
-        updateAnimations();
+        playerNameInput.update(); // Update input field cursor animation
+        updateAnimations(); // Update all visual animations
         
-        if (currentState == GameState::PLAYING && game) {
-            updatePlayerCards();
-            updateGameInfo();
-            updateActionAvailability();
+        if (currentState == GameState::PLAYING && game) { // Only update during active gameplay
+            updatePlayerCards(); // Refresh player card displays with current information
+            updateGameInfo(); // Update current player and game status information
+            updateActionAvailability(); // Refresh button states based on current game state
         }
     }
 
     void GameGUI::updatePlayerCards() {
-        std::vector<Player*> allPlayers = game->getAllPlayers();
+        std::vector<Player*> allPlayers = game->getAllPlayers(); // Get all game participants
         if (playerCards.size() != allPlayers.size()) {
-            createPlayerCards();
+            createPlayerCards(); // Recreate cards if player count changed
             return;
         }
         
-        Player* currentPlayer = game->getCurrentPlayer();
+        Player* currentPlayer = game->getCurrentPlayer(); // Get active player for highlighting
         
+        // Update each player card with current information
         for (size_t i = 0; i < allPlayers.size() && i < playerCards.size(); ++i) {
-            bool isCurrent = (currentPlayer && allPlayers[i] == currentPlayer);
+            bool isCurrent = (currentPlayer && allPlayers[i] == currentPlayer); // Check if current player
             
             // Use the Player's getRoleType method for proper role detection
-            RoleType displayRole = convertRoleType(allPlayers[i]->getRoleType());
+            RoleType displayRole = convertRoleType(allPlayers[i]->getRoleType()); // Convert role string to enum
             
-            playerCards[i].updateInfo(allPlayers[i], isCurrent, displayRole);
+            playerCards[i].updateInfo(allPlayers[i], isCurrent, displayRole); // Update card display
         }
     }
 
     void GameGUI::updateAnimations() {
-        // Animate decorative coins
-        static sf::Clock animClock;
-        float time = animClock.getElapsedTime().asSeconds();
+        // Animate decorative coins with gentle floating motion
+        static sf::Clock animClock; // Static clock to track animation time
+        float time = animClock.getElapsedTime().asSeconds(); // Get elapsed time for smooth animation
         
+        // Apply floating animation to each decorative coin
         for (size_t i = 0; i < decorativeCoins.size(); ++i) {
-            float offset = sin(time + i) * 2;
-            sf::Vector2f pos = decorativeCoins[i].getPosition();
-            decorativeCoins[i].setPosition(pos.x, pos.y + offset);
+            float offset = sin(time + i) * 2; // Sine wave for smooth up-down motion
+            sf::Vector2f pos = decorativeCoins[i].getPosition(); // Get current position
+            decorativeCoins[i].setPosition(pos.x, pos.y + offset); // Apply vertical offset
         }
     }
 
     void GameGUI::render() {
-        window.clear(theme.background);
+        window.clear(theme.background); // Clear window with background color
         
-        // Draw decorative elements
+        // Draw decorative elements for visual enhancement
         for (const auto& coin : decorativeCoins) {
-            window.draw(coin);
+            window.draw(coin); // Draw floating coin animations
         }
         
-        // Draw based on current state
+        // Draw interface based on current game state
         switch (currentState) {
             case GameState::MAIN_MENU:
-                window.draw(titleText);
-                window.draw(subtitleText);
+                window.draw(titleText); // Draw game title
+                window.draw(subtitleText); // Draw creator attribution
                 for (const auto& button : menuButtons) {
-                    button.draw(window);
+                    button.draw(window); // Draw main menu buttons
                 }
                 break;
                 
             case GameState::SETUP_PLAYERS:
-                window.draw(instructionText);
-                playerNameInput.draw(window);
-                addPlayerButton.draw(window);
-                startGameButton.draw(window);
-                backButton.draw(window);
+                window.draw(instructionText); // Draw setup instructions
+                playerNameInput.draw(window); // Draw player name input field
+                addPlayerButton.draw(window); // Draw add player button
+                startGameButton.draw(window); // Draw start game button
+                backButton.draw(window); // Draw back to menu button
                 
+                // Draw player cards with delete buttons during setup
                 for (const auto& card : playerCards) {
-                    card.draw(window, true); // Show delete buttons during setup
+                    card.draw(window, true); // Show delete buttons during setup phase
                 }
                 break;
                 
             case GameState::PLAYING: {
-                // Draw game panels
-                window.draw(gameInfoPanel);
-                window.draw(actionPanel);
-                window.draw(playerPanel);
-                window.draw(feedbackPanel);
+                // Draw organized game interface panels
+                window.draw(gameInfoPanel); // Draw game information panel
+                window.draw(actionPanel); // Draw action selection panel
+                window.draw(playerPanel); // Draw player status panel
+                window.draw(feedbackPanel); // Draw message feedback panel
                 
-                // Draw game information
-                window.draw(currentPlayerText);
-                window.draw(gameStatusText);
+                // Draw game information and status displays
+                window.draw(currentPlayerText); // Draw current player indicator
+                window.draw(gameStatusText); // Draw game status information
                 
-                // Draw action buttons
+                // Draw all available action buttons
                 for (const auto& button : actionButtons) {
-                    button.draw(window);
+                    button.draw(window); // Draw action buttons with current availability
                 }
                 
-                // Draw player cards with target highlighting
-                std::vector<Player*> allPlayers = game->getAllPlayers();
+                // Draw player cards with target highlighting during selection
+                std::vector<Player*> allPlayers = game->getAllPlayers(); // Get all players for highlighting
                 for (size_t i = 0; i < playerCards.size() && i < allPlayers.size(); ++i) {
-                    // Highlight targetable players when waiting for target
+                    // Highlight targetable players when waiting for target selection
                     if (waitingForTarget && allPlayers[i] != game->getCurrentPlayer() && allPlayers[i]->isActive()) {
-                        // Draw a selection highlight
-                        sf::RectangleShape highlight = playerCards[i].background;
-                        highlight.setFillColor(sf::Color(255, 255, 0, 50)); // Semi-transparent yellow
-                        highlight.setOutlineColor(sf::Color::Yellow);
-                        highlight.setOutlineThickness(3);
-                        window.draw(highlight);
+                        // Draw a selection highlight for valid targets
+                        sf::RectangleShape highlight = playerCards[i].background; // Copy card background shape
+                        highlight.setFillColor(sf::Color(255, 255, 0, 50)); // Semi-transparent yellow highlight
+                        highlight.setOutlineColor(sf::Color::Yellow); // Bright yellow border
+                        highlight.setOutlineThickness(3); // Thick border for visibility
+                        window.draw(highlight); // Draw highlight behind card
                     }
                     playerCards[i].draw(window, false); // Don't show delete buttons during gameplay
                 }
                 
-                // Draw action feedback
-                window.draw(actionFeedbackText);
+                // Draw action feedback for user responses
+                window.draw(actionFeedbackText); // Display action results and messages
                 break;
             }
                 
             case GameState::GAME_OVER:
-                // Draw game over screen
-                window.draw(gameOverTitle);
-                window.draw(winnerText);
-                returnToMenuButton.draw(window);
+                // Draw game completion screen
+                window.draw(gameOverTitle); // Draw "GAME OVER" title
+                window.draw(winnerText); // Draw winner announcement
+                returnToMenuButton.draw(window); // Draw return to menu button
                 break;
         }
         
         // Draw reactive player selection overlay if waiting for selection
         if (waitingForReactivePlayer) {
-            window.draw(selectionOverlay);
-            window.draw(selectionTitle);
+            window.draw(selectionOverlay); // Draw semi-transparent overlay
+            window.draw(selectionTitle); // Draw selection prompt title
             
-            // Draw question text if it's a General decision
+            // Draw question text if it's a General decision for coup blocking
             if (pendingReactiveAction == "general_coup_decision") {
-                window.draw(generalDecisionQuestion);
+                window.draw(generalDecisionQuestion); // Draw coup blocking decision question
             }
 
+            // Draw reactive player selection buttons
             for (const auto& button : reactivePlayerButtons) {
-                button.draw(window);
+                button.draw(window); // Draw selection buttons for eligible players
             }
         }
         
-        // Always draw message
-        window.draw(messageText);
+        // Always draw message feedback at bottom of screen
+        window.draw(messageText); // Display current message to user
         
-        window.display();
+        window.display(); // Present rendered frame to screen
     }
 
     sf::Vector2f GameGUI::getCenterPosition(sf::Vector2f size) const {
-        return sf::Vector2f((WINDOW_WIDTH - size.x) / 2, (WINDOW_HEIGHT - size.y) / 2);
+        return sf::Vector2f((WINDOW_WIDTH - size.x) / 2, (WINDOW_HEIGHT - size.y) / 2); // Calculate centered position
     }
 
     sf::Vector2f GameGUI::getButtonGridPosition(int index, int columns, sf::Vector2f startPos, sf::Vector2f spacing) const {
-        int row = index / columns;
-        int col = index % columns;
-        return sf::Vector2f(startPos.x + col * spacing.x, startPos.y + row * spacing.y);
+        int row = index / columns; // Calculate row based on index and column count
+        int col = index % columns; // Calculate column position within row
+        return sf::Vector2f(startPos.x + col * spacing.x, startPos.y + row * spacing.y); // Return grid position
     }
 
     void GameGUI::updateMessage(const std::string& message, bool isError, bool isWarning) {
-        lastMessage = message;
+        lastMessage = message; // Store message for reference
         
+        // Set appropriate color based on message type
         if (isError) {
-            messageText.setFillColor(theme.error);
-            actionFeedbackText.setFillColor(theme.error);
+            messageText.setFillColor(theme.error); // Red for error messages
+            actionFeedbackText.setFillColor(theme.error); // Red for action feedback
         } else if (isWarning) {
-            messageText.setFillColor(theme.warning);
-            actionFeedbackText.setFillColor(theme.warning);
+            messageText.setFillColor(theme.warning); // Orange for warning messages
+            actionFeedbackText.setFillColor(theme.warning); // Orange for action feedback
         } else {
-            messageText.setFillColor(theme.success);
-            actionFeedbackText.setFillColor(theme.success);
+            messageText.setFillColor(theme.success); // Green for success messages
+            actionFeedbackText.setFillColor(theme.success); // Green for action feedback
         }
         
-        messageText.setString(message);
-        actionFeedbackText.setString(message);
+        messageText.setString(message); // Update main message display
+        actionFeedbackText.setString(message); // Update action feedback display
     }
 
     void GameGUI::createDecorativeElements() {
-        decorativeCoins.clear();
+        decorativeCoins.clear(); // Clear existing decorative elements
         
-        // Create some decorative coins around the window
+        // Create floating coin decorations around the window for visual appeal
         for (int i = 0; i < 8; ++i) {
-            sf::CircleShape coin(12);
-            coin.setFillColor(sf::Color(255, 215, 0, 150)); // Semi-transparent gold
-            coin.setOutlineThickness(2);
-            coin.setOutlineColor(sf::Color(255, 255, 255, 100));
+            sf::CircleShape coin(12); // Small circular coins
+            coin.setFillColor(sf::Color(255, 215, 0, 150)); // Semi-transparent gold color
+            coin.setOutlineThickness(2); // Subtle border
+            coin.setOutlineColor(sf::Color(255, 255, 255, 100)); // Semi-transparent white outline
             
-            // Position coins around the edges
-            float angle = (i * 45) * 3.14159f / 180.0f; // Convert to radians
-            float radius = 300;
-            float x = WINDOW_WIDTH/2 + cos(angle) * radius;
-            float y = WINDOW_HEIGHT/2 + sin(angle) * radius;
+            // Position coins around the edges in circular pattern
+            float angle = (i * 45) * 3.14159f / 180.0f; // Convert degrees to radians for positioning
+            float radius = 300; // Distance from center
+            float x = WINDOW_WIDTH/2 + cos(angle) * radius; // Calculate X position using trigonometry
+            float y = WINDOW_HEIGHT/2 + sin(angle) * radius; // Calculate Y position using trigonometry
             
-            coin.setPosition(x, y);
-            decorativeCoins.push_back(coin);
+            coin.setPosition(x, y); // Apply calculated position
+            decorativeCoins.push_back(coin); // Add coin to decoration list
         }
     }
 
     RoleType GameGUI::convertRoleType(const std::string& roleStr) const {
+        // Convert string role names to enum values for consistent handling
         if (roleStr == "Governor") return RoleType::GOVERNOR;
-        else if (roleStr == "Baron") return RoleType::BARON;
         else if (roleStr == "Spy") return RoleType::SPY;
+        else if (roleStr == "Baron") return RoleType::BARON;
         else if (roleStr == "General") return RoleType::GENERAL;
         else if (roleStr == "Judge") return RoleType::JUDGE;
         else if (roleStr == "Merchant") return RoleType::MERCHANT;
-        else return RoleType::PLAYER;
+        else return RoleType::PLAYER; // Default role for unrecognized strings
     }
 
     std::vector<Player*> GameGUI::getEligibleReactivePlayers(const std::string& action) const {
-        std::vector<Player*> eligiblePlayers;
-        if (!game) return eligiblePlayers;
+        std::vector<Player*> eligiblePlayers; // Initialize list of eligible players
+        if (!game) return eligiblePlayers; // Return empty if no game exists
         
-        std::vector<Player*> allPlayers = game->getAllPlayers();
+        std::vector<Player*> allPlayers = game->getAllPlayers(); // Get all game participants
         
+        // Check each player for eligibility based on action type and role
         for (Player* player : allPlayers) {
             if (action == "undo") {
-                Governor* governor = dynamic_cast<Governor*>(player);
-                if (governor && player->isActive()) {
-                    eligiblePlayers.push_back(player);
+                Governor* governor = dynamic_cast<Governor*>(player); // Check for Governor role
+                if (governor && player->isActive()) { // Governor must be active to use undo
+                    eligiblePlayers.push_back(player); // Add eligible Governor
                 }
             }
             else if (action == "spy_on") {
-                // Check if player is a Spy and is active
-                Spy* spy = dynamic_cast<Spy*>(player);
-                if (spy && player->isActive()) {
-                    eligiblePlayers.push_back(player);
+                // Check if player is a Spy and is active for surveillance ability
+                Spy* spy = dynamic_cast<Spy*>(player); // Check for Spy role
+                if (spy && player->isActive()) { // Spy must be active to use spy ability
+                    eligiblePlayers.push_back(player); // Add eligible Spy
                 }
             }
             else if (action == "block_coup") {
-                General* general = dynamic_cast<General*>(player);
-                if (general && player->coins() >= 5) {
+                General* general = dynamic_cast<General*>(player); // Check for General role
+                if (general && player->coins() >= 5) { // General needs 5+ coins to block coup
                     // Allow both active and inactive Generals (inactive can block their own coup)
-                    eligiblePlayers.push_back(player);
+                    eligiblePlayers.push_back(player); // Add eligible General
                 }
             }
             else if (action == "block_bribe") {
-                Judge* judge = dynamic_cast<Judge*>(player);
-                if (judge && player->isActive()) {
-                    eligiblePlayers.push_back(player);
+                Judge* judge = dynamic_cast<Judge*>(player); // Check for Judge role
+                if (judge && player->isActive()) { // Judge must be active to block bribes
+                    eligiblePlayers.push_back(player); // Add eligible Judge
                 }
             }
         }
         
-        return eligiblePlayers;
+        return eligiblePlayers; // Return list of players who can perform the reactive action
     }
 
     void GameGUI::showReactivePlayerSelection(const std::string& action, Player* target, const std::vector<Player*>& eligiblePlayers) {
-        waitingForReactivePlayer = true;
-        pendingReactiveAction = action;
-        pendingReactiveTarget = target;
-        eligibleReactivePlayers = eligiblePlayers;
+        waitingForReactivePlayer = true; // Enable reactive player selection mode
+        pendingReactiveAction = action; // Store action to be performed
+        pendingReactiveTarget = target; // Store target of the action
+        eligibleReactivePlayers = eligiblePlayers; // Store list of eligible players
         
-        // Setup selection title
+        // Setup selection title based on action type
         std::string roleType = (action == "undo") ? "Governor" :
                                (action == "spy_on") ? "Spy" : 
                                (action == "block_coup") ? "General" : 
                                (action == "block_bribe") ? "Judge" : "Player";
-        selectionTitle.setString("Choose " + roleType);
+        selectionTitle.setString("Choose " + roleType); // Set appropriate role title
 
-        // "Who's gonna use it?" title
-        selectionTitle.setFont(mainFont);
-        selectionTitle.setString("Who's gonna use it?");
-        selectionTitle.setCharacterSize(24);
-        selectionTitle.setFillColor(theme.accent);
-        selectionTitle.setStyle(sf::Text::Bold);
-        sf::FloatRect bounds = selectionTitle.getLocalBounds();
-        selectionTitle.setPosition((WINDOW_WIDTH - bounds.width) / 2, 200);
+        // "Who's gonna use it?" title for user guidance
+        selectionTitle.setFont(mainFont); // Apply main font
+        selectionTitle.setString("Who's gonna use it?"); // Clear instruction text
+        selectionTitle.setCharacterSize(24); // Large readable size
+        selectionTitle.setFillColor(theme.accent); // Gold color for prominence
+        selectionTitle.setStyle(sf::Text::Bold); // Bold for emphasis
+        sf::FloatRect bounds = selectionTitle.getLocalBounds(); // Get text bounds for centering
+        selectionTitle.setPosition((WINDOW_WIDTH - bounds.width) / 2, 200); // Center horizontally
         
-        // Create buttons for each eligible player
-        reactivePlayerButtons.clear();
-        sf::Vector2f buttonSize(300, 50); // Increased width from 250 to 300
-        sf::Vector2f startPos((WINDOW_WIDTH - buttonSize.x) / 2, 280);
-        int spacing = 60;
+        // Create buttons for each eligible player with role information
+        reactivePlayerButtons.clear(); // Clear existing buttons
+        sf::Vector2f buttonSize(300, 50); // Increased width for better visibility
+        sf::Vector2f startPos((WINDOW_WIDTH - buttonSize.x) / 2, 280); // Centered starting position
+        int spacing = 60; // Vertical spacing between buttons
         
+        // Generate selection buttons for each eligible player
         for (size_t i = 0; i < eligiblePlayers.size(); ++i) {
-            sf::Vector2f pos(startPos.x, startPos.y + i * spacing);
-            std::string buttonText = eligiblePlayers[i]->getName() + " (" + roleType + ")";
+            sf::Vector2f pos(startPos.x, startPos.y + i * spacing); // Calculate button position
+            std::string buttonText = eligiblePlayers[i]->getName() + " (" + roleType + ")"; // Display name and role
             
+            // Create button with player identification and action
             reactivePlayerButtons.emplace_back(pos, buttonSize, buttonText, 
                 "select_reactive_player_" + std::to_string(i), theme.primary);
-            reactivePlayerButtons.back().setFont(mainFont);
+            reactivePlayerButtons.back().setFont(mainFont); // Apply font to new button
         }
     }
 
     void GameGUI::hideReactivePlayerSelection() {
-        waitingForReactivePlayer = false;
-        pendingReactiveAction = "";
-        pendingReactiveTarget = nullptr;
-        eligibleReactivePlayers.clear();
-        reactivePlayerButtons.clear();
+        waitingForReactivePlayer = false; // Disable reactive selection mode
+        pendingReactiveAction = ""; // Clear pending action
+        pendingReactiveTarget = nullptr; // Clear target reference
+        eligibleReactivePlayers.clear(); // Clear eligible player list
+        reactivePlayerButtons.clear(); // Clear selection buttons
     }
 
     void GameGUI::executeReactiveAction(const std::string& action, Player* reactivePlayer, Player* target) {
         try {
+            // Execute Governor's undo tax ability
             if (action == "undo" && target) {
-                Governor* governor = dynamic_cast<Governor*>(reactivePlayer);
+                Governor* governor = dynamic_cast<Governor*>(reactivePlayer); // Verify Governor role
                 if (governor) {
-                    governor->undo(*target);
+                    governor->undo(*target); // Execute undo action on target
                     updateMessage(governor->getName() + " blocked " + target->getName() + "'s tax ability");
                 } else {
-                    updateMessage("Selected player is not a Governor!", true);
+                    updateMessage("Selected player is not a Governor!", true); // Role validation error
                 }
             }
+            // Execute Spy's surveillance ability
             else if (action == "spy_on" && target) {
-                Spy* spy = dynamic_cast<Spy*>(reactivePlayer);
+                Spy* spy = dynamic_cast<Spy*>(reactivePlayer); // Verify Spy role
                 if (spy) {
-                    spy->spy_on(*target);
+                    spy->spy_on(*target); // Execute spy action on target
                     updateMessage(spy->getName() + " spied on " + target->getName() + 
                                 " (Coins: " + std::to_string(target->coins()) + ") and revoked their arrest ability for their next turn");
                 } else {
-                    updateMessage("Selected player is not a Spy!", true);
+                    updateMessage("Selected player is not a Spy!", true); // Role validation error
                 }
             }
+            // Execute General's coup blocking ability
             else if (action == "block_coup" && target) {
-                General* general = dynamic_cast<General*>(reactivePlayer);
-                if (general && reactivePlayer->coins() >= 5) {
-                    general->block_coup(*target);
+                General* general = dynamic_cast<General*>(reactivePlayer); // Verify General role
+                if (general && reactivePlayer->coins() >= 5) { // Verify coin requirement
+                    general->block_coup(*target); // Execute coup block and revive target
                     updateMessage(general->getName() + " blocked coup and revived " + target->getName());
                 } else {
-                    updateMessage("Selected player is not a General with 5+ coins!", true);
+                    updateMessage("Selected player is not a General with 5+ coins!", true); // Requirements error
                 }
             }
+            // Execute Judge's bribe blocking ability
             else if (action == "block_bribe" && target) {
-                Judge* judge = dynamic_cast<Judge*>(reactivePlayer);
+                Judge* judge = dynamic_cast<Judge*>(reactivePlayer); // Verify Judge role
                 if (judge) {
-                    judge->block_bribe(*target);
+                    judge->block_bribe(*target); // Execute bribe block on target
                     updateMessage(judge->getName() + " blocked " + target->getName() + "'s bribe");
                 } else {
-                    updateMessage("Selected player is not a Judge!", true);
+                    updateMessage("Selected player is not a Judge!", true); // Role validation error
                 }
             }
             
-            // Update game state
-            updatePlayerCards();
+            // Update game state after reactive action completion
+            updatePlayerCards(); // Refresh player card displays
             updateGameInfo(); // Force update of game info to reflect changes
-            createActionButtons();
-            addReactiveAbilityButtons();
+            createActionButtons(); // Recreate action buttons for current state
+            addReactiveAbilityButtons(); // Refresh reactive ability availability
             
         } catch (const std::exception& e) {
-            updateMessage("Error: " + std::string(e.what()), true);
+            updateMessage("Error: " + std::string(e.what()), true); // Handle execution errors
         }
     }
 
     void GameGUI::showGeneralBlockCoupDecision() {
-        if (!game) return;
+        if (!game) return; // Exit if no game exists
         
-        // Find ANY General who can block coup (active or inactive)
+        // Find ANY General who can block coup (active or inactive with sufficient coins)
         Player* generalPlayer = nullptr;
-        std::vector<Player*> allPlayers = game->getAllPlayers();
+        std::vector<Player*> allPlayers = game->getAllPlayers(); // Get all game participants
         
+        // Search for eligible General to make coup blocking decision
         for (Player* player : allPlayers) {
-            if (player->isGeneral() && player->coins() >= 5) {
-                generalPlayer = player;
-                break;
+            if (player->isGeneral() && player->coins() >= 5) { // General with coin requirement
+                generalPlayer = player; // Found eligible General
+                break; // Only need one General for decision
             }
         }
         
-        if (!generalPlayer) return;
+        if (!generalPlayer) return; // Exit if no eligible General found
         
-        // Set up the decision overlay
-        waitingForReactivePlayer = true;
-        pendingReactiveAction = "general_coup_decision";
-        pendingReactiveTarget = generalPlayer;
+        // Set up the decision overlay for General's coup blocking choice
+        waitingForReactivePlayer = true; // Enable selection mode
+        pendingReactiveAction = "general_coup_decision"; // Set special action type
+        pendingReactiveTarget = generalPlayer; // Store General making decision
         
-        // Setup selection title
-        selectionTitle.setFont(mainFont);
-        selectionTitle.setString(generalPlayer->getName() + " (General)");
-        selectionTitle.setCharacterSize(32);
-        selectionTitle.setFillColor(theme.accent);
-        selectionTitle.setStyle(sf::Text::Bold);
+        // Setup selection title with General's name
+        selectionTitle.setFont(mainFont); // Apply main font
+        selectionTitle.setString(generalPlayer->getName() + " (General)"); // Display General's identity
+        selectionTitle.setCharacterSize(32); // Large prominent size
+        selectionTitle.setFillColor(theme.accent); // Gold color for importance
+        selectionTitle.setStyle(sf::Text::Bold); // Bold for emphasis
         
-        // Center the title
-        sf::FloatRect bounds = selectionTitle.getLocalBounds();
-        selectionTitle.setPosition((WINDOW_WIDTH - bounds.width) / 2, 200);
+        // Center the title horizontally
+        sf::FloatRect bounds = selectionTitle.getLocalBounds(); // Get text dimensions
+        selectionTitle.setPosition((WINDOW_WIDTH - bounds.width) / 2, 200); // Center positioning
         
-        // Add subtitle asking the question
-        sf::Text questionText;
-        questionText.setFont(mainFont);
-        questionText.setString("Choose a player to block coup on (or decline to end game):");
-        questionText.setCharacterSize(20);
-        questionText.setFillColor(theme.textSecondary);
-        sf::FloatRect questionBounds = questionText.getLocalBounds();
-        questionText.setPosition((WINDOW_WIDTH - questionBounds.width) / 2, 250);
+        // Add subtitle asking the decision question
+        sf::Text questionText; // Create question text element
+        questionText.setFont(mainFont); // Apply main font
+        questionText.setString("Choose a player to block coup on (or decline to end game):"); // Decision prompt
+        questionText.setCharacterSize(20); // Medium readable size
+        questionText.setFillColor(theme.textSecondary); // Secondary text color for subtlety
+        sf::FloatRect questionBounds = questionText.getLocalBounds(); // Get question text bounds
+        questionText.setPosition((WINDOW_WIDTH - questionBounds.width) / 2, 250); // Center question text
         
-        // Store the question text
-        generalDecisionQuestion = questionText;
+        // Store the question text for rendering
+        generalDecisionQuestion = questionText; // Save question for display
         
         // Create buttons for each inactive player + decline option
-        reactivePlayerButtons.clear();
-        sf::Vector2f buttonSize(200, 45);
-        sf::Vector2f startPos((WINDOW_WIDTH - buttonSize.x) / 2, 300);
-        int spacing = 55;
-        int buttonIndex = 0;
+        reactivePlayerButtons.clear(); // Clear existing buttons
+        sf::Vector2f buttonSize(200, 45); // Compact button size for multiple options
+        sf::Vector2f startPos((WINDOW_WIDTH - buttonSize.x) / 2, 300); // Centered starting position
+        int spacing = 55; // Vertical spacing between buttons
+        int buttonIndex = 0; // Track button position
         
-        // Add buttons for inactive players
+        // Add buttons for each inactive player that can be revived
         for (Player* player : allPlayers) {
-            if (!player->isActive()) {
-                sf::Vector2f pos(startPos.x, startPos.y + buttonIndex * spacing);
-                std::string buttonText = "Revive " + player->getName();
+            if (!player->isActive()) { // Only show eliminated players as revival options
+                sf::Vector2f pos(startPos.x, startPos.y + buttonIndex * spacing); // Calculate button position
+                std::string buttonText = "Revive " + player->getName(); // Clear revival option text
                 reactivePlayerButtons.emplace_back(pos, buttonSize, buttonText, 
-                    "general_revive_" + std::to_string(buttonIndex), sf::Color(50, 205, 50));
+                    "general_revive_" + std::to_string(buttonIndex), sf::Color(50, 205, 50)); // Green for positive action
                 eligibleReactivePlayers.push_back(player); // Store the player for later reference
-                buttonIndex++;
+                buttonIndex++; // Move to next button position
             }
         }
         
-        // Add decline button
-        sf::Vector2f declinePos(startPos.x, startPos.y + buttonIndex * spacing);
+        // Add decline button for General to refuse blocking coup
+        sf::Vector2f declinePos(startPos.x, startPos.y + buttonIndex * spacing); // Position after revival options
         reactivePlayerButtons.emplace_back(declinePos, buttonSize, "Decline", 
-            "general_block_no", sf::Color(220, 20, 60));
+            "general_block_no", sf::Color(220, 20, 60)); // Red for negative/ending action
         
+        // Apply font to all created buttons for consistent typography
         for (auto& button : reactivePlayerButtons) {
-            button.setFont(mainFont);
+            button.setFont(mainFont); // Ensure consistent typography across all buttons
         }
     }
+
 } // namespace coup

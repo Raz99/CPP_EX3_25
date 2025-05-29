@@ -1,4 +1,11 @@
-// email: your_email@example.com
+// email: razcohenp@gmail.com
+
+/**
+ * Game.cpp
+ * Implementation of the Game class for the Coup card game.
+ * Handles game flow, player management, turn progression and victory conditions.
+ */
+
 #include "../include/Game.hpp"
 #include "../include/Player.hpp"
 #include "../include/roles/General.hpp"
@@ -8,195 +15,190 @@
 #include "../include/roles/Baron.hpp"
 #include "../include/roles/Spy.hpp"
 
-#include <iostream> // for printing
-#include <stdexcept>
-#include <algorithm> // for std::find
-#include <chrono> // for seeding random generator
+#include <iostream> // For console output operations
+#include <stdexcept> // For exception handling
+#include <algorithm> // For STL algorithms like std::find
+#include <chrono> // For high-precision time-based random seeding
 
 namespace coup {
-    // Constructor - initialize with first player
+    /**
+     * Default constructor initializes an empty game state.
+     * Sets up random number generation and prepares for player addition.
+     */
     Game::Game() : current_player_index(0), game_started(false), last_arrested_player(nullptr) {
-        // Seed random generator with current time for role assignment
-        auto seed = std::chrono::high_resolution_clock::now().time_since_epoch().count();
-        random_generator.seed(seed);
+        auto seed = std::chrono::high_resolution_clock::now().time_since_epoch().count(); // Get current time for randomization
+        random_generator.seed(seed); // Initialize random generator with unique seed
     }
     
-    // Destructor - cleanup
+    /**
+     * Destructor performs cleanup of game resources.
+     * Clears player list to ensure proper memory management.
+     */
     Game::~Game() {
-        players_list.clear(); // Clear the player list
+        players_list.clear(); // Remove all player references from the game
     }
 
-    // Print current player's name
+    /**
+     * Displays the name of the current player whose turn it is.
+     * Provides console output for turn identification.
+     */
     void Game::turn() const {
-        // Check if game has started
-        if (!game_started) {
+        if (!game_started) { // Verify game has been properly initialized
             throw std::runtime_error("Game has not started yet");
         }
 
-        // Check if there are no players in the game
-        if (players_list.empty()) {
+        if (players_list.empty()) { // Ensure at least one player exists
             throw std::runtime_error("No players in game");
         }
         
-        // Print the name of the current player
-        std::cout << players_list[current_player_index]->getName() << std::endl;
+        std::cout << players_list[current_player_index]->getName() << std::endl; // Output current player's name
     }
     
-    // Get active players list
+    /**
+     * Generates a list of names of all currently active players.
+     * Excludes players who have been eliminated from the game.
+     */
     std::vector<std::string> Game::players() const {
-        std::vector<std::string> names;
+        std::vector<std::string> names; // Container for active player names
 
-        // For each player in the game
-        for (const Player* player : players_list) {
-            // Check if player is active
-            if (player->isActive()) {
-                names.push_back(player->getName()); // Add active player's name to the list
+        for (const Player* player : players_list) { // Iterate through all registered players
+            if (player->isActive()) { // Check if player is still in the game
+                names.push_back(player->getName()); // Add active player to result list
             }
         }
         
-        return names;
+        return names; // Return collection of active player names
     }
     
-    // Get winner name (throws if game still active)
+    /**
+     * Determines and returns the name of the winning player.
+     * Only succeeds when exactly one player remains active.
+     */
     std::string Game::winner() const {
-        // Check if game has started
-        if (!game_started) {
+        if (!game_started) { // Ensure game has been properly started
             throw std::runtime_error("Game has not started yet");
         }
 
-        int active_count = 0; // Count of active players
-        std::string winner_name; // Name of the winner
+        int active_count = 0; // Counter for remaining active players
+        std::string winner_name; // Storage for the winner's name
         
-        // Count active players and find potential winner
-        for (const Player* player : players_list) {
+        for (const Player* player : players_list) { // Count active players and identify winner
             if (player->isActive()) {
-                active_count++;
-                winner_name = player->getName();
+                active_count++; // Increment active player count
+                winner_name = player->getName(); // Store potential winner's name
             }
         }
         
-        // Game is still active if more than one player remains
-        if (active_count > 1) {
+        if (active_count > 1) { // Game continues if multiple players remain
             throw std::runtime_error("Game is still active");
         }
         
-        // No players left (shouldn't happen, just a safety check)
-        if (active_count == 0) {
+        if (active_count == 0) { // Safety check for impossible state
             throw std::runtime_error("No active players found");
         }
         
-        return winner_name; // Exactly one player remains
+        return winner_name; // Return the sole remaining player's name
     }
     
-    // Add player to game
+    /**
+     * Adds a new player to the game during setup phase.
+     * Enforces player count limits and game state restrictions.
+     */
     void Game::addPlayer(Player* player) {
-        // Check if game has already started
-        if (game_started) {
+        if (game_started) { // Prevent player addition after game begins
             throw std::runtime_error("Cannot add players after game has started");
         }
 
-        // Check max players
-        if (players_list.size() >= 6) {
+        if (players_list.size() >= 6) { // Enforce maximum player limit
             throw std::runtime_error("Maximum 6 players allowed");
         }
 
-        players_list.push_back(player);
+                players_list.push_back(player); // Add the new player to the game roster
     }
     
-    // Move to next turn
+    /**
+     * Advances the game to the next player's turn.
+     * Handles end-of-turn cleanup and special role abilities.
+     */
     void Game::nextTurn() {
-        // Check if game has started
-        if (!game_started) {
+        if (!game_started) { // Ensure game is in progress
             throw std::runtime_error("Game has not started yet");
         }
 
-        if (players().empty()) {
+        if (players().empty()) { // Verify active players exist
             throw std::runtime_error("No players in the game");
         }
 
-        // Clear the current player's sanction since their turn is over
-        if(players_list[current_player_index]->isSanctioned()) {
+        if(players_list[current_player_index]->isSanctioned()) { // Clear sanctions at turn end
             players_list[current_player_index]->setSanctionStatus(false);
         }
 
-        // Clear the current player's arrest block since their turn is over
-        if(!players_list[current_player_index]->isArrestAvailable()) {
+        if(!players_list[current_player_index]->isArrestAvailable()) { // Restore arrest availability
             players_list[current_player_index]->setArrestAvailability(true);
         }
 
-        // Clear the current player's bribe used flag since their turn is over
-        if(players_list[current_player_index]->isBribeUsed()) {
+        if(players_list[current_player_index]->isBribeUsed()) { // Reset bribe usage flag
             players_list[current_player_index]->resetBribeUsed();
         }
 
-        int old_player_index = current_player_index; // Store the old player index
-        current_player_index = (current_player_index + 1) % players_list.size(); // Move to next player
-        Player* next_player = players_list[current_player_index]; // Get the next player
+        int old_player_index = current_player_index; // Store current position for loop detection
+        current_player_index = (current_player_index + 1) % players_list.size(); // Advance to next player index
+        Player* next_player = players_list[current_player_index]; // Get reference to next player
 
-        // While the next player is not active, skip to the next one
-        while(!next_player->isActive()) {
+        while(!next_player->isActive()) { // Skip eliminated players
             current_player_index = (current_player_index + 1) % players_list.size();
 
-            // If we looped back to the original player, check if game should continue
-            if(current_player_index == old_player_index) {
-                // Count active players and check for General
-                int active_count = 0;
-                bool has_active_general_with_coins = false;
+            if(current_player_index == old_player_index) { // Detect full loop through player list
+                int active_count = 0; // Count remaining active players
+                bool has_active_general_with_coins = false; // Check for coup-blocking General
                 for (Player* player : players_list) {
                     if (player->isActive()) {
                         active_count++;
-                        if (player->isGeneral() && player->coins() >= 5) {
+                        if (player->isGeneral() && player->coins() >= 5) { // General with blocking capability
                             has_active_general_with_coins = true;
                         }
                     }
                 }
                 
-                // If there are exactly 2 active players and one is a General with 5+ coins,
-                // don't end the game yet - let the GUI handle the block_coup decision
-                if (active_count == 2 && has_active_general_with_coins) {
-                    // Find the first active player and set as current
-                    for (size_t i = 0; i < players_list.size(); i++) {
+                if (active_count == 2 && has_active_general_with_coins) { // Special case: General can prevent game end
+                    for (size_t i = 0; i < players_list.size(); i++) { // Find first active player
                         if (players_list[i]->isActive()) {
-                            current_player_index = i;
+                            current_player_index = i; // Set as current player
                             break;
                         }
                     }
-                    return;
+                    return; // Allow GUI to handle coup blocking decision
                 }
                 
-                return; // No more active players or game should end
+                return; // End turn advancement if no valid players remain
             }
 
-            next_player = players_list[current_player_index];
+            next_player = players_list[current_player_index]; // Update next player reference
         }
 
-        // If the next player is a Merchant, check for bonus coin
-        if(next_player->isMerchant()) {
-            // If merchant has 3+ coins at start of turn, gain an extra
-            if (next_player->coins() >= 3) {
+        if(next_player->isMerchant()) { // Handle Merchant's turn-start bonus
+            if (next_player->coins() >= 3) { // Merchant gains coin if wealthy enough
                 next_player->addCoins(1);
             }
         }
 
-        // Clear the next player's used tax last action flag since it's a new turn
-        if(next_player->usedTaxLastAction()) {
+        if(next_player->usedTaxLastAction()) { // Clear tax action tracking
             next_player->resetUsedTaxLastAction();
         }
 
-        // Checks if the next player did coup on his last turn
-        // If so, clear the pointer of couped_by to avoid block_coup that should not be possible anymore
-        for(Player* player : players_list) {
+        for(Player* player : players_list) { // Clear coup tracking for expired actions
             if (player->getCoupedBy() == next_player) {
-                // Clear the pointer to the player who performed coup on this player
-                player->resetCoupedBy();
+                player->resetCoupedBy(); // Remove coup reference when window expires
             }
         }
     }
     
-    // Check if it's player's turn
+    /**
+     * Verifies if the specified player is currently allowed to act.
+     * Used for turn validation and action authorization.
+     */
     bool Game::isPlayerTurn(const Player* player) const {
-        // Check if game has started
-        if (!game_started) {
+        if (!game_started) { // Ensure game is running
             throw std::runtime_error("Game has not started yet");
         }
 

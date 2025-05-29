@@ -1,35 +1,44 @@
+// General role implementation for Coup card game
+// This file implements the General's special ability to block coup attempts
+// filepath: /home/razco/Uni/CPP/CPP_EX3_25/src/roles/General.cpp
 // email: razcohenp@gmail.com
 #include "../include/roles/General.hpp"
 #include "../include/Game.hpp"
 #include <stdexcept>
 
 namespace coup {
-    // Constructor
+    // Initialize General player with game reference and name
+    // General inherits all basic player abilities plus coup blocking
     General::General(Game& game, const std::string& name) : Player(game, name) {}
     
-    // Block coup of another player (or self)
+    // General's special ability: Block coup attempts on any player for 5 coins
+    // This powerful defensive ability can save players from elimination
     void General::block_coup(Player& target) {
-        // Check if game has started
+        // Verify game state before allowing coup blocking
         if (!game.isGameStarted()) {
             throw std::runtime_error("Game has not started yet");
         }
         
-        // Ensure player has enough coins
+        // Check if General has sufficient funds to block the coup
+        // Blocking requires exactly 5 coins as payment
         if (coin_count < 5) {
             throw std::runtime_error("Not enough coins to block coup");
         }
 
-        // Ensure target is couped
+        // Validate that target player is actually being couped
+        // Cannot block coup on active players who aren't under attack
         if (target.isActive()) {
             throw std::runtime_error("Target player is not couped");
         }
 
+        // Ensure coup is still blockable - timing is critical in Coup
+        // Once coup resolution begins, it cannot be reversed
         if (target.getCoupedBy() == nullptr) {
             throw std::runtime_error("Too late, you cannot block this coup anymore");
         }
         
-        removeCoins(5); // Pay 5 coins to block the coup
-        target.resetCoupedBy(); // Clear the pointer to the player who performed coup
-        target.setActivityStatus(true); // Restore target's activity status
+        removeCoins(5); // Deduct the blocking fee from General's treasury
+        target.resetCoupedBy(); // Remove coup attacker reference from target
+        target.setActivityStatus(true); // Restore target to active gameplay status
     }
 }
