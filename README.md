@@ -17,10 +17,10 @@ Coup is a strategic card game for 2-6 players where participants take on differe
 The game includes six specialized roles, each with unique abilities:
 
 - **Governor** - Enhanced taxation (3 coins instead of 2) and can undo other players' tax actions
+- **Spy** - Intelligence gatherer who can reveal opponent coins and block arrest actions
+- **Baron** - Investment specialist who can triple coins (pay 3, get 6) and receives compensation when sanctioned
 - **General** - Can block coup attempts for 5 coins and has defensive capabilities  
 - **Judge** - Can block bribe actions and imposes penalties on attackers
-- **Baron** - Investment specialist who can triple coins (pay 3, get 6) and receives compensation when sanctioned
-- **Spy** - Intelligence gatherer who can reveal opponent coins and block arrest actions
 - **Merchant** - Generates passive income and has alternative payment methods for penalties
 
 ## Installation Instructions
@@ -134,51 +134,12 @@ Every player can perform these basic actions regardless of their role:
 - **Role-specific Buttons:** Special abilities appear when applicable
 
 ### Special Ability Usage
-- **Governor:** "Undo" button appears when someone uses tax, also gains 3 coins instead of 2 when using the tax action.
-- **Spy:** "Spy On" for peeking at another players's coins and prevents their arrest ability for their next turn
-- **Baron:** "Invest" button for wealth multiplication (3 -> 6 coins). In addition, if targeted by a sanction, receives 1 coin as compensation.
-- **General:** "Block Coup" (for 5 coins) option when coup attempts occur, also regains the coin lost when arrested
-- **Judge:** "Block Bribe" when bribe actions are used, also if sanctioned, the attacker must pay 1 extra coin to the bank
-- **Merchant:** Starts their turn with an extra coin if they have at least 3. If arrested, pays 2 coins to the bank instead of giving 1 to **Note:** Actions that cancel or block other players' actions are performed in real-time and do not consume the player's turn.
-
-## Project Structure
-
-```
-.
-├── include/
-│   ├── Game.hpp              # Main game controller
-│   ├── GameGUI.hpp           # GUI implementation
-│   ├── Player.hpp            # Base player class
-│   └── roles/
-│       ├── Governor.hpp      # Governor role
-│       ├── Spy.hpp           # Spy role
-│       ├── Baron.hpp         # Baron role
-│       ├── General.hpp       # General role
-│       ├── Judge.hpp         # Judge role
-│       └── Merchant.hpp      # Merchant role
-├── src/
-│   ├── Game.cpp              # Game logic implementation
-│   ├── GameGUI.cpp           # GUI implementation
-│   ├── Player.cpp            # Base player implementation
-│   └── roles/
-│       ├── Governor.cpp      # Governor abilities
-│       ├── Spy.cpp           # Spy abilities
-│       ├── General.cpp       # General abilities
-│       ├── Baron.cpp         # Baron abilities
-│       ├── Judge.cpp         # Judge abilities
-│       └── Merchant.cpp      # Merchant abilities
-├── tests/
-│   ├── doctest.h             # Testing framework
-│   ├── test_game.cpp         # Game logic tests
-│   ├── test_player.cpp       # Player action tests
-│   └── test_roles.cpp        # Role-specific tests
-├── resources/
-│   └── tahoma.ttf            # Font file for GUI
-├── Makefile                  # Build configuration
-├── MainGUI.cpp               # GUI entry point
-├── example.cpp               # Demo implementation
-└── README.md                 # This file
-```
+- **Governor:** "Undo" button appears when someone uses tax
+- **Spy:** "Spy On" for intelligence gathering
+- **Baron:** "Invest" button for wealth multiplication
+- **General:** "Block Coup" option when coup attempts occur
+- **Judge:** "Block Bribe" when bribe actions are used
+- **Merchant:** Automatic bonuses at turn start
 
 ## Acknowledgments
 
