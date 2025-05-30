@@ -2,6 +2,8 @@
 
 A feature-rich, GUI-based implementation of the popular card game **Coup** built in C++ using the SFML graphics library. This project recreates the strategic bluffing and deduction game with original character roles, each having unique abilities that affect gameplay dynamics.
 
+![Game Screenshot](images/screenshot.png)
+
 ## Introduction
 
 Coup is a strategic card game for 2-6 players where participants take on different roles in a dystopian future, using influence and deception to eliminate opponents and be the last player standing. This implementation features:
