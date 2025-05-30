@@ -1,4 +1,4 @@
-# Coup Card Game
+# Coup Game
 
 A feature-rich, GUI-based implementation of the popular card game **Coup** built in C++ using the SFML graphics library. This project recreates the strategic bluffing and deduction game with original character roles, each having unique abilities that affect gameplay dynamics.
 
@@ -56,8 +56,8 @@ vcpkg install sfml
 
 1. **Clone the repository:**
    ```bash
-   git clone https://github.com/Raz99/CPP_EX3_25.git
-   cd CPP_EX3_25
+   git clone https://github.com/Raz99/Coup-Game.git
+   cd Coup-Game
    ```
 
 2. **Build using Make:**
